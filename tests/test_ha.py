@@ -169,7 +169,7 @@ async def test_setup_unload_reload_and_private_diagnostics(hass):
         assert await async_setup_entry(hass, entry)
         assert http.async_register_static_paths.await_count == 1
     diagnostics = await async_get_config_entry_diagnostics(hass, entry)
-    assert diagnostics == {"version": "0.1.0", "read_only": True}
+    assert diagnostics == {"version": "0.1.1", "read_only": True}
 
 
 async def test_config_flow_singleton(hass):

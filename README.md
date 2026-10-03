@@ -16,7 +16,7 @@ flowchart TD
 Rename an entity? Retire a helper? Clean up that integration you stopped using?
 Inspect its references before the lights mysteriously stop working.
 
-**v0.1.0 · Experimental alpha · Home Assistant 2026.9.4+ · Admin only · MIT**
+**v0.1.1 · Experimental alpha · Home Assistant 2026.9.4+ · Admin only · MIT**
 
 ![The actual panel in its synthetic demo harness](docs/panel-light.png)
 
@@ -74,6 +74,8 @@ Graph edges point **from a configuration to the entity it references**. Impact
 analysis first walks incoming references to find dependent configurations, then
 follows their action targets, script calls and membership. It does not jump
 upstream again from discovered action targets and invent runtime trigger chains.
+Dashboards remain visible as dependent configurations, but traversal stops there:
+actions on other cards do not become downstream effects of the selected entity.
 
 Different locations remain separate references; identical references are deduplicated.
 Nodes appear once and the edge list retains alternative paths. Default depth is 6,

@@ -71,6 +71,10 @@ class DependencyGraph:
                 continue
             visited.add(current)
             for ref in self.outgoing.get(current, []):
+                # A dashboard groups independent cards, not a shared action sequence.
+                # Keep its incoming dependency edges without expanding other card actions.
+                if ref.source_type == "dashboard":
+                    continue
                 if ref.role not in EFFECT_ROLES or ref.target is None:
                     continue
                 if follow(current, ref, ref.target, depth + 1, "downstream"):

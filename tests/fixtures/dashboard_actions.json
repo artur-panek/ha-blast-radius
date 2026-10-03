@@ -1,0 +1,35 @@
+[
+  {
+    "source_id": "automation.kitchen",
+    "source_type": "automation",
+    "name": "Kitchen presence",
+    "config": {
+      "triggers": [{"trigger": "state", "entity_id": "binary_sensor.kitchen_presence"}],
+      "actions": [{"action": "light.turn_on", "target": {"entity_id": "light.kitchen"}}]
+    }
+  },
+  {
+    "source_id": "dashboard.home",
+    "source_type": "dashboard",
+    "name": "Home",
+    "config": {
+      "views": [
+        {"cards": [
+          {"type": "light", "entity": "light.kitchen"},
+          {"type": "tile", "entity": "light.kitchen"}
+        ]},
+        {"cards": [{"type": "button", "tap_action": {
+          "action": "call-service", "service": "script.power_off"
+        }}]}
+      ]
+    }
+  },
+  {
+    "source_id": "script.power_off",
+    "source_type": "script",
+    "name": "Computer off",
+    "config": {"sequence": [
+      {"action": "button.press", "target": {"entity_id": "button.computer_power"}}
+    ]}
+  }
+]

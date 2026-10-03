@@ -59,6 +59,11 @@ Graph nodes include `id`, `depth`, `relationship`, and a traversal predecessor
 `cycles` lists detected back-edge paths (up to 50), not every possible simple cycle.
 `truncated` identifies depth/size limits.
 
+Dashboards are terminal dependents: their direct entity and script references stay
+visible, but forward impact traversal does not expand dashboard actions. Cards are
+independent controls; sharing a dashboard does not establish an impact path.
+Analyzing a script directly still follows its own actions.
+
 ```json
 {"id":3,"type":"blast_radius/preview","entity_id":"light.office","operation":"rename","new_entity_id":"light.desk"}
 ```

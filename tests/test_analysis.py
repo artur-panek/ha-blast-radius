@@ -48,6 +48,44 @@ def test_recursive_actions_do_not_pull_in_unrelated_readers(analyzer):
     assert "input_boolean.music_enabled" not in nodes  # A condition, not a downstream target.
 
 
+@pytest.fixture
+def dashboard_analyzer():
+    data = json.loads((Path(__file__).parent / "fixtures/dashboard_actions.json").read_text())
+    sources = tuple(Source(**source) for source in data)
+    return Analyzer(
+        sources,
+        {s.source_id for s in sources}
+        | {"light.kitchen", "binary_sensor.kitchen_presence", "button.computer_power"},
+    )
+
+
+def test_shared_dashboard_does_not_connect_unrelated_card_actions(dashboard_analyzer):
+    report = dashboard_analyzer.preview("light.kitchen", "delete", max_depth=12)
+    assert {node["id"] for node in report["graph"]["nodes"]} == {
+        "light.kitchen",
+        "automation.kitchen",
+        "dashboard.home",
+    }
+    assert report["summary"]["downstream"] == 0
+    assert report["preview"]["affected_sources"] == {"automation": 1, "dashboard": 1}
+    assert {ref["path"] for ref in report["references"]} == {
+        "actions[0].target.entity_id",
+        "views[0].cards[0].entity",
+        "views[0].cards[1].entity",
+    }
+    assert all(ref["target"] == "light.kitchen" for ref in report["graph"]["edges"])
+    assert not report["graph"]["truncated"]
+
+
+def test_dashboard_script_reference_and_script_effects_remain_visible(dashboard_analyzer):
+    report = dashboard_analyzer.analyze("script.power_off")
+    nodes = {node["id"]: node for node in report["graph"]["nodes"]}
+    assert set(nodes) == {"script.power_off", "dashboard.home", "button.computer_power"}
+    assert nodes["button.computer_power"]["relationship"] == "downstream"
+    assert report["references"][0]["path"] == "views[1].cards[0].tap_action.service"
+    assert report["references"][0]["role"] == Role.CALL
+
+
 def test_array_nested_script_and_scene_references(analyzer):
     refs = analyzer.analyze("media_player.speaker")["references"]
     assert any(r["path"] == "entities.media_player.speaker" for r in refs)
