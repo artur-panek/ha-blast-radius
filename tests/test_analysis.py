@@ -246,3 +246,24 @@ def test_limits_produce_coverage_warnings(monkeypatch):
     monkeypatch.setattr(references, "MAX_REFERENCES", 50_000)
     monkeypatch.setattr(references, "MAX_NESTING", 1)
     assert scan_sources((source,), set()).warnings
+
+
+def test_template_reads_in_action_data_are_not_downstream_writes():
+    source = Source(
+        "script.notify",
+        "script",
+        "Notify",
+        {
+            "sequence": [
+                {
+                    "action": "notify.send_message",
+                    "data": {"message": "{{ states('sensor.temperature') }}"},
+                    "target": {"entity_id": "{{ states('input_text.notification_target') }}"},
+                }
+            ]
+        },
+    )
+    analyzer = Analyzer((source,), {"sensor.temperature", "input_text.notification_target"})
+    assert analyzer.analyze("script.notify")["summary"]["downstream"] == 0
+    assert len(analyzer.analyze("sensor.temperature")["references"]) == 1
+    assert all(ref.role == Role.READ for ref in analyzer.references if ref.target)

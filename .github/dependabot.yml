@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule: {interval: monthly}
+    groups:
+      ha-test-environment:
+        patterns: ['homeassistant', 'home-assistant-frontend', 'pytest-homeassistant-custom-component']
+      development:
+        patterns: ['pytest*', 'ruff', 'mypy']
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule: {interval: monthly}
+    groups:
+      frontend:
+        patterns: ['*']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: {interval: monthly}

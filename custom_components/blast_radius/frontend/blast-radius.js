@@ -1184,7 +1184,7 @@ var me = o`
 			6,
 			8,
 			12
-		].map((e) => B`<option value=${e}>${e}</option>`)}
+		].map((e) => B`<option value=${e} ?selected=${e === this.depth}>${e}</option>`)}
             </select></label
           >
           <button

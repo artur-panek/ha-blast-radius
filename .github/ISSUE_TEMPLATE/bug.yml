@@ -1,0 +1,21 @@
+name: Bug report
+description: Incorrect reference, broken analysis, or panel issue
+labels: [bug]
+body:
+  - type: input
+    id: versions
+    attributes: {label: HA and Blast Radius versions}
+    validations: {required: true}
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal synthetic configuration and steps
+      description: Remove credentials, household details and installation paths.
+    validations: {required: true}
+  - type: textarea
+    id: result
+    attributes: {label: Expected and actual result}
+    validations: {required: true}
+  - type: textarea
+    id: coverage
+    attributes: {label: Relevant coverage warnings or redacted report}

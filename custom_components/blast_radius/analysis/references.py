@@ -70,7 +70,10 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
             if is_template(value):
                 result = inspect_template(value)
                 for target in result.literals:
-                    emit(source, target, path, Confidence.TEMPLATE_LITERAL, role)
+                    # A states() read in action data is not an action target.
+                    # Even templated targets can read one entity to select another.
+                    # Keep their visible literals as dependencies, never guessed effects.
+                    emit(source, target, path, Confidence.TEMPLATE_LITERAL, Role.READ)
                 if result.dynamic:
                     emit(
                         source,
@@ -101,7 +104,14 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
             elif key in {"area_id", "device_id", "floor_id", "label_id"}:
                 emit(source, None, path, Confidence.DYNAMIC, role, f"Unexpanded {key} target")
             elif value in known_entities:
-                emit(source, value, path, Confidence.UNKNOWN, role, "Literal in an untyped field")
+                emit(
+                    source,
+                    value,
+                    path,
+                    Confidence.UNKNOWN,
+                    Role.READ,
+                    "Literal in an untyped field",
+                )
 
     for source in sources:
         initial = {"dashboard": Role.DISPLAY, "scene": Role.WRITE, "group": Role.MEMBER}.get(

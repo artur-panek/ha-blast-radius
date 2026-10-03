@@ -73,7 +73,7 @@ async def test_real_automation_script_adapter_and_non_mutation(hass):
     assert "media_player.speaker" in names
     coordinator = BlastRadiusCoordinator(hass)
     with patch.object(
-        hass.services, "async_call", side_effect=AssertionError("must not call services")
+        type(hass.services), "async_call", side_effect=AssertionError("must not call services")
     ):
         report = await coordinator.request(
             "preview",
@@ -177,8 +177,24 @@ async def test_config_flow_singleton(hass):
 
     flow = BlastRadiusConfigFlow()
     flow.hass = hass
+    flow.handler = DOMAIN
     flow.context = {"source": "user"}
     result = await flow.async_step_user()
     assert result["type"] == "form"
     result = await flow.async_step_user({})
     assert result["type"] == "create_entry"
+    MockConfigEntry(domain=DOMAIN, data={}, unique_id=DOMAIN).add_to_hass(hass)
+    from homeassistant.data_entry_flow import AbortFlow
+
+    with pytest.raises(AbortFlow) as error:
+        await flow.async_step_user()
+    assert error.value.reason == "already_configured"
+
+
+async def test_install_through_config_entry_manager(hass):
+    entry = MockConfigEntry(domain=DOMAIN, data={}, unique_id=DOMAIN)
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    assert "blast-radius" in hass.data[frontend.DATA_PANELS]
+    assert await hass.config_entries.async_unload(entry.entry_id)

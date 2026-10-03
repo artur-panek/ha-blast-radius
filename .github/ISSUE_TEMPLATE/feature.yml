@@ -1,0 +1,12 @@
+name: Feature request
+description: Propose source coverage or a focused improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes: {label: What problem should this solve?}
+    validations: {required: true}
+  - type: textarea
+    id: example
+    attributes: {label: Synthetic example and expected behaviour}
+    validations: {required: true}

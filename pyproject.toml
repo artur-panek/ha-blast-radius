@@ -7,7 +7,11 @@ dependencies = ["jinja2>=3.1.6,<4"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8,<10", "pytest-asyncio>=1,<2", "pytest-cov>=6,<8", "ruff>=0.12,<1", "mypy>=1.16,<2"]
-ha = ["homeassistant==2026.9.4; python_version >= '3.14'", "pytest-homeassistant-custom-component==0.13.367; python_version >= '3.14'"]
+ha = [
+  "homeassistant==2026.9.4; python_full_version >= '3.14.2'",
+  "pytest-homeassistant-custom-component==0.13.367; python_full_version >= '3.14.2'",
+  "home-assistant-frontend==20260826.7; python_full_version >= '3.14.2'",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -23,7 +27,8 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 [tool.mypy]
 files = ["custom_components/blast_radius/analysis"]
 strict = true
-follow_imports = "silent"
+follow_imports = "skip"
+ignore_missing_imports = true
 
 [tool.coverage.run]
 source = ["custom_components/blast_radius/analysis"]
@@ -31,3 +36,13 @@ source = ["custom_components/blast_radius/analysis"]
 [tool.coverage.report]
 show_missing = true
 fail_under = 85
+
+[build-system]
+requires = ["setuptools>=78"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["custom_components*"]
+
+[tool.setuptools.package-data]
+"custom_components.blast_radius" = ["*.json", "translations/*.json", "frontend/*.js"]
