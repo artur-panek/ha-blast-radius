@@ -20,8 +20,22 @@ Validated locally on 2026-10-03 against Home Assistant 2026.9.4 / Python 3.14.7.
 The panel screenshots and browser harness use synthetic data. No access to a
 real household installation was used or required.
 
-GitHub Actions and HACS validation are configured. **Remote CI and HACS repository
-validation have not run yet**, because the GitHub repository has not been created.
+## GitHub Actions
+
+The first [published build](https://github.com/artur-panek/ha-blast-radius/actions/runs/37157836225)
+ran on 2026-10-03 at commit `3684c907efa7916f5218e566016906e4fa7a2b36`.
+
+| Job | Result |
+| --- | --- |
+| Python | Passed: 40 tests, 97.13% engine coverage, Ruff, mypy and package audit |
+| Frontend | Passed: formatting, TypeScript/build, committed bundle consistency and 5 browser tests |
+| Official hassfest | Passed |
+| HACS | Failed: repository description and topics are not set |
+
+HACS passed its license, information, issues, archived, integration manifest and
+`hacs.json` checks. Its remaining failures concern the GitHub repository's About
+metadata. Add a description and topics, then rerun the HACS job.
+
 The HACS action intentionally excludes the upstream `brands` check for the custom
 repository alpha. Remove that exclusion before a future default-list submission.
 

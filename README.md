@@ -41,8 +41,6 @@ conditional branch will run tonight. That would be a different project.
 
 ### HACS custom repository
 
-Once this repository is published at the URL below:
-
 1. In HACS, open **Custom repositories** from its menu.
 2. Add `https://github.com/artur-panek/ha-blast-radius`, type **Integration**.
 3. Download **HA Blast Radius**, then restart Home Assistant.
