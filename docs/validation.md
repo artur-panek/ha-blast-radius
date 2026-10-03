@@ -5,6 +5,8 @@
 Local validation: 42 Python tests and 5 Chromium browser tests passed. The HA
 lifecycle test covers registering, removing and restoring the sidebar icon module.
 Ruff, mypy, TypeScript/build and the package audit passed.
+All four jobs passed in the [v0.1.2 CI run](https://github.com/artur-panek/ha-blast-radius/actions/runs/37159867613):
+Python, frontend, official hassfest and HACS.
 
 The radius mark was visually inspected at 24 px and 40 px, on light and dark
 backgrounds, and in the panel's mobile header. Updated panel screenshots remain
