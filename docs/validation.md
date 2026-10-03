@@ -40,6 +40,25 @@ The local installation ZIP and CI package have the same SHA-256:
 `1f2e80fae2f203514ad3977d8c8fdde7dfad5c64dbf0ee2b4640132c78f23fa0`.
 No GitHub release or tag was created as part of this validation.
 
+### First numbered HACS release
+
+Later on 2026-10-04, release automation was added without changing the integration's
+runtime code. All six jobs passed in the [publication CI run](https://github.com/artur-panek/ha-blast-radius/actions/runs/37163333604)
+at `0eb10f4d2d1ed3e275929a6d9343a4ea8a032339`: both Python versions, frontend,
+hassfest, HACS and publication. The suite now includes 22 release-automation tests:
+81 tests pass on Python 3.14; 70 pass on Python 3.12 with the HA module skipped.
+The 6 browser tests and engine coverage are unchanged.
+
+The workflow published [v0.1.3](https://github.com/artur-panek/ha-blast-radius/releases/tag/v0.1.3)
+in the standard HACS release channel, with an explicit experimental-alpha label.
+The tag points to the tested commit. The ZIP and checksum file are attached; its
+SHA-256 matches the local package:
+`418b0534c7e90914db30f1e3afe9e237d036400b2705b0eac4b8f21c51186dfb`.
+This differs from the preparation ZIP above because the bundled installation
+instructions now explain numbered updates. No private household screenshots were
+published. HACS discovery and installation on the user's server are not remotely
+verified; branch installs need the documented one-time switch to the numbered release.
+
 ## v0.1.2
 
 Local validation: 42 Python tests and 5 Chromium browser tests passed. The HA
