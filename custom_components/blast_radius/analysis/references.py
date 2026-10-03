@@ -16,13 +16,20 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
     found: dict[Reference, None] = {}
     warnings: set[str] = set()
 
-    def emit(source: Source, target: str | None, path: str, confidence: Confidence,
-             role: Role, reason: str = "") -> None:
+    def emit(
+        source: Source,
+        target: str | None,
+        path: str,
+        confidence: Confidence,
+        role: Role,
+        reason: str = "",
+    ) -> None:
         if len(found) >= MAX_REFERENCES:
             warnings.add("Reference limit reached; analysis is incomplete.")
             return
-        found[Reference(source.source_id, source.source_type, target, path,
-                        confidence, role, reason)] = None
+        found[
+            Reference(source.source_id, source.source_type, target, path, confidence, role, reason)
+        ] = None
 
     def walk(source: Source, value: Any, path: str, key: str, role: Role, depth: int) -> None:
         if depth > MAX_NESTING:
@@ -37,7 +44,17 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     continue
                 child_path = f"{path}.{field}" if path else field
                 next_role = role
-                if field in {"trigger", "triggers", "condition", "conditions", "if", "while", "until", "wait_template", "wait_for_trigger"}:
+                if field in {
+                    "trigger",
+                    "triggers",
+                    "condition",
+                    "conditions",
+                    "if",
+                    "while",
+                    "until",
+                    "wait_template",
+                    "wait_for_trigger",
+                }:
                     next_role = Role.READ
                 elif field in {"action", "actions", "sequence", "then", "else"}:
                     next_role = Role.WRITE
@@ -55,8 +72,14 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                 for target in result.literals:
                     emit(source, target, path, Confidence.TEMPLATE_LITERAL, role)
                 if result.dynamic:
-                    emit(source, None, path, Confidence.DYNAMIC, role,
-                         "Unsupported template syntax" if result.invalid else "Runtime expression")
+                    emit(
+                        source,
+                        None,
+                        path,
+                        Confidence.DYNAMIC,
+                        role,
+                        "Unsupported template syntax" if result.invalid else "Runtime expression",
+                    )
             elif key in _ENTITY_KEYS:
                 # HA accepts comma-separated entity targets as well as arrays.
                 for target in value.split(","):
@@ -64,7 +87,14 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     if ENTITY_RE.fullmatch(target):
                         emit(source, target, path, Confidence.EXPLICIT, role)
                     elif target:
-                        emit(source, None, path, Confidence.DYNAMIC, role, "Non-literal entity target")
+                        emit(
+                            source,
+                            None,
+                            path,
+                            Confidence.DYNAMIC,
+                            role,
+                            "Non-literal entity target",
+                        )
             elif key in {"action", "service"}:
                 if value.startswith("script.") and value[7:] not in _SCRIPT_SERVICES:
                     emit(source, value, path, Confidence.EXPLICIT, Role.CALL)
@@ -75,6 +105,7 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
 
     for source in sources:
         initial = {"dashboard": Role.DISPLAY, "scene": Role.WRITE, "group": Role.MEMBER}.get(
-            source.source_type, Role.READ)
+            source.source_type, Role.READ
+        )
         walk(source, source.config, "", "", initial, 0)
     return Scan(tuple(found), tuple(sorted(warnings)))

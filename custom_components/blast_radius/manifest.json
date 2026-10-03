@@ -1,0 +1,13 @@
+{
+  "domain": "blast_radius",
+  "name": "HA Blast Radius",
+  "codeowners": ["@artur-panek"],
+  "config_flow": true,
+  "dependencies": ["frontend", "http", "panel_custom", "websocket_api"],
+  "documentation": "https://github.com/artur-panek/ha-blast-radius",
+  "integration_type": "service",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/artur-panek/ha-blast-radius/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

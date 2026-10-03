@@ -1,0 +1,12 @@
+{
+  "title": "HA Blast Radius",
+  "config": {
+    "step": {
+      "user": {
+        "title": "HA Blast Radius",
+        "description": "Add a read-only impact analysis panel to your sidebar. Only administrators can inspect configuration. This integration never renames entities or edits configuration."
+      }
+    },
+    "abort": {"already_configured": "HA Blast Radius is already configured."}
+  }
+}

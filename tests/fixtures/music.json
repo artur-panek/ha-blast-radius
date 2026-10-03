@@ -1,0 +1,20 @@
+[
+  {"source_id":"automation.wall_button", "source_type":"automation", "name":"Wall button", "config":{
+    "triggers":[{"trigger":"state", "entity_id":"binary_sensor.wall_button", "to":"on"}],
+    "conditions":[{"condition":"state", "entity_id":"input_boolean.music_enabled", "state":"on"}],
+    "actions":[{"action":"script.music_toggle"}]
+  }},
+  {"source_id":"script.music_toggle", "source_type":"script", "name":"Music toggle", "config":{
+    "sequence":[{"choose":[{"conditions":"{{ is_state('media_player.speaker', 'playing') }}", "sequence":[{"action":"media_player.media_pause", "target":{"entity_id":["media_player.speaker","media_player.tablet"]}}]}], "default":[{"action":"media_player.media_play", "target":{"entity_id":["media_player.speaker","media_player.tablet"]}}]}]
+  }},
+  {"source_id":"automation.indicator", "source_type":"automation", "name":"Indicator", "config":{
+    "triggers":[{"trigger":"template", "value_template":"{{ is_state('binary_sensor.wall_button', 'on') }}"}],
+    "actions":[{"action":"light.turn_on", "target":{"entity_id":"{{ 'light.' ~ room }}"}}]
+  }},
+  {"source_id":"scene.evening", "source_type":"scene", "name":"Evening", "config":{
+    "entities":{"light.desk":{"state":"on"}, "media_player.speaker":{"state":"paused"}}
+  }},
+  {"source_id":"dashboard.home", "source_type":"dashboard", "name":"Home", "config":{
+    "views":[{"cards":[{"type":"entities", "entities":["media_player.speaker", {"entity":"binary_sensor.wall_button"}]}]}]
+  }}
+]
