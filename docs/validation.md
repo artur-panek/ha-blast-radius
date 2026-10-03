@@ -27,6 +27,18 @@ HA theme, browser or custom card. The alpha remains tested only against Core 202
 
 The Quality workflow now checks Python 3.12 engine compatibility as well as the
 full Python 3.14 HA suite, generated assets, browser behavior, hassfest and HACS.
+All five jobs passed in the [v0.1.3 CI run](https://github.com/artur-panek/ha-blast-radius/actions/runs/37162015799)
+for runtime commit `5bb27b134a9cff811b8c4326f86fdb217d16b941`:
+
+- Python 3.12: 48 engine tests passed; the HA module was intentionally skipped.
+- Python 3.14: 59 tests passed, including the HA integration suite.
+- Frontend: formatting, build, generated bundle/brand checks and 6 browser tests passed.
+- Official hassfest and HACS: passed. The upstream brands check remains excluded
+  for the custom-repository alpha, as documented below.
+
+The local installation ZIP and CI package have the same SHA-256:
+`1f2e80fae2f203514ad3977d8c8fdde7dfad5c64dbf0ee2b4640132c78f23fa0`.
+No GitHub release or tag was created as part of this validation.
 
 ## v0.1.2
 
