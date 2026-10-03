@@ -1,5 +1,7 @@
 import { LitElement, html, nothing } from "lit";
 import { styles } from "./styles";
+import { brandMark } from "./brand";
+import { version } from "../package.json";
 import type { Confidence, Entity, Hass, Reference, Report } from "./types";
 
 const labels: Record<Confidence, string> = {
@@ -162,7 +164,7 @@ export class BlastRadiusPanel extends LitElement {
         report.references.length
           ? this.references(report.references)
           : html`<div class="empty">
-              <div class="symbol">◎</div>
+              <div class="symbol">${brandMark()}</div>
               <h3>No direct references found</h3>
               <p class="muted">
                 Nothing in the inspected sources points to this entity. Check
@@ -276,9 +278,14 @@ export class BlastRadiusPanel extends LitElement {
           aria-label="Open sidebar"
           @click=${() => this.dispatchEvent(new CustomEvent("hass-toggle-menu", { bubbles: true, composed: true }))}
         >
-          ☰</button
-        ><strong>HA Blast Radius</strong
-        ><span class="badge">READ ONLY · α 0.1</span>
+          ☰
+        </button>
+        <div class="brand-lockup">
+          ${brandMark()}<strong>HA Blast Radius</strong>
+        </div>
+        <span class="badge"
+          >READ ONLY<span class="release-label"> · α ${version}</span></span
+        >
       </header>
       <main>
         <div class="eyebrow">Configuration impact analysis</div>
@@ -464,7 +471,7 @@ export class BlastRadiusPanel extends LitElement {
               `
             : !this.loading && !this.error
               ? html`<section class="card empty">
-                  <div class="symbol">◎</div>
+                  <div class="symbol">${brandMark()}</div>
                   <h2>Start with one entity</h2>
                   <p class="muted">
                     A button, a helper, an old light.<br />Find out what points

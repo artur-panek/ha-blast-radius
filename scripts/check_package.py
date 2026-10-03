@@ -7,10 +7,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 COMPONENT = ROOT / "custom_components/blast_radius"
 manifest = json.loads((COMPONENT / "manifest.json").read_text())
-assert manifest["version"] == "0.1.1"
+assert manifest["version"] == "0.1.2"
 assert manifest["config_flow"] is True
 assert json.loads((ROOT / "hacs.json").read_text())["homeassistant"] == "2026.9.4"
 assert (COMPONENT / "frontend/blast-radius.js").stat().st_size > 1000
+assert (COMPONENT / "frontend/blast-radius-icons.js").is_file()
+assert (COMPONENT / "brand/icon.png").is_file()
+assert (COMPONENT / "brand/dark_icon.png").is_file()
 assert [
     p.name
     for p in (ROOT / "custom_components").iterdir()

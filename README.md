@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/brand/dark-icon.svg">
+  <img src="docs/brand/icon.svg" width="64" height="64" alt="HA Blast Radius icon">
+</picture>
+
 # HA Blast Radius
 
 **Know what breaks before you touch it.**
@@ -16,7 +21,7 @@ flowchart TD
 Rename an entity? Retire a helper? Clean up that integration you stopped using?
 Inspect its references before the lights mysteriously stop working.
 
-**v0.1.1 · Experimental alpha · Home Assistant 2026.9.4+ · Admin only · MIT**
+**v0.1.2 · Experimental alpha · Home Assistant 2026.9.4+ · Admin only · MIT**
 
 ![The actual panel in its synthetic demo harness](docs/panel-light.png)
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2 — 2026-10-04
+
+- Add an original vector radius mark to the panel, sidebar and integration tile.
+- Include local light/dark brand images at standard and high resolution.
+- Keep header branding compact on mobile and match the active HA accent color.
+- Ship the dashboard impact fix from 0.1.1.
+
 ## 0.1.1 — 2026-10-04
 
 - Stop impact traversal at dashboards so unrelated card actions and their script

@@ -160,16 +160,20 @@ async def test_setup_unload_reload_and_private_diagnostics(hass):
     entry = MockConfigEntry(domain=DOMAIN, data={}, unique_id=DOMAIN)
     entry.add_to_hass(hass)
     hass.data[frontend.DATA_PANELS] = {}
+    hass.data[frontend.DATA_EXTRA_MODULE_URL] = set()
+    icon_url = "/blast_radius_static/blast-radius-icons.js?v=0.1.2"
     with patch.object(hass, "http", create=True) as http:
         http.async_register_static_paths = AsyncMock()
         assert await async_setup_entry(hass, entry)
         assert hass.data[frontend.DATA_PANELS]["blast-radius"].require_admin
+        assert icon_url in hass.data[frontend.DATA_EXTRA_MODULE_URL]
         assert await async_unload_entry(hass, entry)
         assert "blast-radius" not in hass.data[frontend.DATA_PANELS]
+        assert icon_url not in hass.data[frontend.DATA_EXTRA_MODULE_URL]
         assert await async_setup_entry(hass, entry)
         assert http.async_register_static_paths.await_count == 1
     diagnostics = await async_get_config_entry_diagnostics(hass, entry)
-    assert diagnostics == {"version": "0.1.1", "read_only": True}
+    assert diagnostics == {"version": "0.1.2", "read_only": True}
 
 
 async def test_config_flow_singleton(hass):

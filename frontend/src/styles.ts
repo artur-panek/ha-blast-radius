@@ -35,7 +35,24 @@ export const styles = css`
   }
   header strong {
     font-size: 20px;
-    font-weight: 500;
+    font-weight: 600;
+    letter-spacing: -0.4px;
+    white-space: nowrap;
+  }
+  .brand-lockup {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-mark {
+    display: block;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    color: var(--primary-text-color, #25313b);
+  }
+  .brand-mark .radius {
+    fill: var(--br-accent);
   }
   header .badge {
     margin-left: auto;
@@ -265,6 +282,11 @@ export const styles = css`
     font-size: 36px;
     color: var(--br-accent);
   }
+  .empty .brand-mark {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+  }
   .tree {
     list-style: none;
     padding: 0;
@@ -395,6 +417,14 @@ export const styles = css`
   @media (max-width: 500px) {
     header {
       padding: 0 12px;
+      gap: 8px;
+    }
+    header .brand-mark {
+      width: 28px;
+      height: 28px;
+    }
+    header .release-label {
+      display: none;
     }
     header strong {
       font-size: 17px;

@@ -45,7 +45,7 @@ jobs:
       - run: npm ci
       - run: npx prettier --check 'src/*.ts' '*.ts' '*.json' 'test/*.ts' index.html
       - run: npm run build
-      - run: git diff --exit-code -- ../custom_components/blast_radius/frontend/blast-radius.js
+      - run: git diff --exit-code -- ../custom_components/blast_radius/frontend/
       - run: npx playwright install --with-deps chromium
       - run: npm test
 

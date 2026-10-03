@@ -1,4 +1,28 @@
-# v0.1.0 validation
+# Validation
+
+## v0.1.2
+
+Local validation: 42 Python tests and 5 Chromium browser tests passed. The HA
+lifecycle test covers registering, removing and restoring the sidebar icon module.
+Ruff, mypy, TypeScript/build and the package audit passed.
+
+The radius mark was visually inspected at 24 px and 40 px, on light and dark
+backgrounds, and in the panel's mobile header. Updated panel screenshots remain
+synthetic. Standard and high-resolution integration icons are packaged locally.
+
+## v0.1.1
+
+The dashboard traversal regression was reproduced with synthetic light and
+computer-control cards. Before the fix, analyzing the light included an unrelated
+computer script and its button target. After the fix, the light retains its
+automation and both dashboard references, with no unrelated downstream targets.
+Selecting the computer script still reports its dashboard reference and button target.
+
+Local validation: 42 Python tests passed, 97.15% engine coverage, Ruff, mypy and the
+package audit passed. Regenerating demo data produced no changes.
+All four jobs passed in the [patch CI run](https://github.com/artur-panek/ha-blast-radius/actions/runs/37159173784).
+
+## v0.1.0
 
 Validated locally on 2026-10-03 against Home Assistant 2026.9.4 / Python 3.14.7.
 
@@ -20,7 +44,7 @@ Validated locally on 2026-10-03 against Home Assistant 2026.9.4 / Python 3.14.7.
 The panel screenshots and browser harness use synthetic data. No access to a
 real household installation was used or required.
 
-## GitHub Actions
+### GitHub Actions
 
 The first [published build](https://github.com/artur-panek/ha-blast-radius/actions/runs/37157836225)
 ran on 2026-10-03 at commit `3684c907efa7916f5218e566016906e4fa7a2b36`.
