@@ -72,6 +72,10 @@ paths, backups, rollback and common problems. No YAML configuration or credentia
 are needed. A manifest version is not a GitHub release; see the repository's
 [Releases page](https://github.com/artur-panek/ha-blast-radius/releases) for tagged builds.
 
+New numbered versions are published after all Quality checks pass and are discoverable
+through HACS update checks. Already installed from `main`? Use **Redownload** once
+and select the latest numbered release. Updates do not install or restart HA automatically.
+
 ## Usage
 
 1. Select or type an entity ID. Missing old IDs are accepted.

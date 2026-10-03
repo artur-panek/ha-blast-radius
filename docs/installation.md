@@ -13,9 +13,11 @@ Make a Home Assistant backup before installing or updating any custom integratio
 4. Open **Settings → Devices & services → Add integration → HA Blast Radius**.
 5. Confirm setup, then open **Blast Radius** in the sidebar.
 
-This is a custom repository, not a HACS default-directory listing. Before the first
-tagged release, HACS installs from the default branch. A version in the integration
-manifest is not itself a GitHub release.
+This is a custom repository, not a HACS default-directory listing. Choose the
+latest numbered release, not `main`, for the normal update channel. Releases are
+published automatically after all Quality checks pass for a new manifest version.
+The integration remains an experimental alpha; using the standard HACS release
+channel is not a claim of production stability.
 
 ## Manual installation
 
@@ -31,8 +33,17 @@ needed on the Home Assistant machine; the built panel is included.
 
 ## Updating and rolling back
 
-- In HACS, download the available update. When testing a newer default-branch
-  commit, use the repository's redownload option if no versioned update is offered.
+- HACS checks for new numbered releases and exposes available updates in Home
+  Assistant. Discovery is periodic, not immediate. Install the offered update,
+  then restart HA; this integration never installs itself or restarts your server.
+- **One-time switch from `main`:** open HACS → HA Blast Radius → menu →
+  **Redownload**, select the newest numbered release (for example `v0.1.3`), and
+  download it. Restart HA and reload the browser. Even if the panel already says
+  `0.1.3`, this switches HACS from branch tracking to numbered release tracking.
+- If a new release is missing, use the repository menu's **Update information**
+  option and reopen Redownload. Do not delete the integration or edit HACS storage.
+- Staying on `main` is an opt-in development choice; branch updates may include
+  unreleased changes and do not follow the numbered release channel.
 - For manual installation, back up the existing `blast_radius` folder and replace
   it with the complete folder from the chosen version. Do not mix files from versions.
 - Restart Home Assistant and fully reload the browser. The desktop panel header

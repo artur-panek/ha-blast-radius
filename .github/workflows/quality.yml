@@ -74,3 +74,26 @@ jobs:
           comment: false
           # Custom repository alpha: upstream brands/default-list submission is deferred.
           ignore: brands
+
+  release:
+    name: Publish version for HACS
+    needs: [python, frontend, hassfest, hacs]
+    if: >-
+      github.repository == 'artur-panek/ha-blast-radius' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Publish an unreleased manifest version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/publish_release.py

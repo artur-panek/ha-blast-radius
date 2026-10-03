@@ -2,6 +2,9 @@
 
 ## 0.1.3 — 2026-10-04
 
+- Publish numbered GitHub releases automatically after all Quality checks pass,
+  with verified installation assets and a standard HACS update channel.
+- Document the one-time switch from `main` to numbered releases in HACS.
 - Expand forward dependencies by shortest path; avoid missing reachable action
   targets and false incompleteness when closing an already explored cycle.
 - Distinguish constant/value templates from unresolved targets. Keep templated
