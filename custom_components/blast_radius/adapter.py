@@ -20,7 +20,7 @@ def _normalize(value: Any, depth: int = 0) -> Any:
     if depth > 80:
         raise ValueError("Configuration nesting exceeds analysis limit")
     if isinstance(value, Template):
-        return value.template
+        value = value.template
     if isinstance(value, dict):
         return {str(k): _normalize(v, depth + 1) for k, v in value.items()}
     if isinstance(value, (list, tuple)):
@@ -77,10 +77,13 @@ async def collect_snapshot(
             continue
         members = state.attributes.get("entity_id")
         if isinstance(members, (list, tuple, str)):
+            try:
+                members = _normalize(members)
+            except ValueError:
+                warnings.append(f"Membership size limit reached for {state.entity_id}; skipped.")
+                continue
             sources.append(
-                Source(
-                    state.entity_id, state.domain, state.name, {"entity_id": _normalize(members)}
-                )
+                Source(state.entity_id, state.domain, state.name, {"entity_id": members})
             )
 
     lovelace = hass.data.get(LOVELACE_DATA)
@@ -100,6 +103,7 @@ async def collect_snapshot(
 
     warnings.append(
         "Coverage excludes helper configuration without exposed membership, template "
-        "integration definitions, external integrations and unexpanded device/area/label targets."
+        "integration definitions, external integrations and unexpanded "
+        "device/area/floor/label targets."
     )
     return tuple(sources), names, tuple(warnings)

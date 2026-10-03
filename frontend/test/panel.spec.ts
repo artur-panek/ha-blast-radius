@@ -118,3 +118,28 @@ test("configuration labels are rendered as text", async ({ page }) => {
   await expect(page.getByRole("alert")).toContainText("<img src=x");
   await expect(page.locator("blast-radius-panel img")).toHaveCount(0);
 });
+
+test("a failed refresh does not leave a stale report available to export", async ({
+  page,
+}) => {
+  await page
+    .getByRole("combobox", { name: "Entity", exact: true })
+    .fill("binary_sensor.wall_button");
+  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    panel.hass = {
+      callWS: async () => {
+        throw new Error("Snapshot unavailable");
+      },
+    };
+  });
+  await page.getByRole("button", { name: "Refresh snapshot" }).click();
+  await expect(page.getByRole("alert")).toContainText("Snapshot unavailable");
+  await expect(page.getByRole("button", { name: "Export JSON" })).toHaveCount(
+    0,
+  );
+  await expect(
+    page.getByText("triggers[0].entity_id", { exact: true }),
+  ).toHaveCount(0);
+});

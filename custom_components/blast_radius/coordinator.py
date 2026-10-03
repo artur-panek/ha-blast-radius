@@ -31,7 +31,7 @@ class BlastRadiusCoordinator:
                             {"entity_id": eid, "name": names.get(eid, eid), "exists": eid in names}
                             for eid in sorted(set(names) | targets)
                         ],
-                        "warnings": list(warnings),
+                        "warnings": list(engine.warnings),
                         "snapshot_at": timestamp,
                     }
                 args = (message["entity_id"], message.get("max_depth", 6))
@@ -50,6 +50,6 @@ class BlastRadiusCoordinator:
                 "snapshot_at": timestamp,
                 "source_count": len(sources),
                 "entity_count": len(names),
-                "warning_count": len(warnings),
+                "warning_count": len(result.get("warnings", warnings)),
             }
             return result

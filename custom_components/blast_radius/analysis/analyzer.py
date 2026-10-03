@@ -4,7 +4,7 @@ from collections import Counter
 from typing import Any
 
 from .graph import DependencyGraph
-from .models import Confidence, Source
+from .models import Confidence, InvalidInput, Source
 from .references import scan_sources
 from .templates import ENTITY_RE
 
@@ -22,7 +22,7 @@ class Analyzer:
 
     def analyze(self, entity_id: str, max_depth: int = 6) -> dict[str, Any]:
         if not ENTITY_RE.fullmatch(entity_id):
-            raise ValueError("Use a valid domain.entity_id")
+            raise InvalidInput("Use a valid domain.entity_id")
         direct = self.graph.incoming.get(entity_id, [])
         graph = self.graph.impact(entity_id, max_depth)
         affected = {n["id"] for n in graph["nodes"]}
@@ -72,18 +72,18 @@ class Analyzer:
         self, entity_id: str, operation: str, new_entity_id: str | None = None, max_depth: int = 6
     ) -> dict[str, Any]:
         if operation not in {"rename", "delete"}:
-            raise ValueError("Operation must be rename or delete")
+            raise InvalidInput("Operation must be rename or delete")
         if operation == "rename":
             if not new_entity_id or not ENTITY_RE.fullmatch(new_entity_id):
-                raise ValueError("Enter a valid replacement entity ID")
+                raise InvalidInput("Enter a valid replacement entity ID")
             if entity_id == new_entity_id:
-                raise ValueError("Replacement must be different")
+                raise InvalidInput("Replacement must be different")
             if entity_id.partition(".")[0] != new_entity_id.partition(".")[0]:
-                raise ValueError("A rename must stay in the same domain")
+                raise InvalidInput("A rename must stay in the same domain")
             if new_entity_id in self.entities:
-                raise ValueError("Replacement entity ID already exists")
+                raise InvalidInput("Replacement entity ID already exists")
         elif new_entity_id is not None:
-            raise ValueError("Removal previews do not accept a replacement entity ID")
+            raise InvalidInput("Removal previews do not accept a replacement entity ID")
         report = self.analyze(entity_id, max_depth)
         distinct = {(ref["source_id"], ref["source_type"]) for ref in report["references"]}
         report["preview"] = {

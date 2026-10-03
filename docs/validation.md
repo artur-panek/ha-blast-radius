@@ -1,5 +1,33 @@
 # Validation
 
+## v0.1.3
+
+Release-preparation validation on 2026-10-04 against Home Assistant 2026.9.4 /
+Python 3.14.7. New regression cases reproduced incorrect shortest-path expansion,
+cycle truncation, template classification, unexpected exception disclosure and
+stale export behavior before the fixes.
+
+| Check | Result |
+| --- | --- |
+| Python suite | 59 tests passed, including real HA setup/unload and WebSocket tests |
+| Pure analysis coverage | 96.26% |
+| Ruff lint/format and engine mypy | Passed |
+| Frontend formatting, TypeScript and production build | Passed |
+| Chromium browser suite | 6 tests passed |
+| Visual review | Synthetic light, dark and mobile layouts; original radius branding |
+| Generated brand consistency | Regeneration matches committed runtime assets |
+| Package and version consistency | Passed, including local PNG dimensions |
+| Manual-install ZIP | 24 files; two builds byte-for-byte identical |
+| Installed Python dependency consistency | `pip check` passed |
+| Frontend production dependency scan | `npm audit --omit=dev`: 0 reported vulnerabilities |
+
+Dependency scan results are a point-in-time check, not a security certification.
+Browser tests use synthetic reports and do not establish compatibility with every
+HA theme, browser or custom card. The alpha remains tested only against Core 2026.9.4.
+
+The Quality workflow now checks Python 3.12 engine compatibility as well as the
+full Python 3.14 HA suite, generated assets, browser behavior, hassfest and HACS.
+
 ## v0.1.2
 
 Local validation: 42 Python tests and 5 Chromium browser tests passed. The HA

@@ -1,9 +1,10 @@
 """Indexed dependency graph and bounded structural impact traversal."""
 
 from collections import defaultdict, deque
+from heapq import heapify, heappop, heappush
 from typing import Any
 
-from .models import Reference, Role
+from .models import InvalidInput, Reference, Role
 
 MAX_NODES = 500
 MAX_EDGES = 2_000
@@ -23,7 +24,7 @@ class DependencyGraph:
 
     def impact(self, entity_id: str, max_depth: int = 6) -> dict[str, Any]:
         if not 1 <= max_depth <= 12:
-            raise ValueError("Depth must be between 1 and 12")
+            raise InvalidInput("Depth must be between 1 and 12")
         nodes: dict[str, dict[str, Any]] = {
             entity_id: {"id": entity_id, "depth": 0, "relationship": "selected"}
         }
@@ -32,7 +33,15 @@ class DependencyGraph:
 
         def follow(origin: str, ref: Reference, target: str, depth: int, relation: str) -> bool:
             nonlocal truncated
-            if depth > max_depth or len(edges) >= MAX_EDGES:
+            if ref not in edges and len(edges) >= MAX_EDGES:
+                truncated = True
+                return False
+            # Closing a known path adds no depth or nodes. Keep back/alternative
+            # edges without claiming a fully explored cycle was truncated.
+            if target in nodes and nodes[target]["depth"] <= depth:
+                edges[ref] = None
+                return False
+            if depth > max_depth:
                 truncated = True
                 return False
             if target not in nodes and len(nodes) >= MAX_NODES:
@@ -63,10 +72,11 @@ class DependencyGraph:
 
         # Phase two: only action targets/calls/membership of impacted configurations.
         # Do not walk upstream from an action target: that would claim runtime chains.
-        queue = deque((node, nodes[node]["depth"]) for node in sorted(dependents))
+        pending = [(nodes[node]["depth"], node) for node in dependents]
+        heapify(pending)
         visited: set[str] = set()
-        while queue:
-            current, depth = queue.popleft()
+        while pending:
+            depth, current = heappop(pending)
             if current in visited:
                 continue
             visited.add(current)
@@ -78,7 +88,7 @@ class DependencyGraph:
                 if ref.role not in EFFECT_ROLES or ref.target is None:
                     continue
                 if follow(current, ref, ref.target, depth + 1, "downstream"):
-                    queue.append((ref.target, depth + 1))
+                    heappush(pending, (depth + 1, ref.target))
 
         edge_list = list(edges)
         return {

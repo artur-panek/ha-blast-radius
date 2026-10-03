@@ -7,6 +7,7 @@ from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv
 
+from .analysis.models import InvalidInput
 from .const import DOMAIN
 from .coordinator import BlastRadiusCoordinator
 
@@ -23,7 +24,7 @@ async def _respond(
         return
     try:
         result = await coordinator.request(operation, msg)
-    except ValueError as err:
+    except InvalidInput as err:
         connection.send_error(msg["id"], "invalid_input", str(err))
     except Exception:
         connection.send_error(

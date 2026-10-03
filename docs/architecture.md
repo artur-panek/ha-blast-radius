@@ -57,7 +57,9 @@ Graph nodes include `id`, `depth`, `relationship`, and a traversal predecessor
 `via`, reference `path` and `confidence` where applicable. Edges retain the original
 **source references target** direction; `via` need not be the edge source.
 `cycles` lists detected back-edge paths (up to 50), not every possible simple cycle.
-`truncated` identifies depth/size limits.
+`truncated` identifies depth/size limits. Forward expansion processes the shortest
+discovered depth first, so a longer dependent path cannot hide a reachable target.
+Closing an already known cycle does not by itself make the result incomplete.
 
 Dashboards are terminal dependents: their direct entity and script references stay
 visible, but forward impact traversal does not expand dashboard actions. Cards are
@@ -77,6 +79,23 @@ changes_applied: false, note}`. Renames must be valid, same-domain, different,
 and collision-free. Missing source IDs are allowed for stale-reference analysis.
 Removal rejects a replacement ID.
 
+## Template classification
+
+The engine parses Jinja syntax without evaluating it. Literal IDs become read
+dependencies, including IDs inside action-target templates; they are not guessed
+write targets. Templated entity/action/target fields also produce an unresolved
+entry because their final destination is unknown.
+
+Constant-only text and styling are not automatically unresolved. A small allowlist
+of value-only filters is recognized; unknown calls, custom filters and variable
+lookups remain conservative unresolved candidates. Entity-like strings in variables
+are reads, not downstream writes. Malformed or excessively nested templates retain
+visible literal candidates and an unresolved warning instead of aborting the report.
+
+Snapshot warnings describe overall coverage. `unresolved_total` counts uncertainty
+throughout the snapshot; `uncertain_references` narrows it to affected source
+configurations, not individual execution branches or dashboard cards.
+
 ## Safety and privacy
 
 - No service calls, registry writes, config saves or template rendering.
@@ -86,6 +105,8 @@ Removal rejects a replacement ID.
 - No third-party CDN, analytics, tokens or remote execution in the panel.
 - The public static route serves packaged JS only; data commands require admin auth.
 - Config strings over 64 KiB or nesting over 80 levels produce coverage warnings.
+  The same string bound applies to HA Template objects. An invalid source is skipped
+  with a warning rather than hiding otherwise available sources.
 
 ## Verification
 

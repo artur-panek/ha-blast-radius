@@ -9,6 +9,7 @@ ENTITY_RE = re.compile(r"[a-z_][a-z0-9_]*\.[a-z0-9_]+\Z")
 ENTITY_TOKEN = re.compile(r"(?<![\w./])([a-z_][a-z0-9_]*\.[a-z0-9_]+)(?![\w./])")
 _ENV = Environment()
 _FUNCTIONS = {"states", "state_attr", "is_state", "is_state_attr", "has_value"}
+_VALUE_FILTERS = {"float", "int", "round", "default", "abs", "lower", "upper", "trim"}
 
 
 @dataclass(frozen=True)
@@ -25,9 +26,13 @@ def is_template(value: str) -> bool:
 def inspect_template(value: str) -> TemplateReferences:
     """Literal strings are candidates, not proof of a runtime dependency."""
     try:
-        tree = _ENV.parse(value)
-    except TemplateSyntaxError:
+        return _inspect_template(value)
+    except (TemplateSyntaxError, RecursionError):
         return TemplateReferences(tuple(sorted(set(ENTITY_TOKEN.findall(value)))), True, True)
+
+
+def _inspect_template(value: str) -> TemplateReferences:
+    tree = _ENV.parse(value)
     literals: set[str] = set()
     dynamic = False
     for item in tree.find_all(nodes.Const):
@@ -60,8 +65,17 @@ def inspect_template(value: str) -> TemplateReferences:
     allowed_names = _FUNCTIONS | {"states"}
     if any(n.name not in allowed_names for n in tree.find_all(nodes.Name)):
         dynamic = True
-    if any(tree.find_all((nodes.Getitem, nodes.Filter))):
+    if any(n.name not in _VALUE_FILTERS for n in tree.find_all(nodes.Filter)):
         dynamic = True
-    if not literals:
-        dynamic = True
+    for item in tree.find_all(nodes.Getitem):
+        if not (
+            isinstance(item.node, nodes.Name)
+            and item.node.name == "states"
+            and isinstance(item.arg, nodes.Const)
+            and isinstance(item.arg.value, str)
+            and ENTITY_RE.fullmatch(item.arg.value)
+        ):
+            dynamic = True
+    # Literal-only styling/text is not an unresolved entity dependency. Templated
+    # action/target fields are handled separately by the configuration walker.
     return TemplateReferences(tuple(sorted(literals)), dynamic)

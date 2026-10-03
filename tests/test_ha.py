@@ -14,7 +14,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry  # noqa
 
 from custom_components.blast_radius import async_setup_entry, async_unload_entry  # noqa: E402
 from custom_components.blast_radius.adapter import collect_snapshot  # noqa: E402
-from custom_components.blast_radius.const import DOMAIN  # noqa: E402
+from custom_components.blast_radius.const import DOMAIN, VERSION  # noqa: E402
 from custom_components.blast_radius.coordinator import BlastRadiusCoordinator  # noqa: E402
 from custom_components.blast_radius.diagnostics import (
     async_get_config_entry_diagnostics,  # noqa: E402
@@ -161,7 +161,7 @@ async def test_setup_unload_reload_and_private_diagnostics(hass):
     entry.add_to_hass(hass)
     hass.data[frontend.DATA_PANELS] = {}
     hass.data[frontend.DATA_EXTRA_MODULE_URL] = set()
-    icon_url = "/blast_radius_static/blast-radius-icons.js?v=0.1.2"
+    icon_url = f"/blast_radius_static/blast-radius-icons.js?v={VERSION}"
     with patch.object(hass, "http", create=True) as http:
         http.async_register_static_paths = AsyncMock()
         assert await async_setup_entry(hass, entry)
@@ -173,7 +173,7 @@ async def test_setup_unload_reload_and_private_diagnostics(hass):
         assert await async_setup_entry(hass, entry)
         assert http.async_register_static_paths.await_count == 1
     diagnostics = await async_get_config_entry_diagnostics(hass, entry)
-    assert diagnostics == {"version": "0.1.2", "read_only": True}
+    assert diagnostics == {"version": VERSION, "read_only": True}
 
 
 async def test_config_flow_singleton(hass):
@@ -202,3 +202,35 @@ async def test_install_through_config_entry_manager(hass):
     await hass.async_block_till_done()
     assert "blast-radius" in hass.data[frontend.DATA_PANELS]
     assert await hass.config_entries.async_unload(entry.entry_id)
+
+
+@pytest.mark.parametrize("error_type", [ValueError, RuntimeError])
+async def test_unexpected_errors_do_not_leak_details(hass, hass_ws_client, error_type):
+    hass.data[DOMAIN] = {
+        "coordinator": SimpleNamespace(
+            request=AsyncMock(side_effect=error_type("private-token-or-config-path"))
+        )
+    }
+    async_register_commands(hass)
+    client = await hass_ws_client(hass)
+    await client.send_json({"id": 1, "type": "blast_radius/entities"})
+    response = await client.receive_json()
+    assert response["error"]["code"] == "analysis_failed"
+    assert "private-token" not in str(response)
+
+
+async def test_oversized_membership_does_not_abort_snapshot(hass):
+    hass.states.async_set("group.oversized", "on", {"entity_id": "x" * 65_537})
+    hass.states.async_set("group.valid", "on", {"entity_id": ["light.office"]})
+    sources, _, warnings = await collect_snapshot(hass)
+    assert {source.source_id for source in sources} == {"group.valid"}
+    assert any("group.oversized" in warning for warning in warnings)
+
+
+def test_template_objects_obey_the_same_string_limit(hass):
+    from homeassistant.helpers.template import Template
+
+    from custom_components.blast_radius.adapter import _normalize
+
+    with pytest.raises(ValueError, match="string exceeds"):
+        _normalize(Template("x" * 65_537, hass))

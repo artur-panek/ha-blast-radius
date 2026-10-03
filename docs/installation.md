@@ -1,0 +1,74 @@
+# Installation and troubleshooting
+
+HA Blast Radius is an experimental, read-only custom integration. Use Home Assistant
+2026.9.4 or newer and an administrator account. Compatibility is currently tested
+against 2026.9.4; newer versions are not automatically guaranteed to work.
+Make a Home Assistant backup before installing or updating any custom integration.
+
+## HACS custom repository
+
+1. Open HACS and its **Custom repositories** dialog.
+2. Add `https://github.com/artur-panek/ha-blast-radius` as **Integration**.
+3. Download **HA Blast Radius** and restart Home Assistant.
+4. Open **Settings → Devices & services → Add integration → HA Blast Radius**.
+5. Confirm setup, then open **Blast Radius** in the sidebar.
+
+This is a custom repository, not a HACS default-directory listing. Before the first
+tagged release, HACS installs from the default branch. A version in the integration
+manifest is not itself a GitHub release.
+
+## Manual installation
+
+From the repository or a release installation ZIP, copy
+`custom_components/blast_radius/` into the `custom_components/` folder in your Home
+Assistant configuration directory. The final path must be
+`<config>/custom_components/blast_radius/manifest.json`, not a nested repository
+folder. Include the `frontend/`, `brand/`, `analysis/` and `translations/` folders.
+
+Restart Home Assistant, then add the integration through Devices & services.
+Do not add configuration YAML, credentials or dashboard resources. Node.js is not
+needed on the Home Assistant machine; the built panel is included.
+
+## Updating and rolling back
+
+- In HACS, download the available update. When testing a newer default-branch
+  commit, use the repository's redownload option if no versioned update is offered.
+- For manual installation, back up the existing `blast_radius` folder and replace
+  it with the complete folder from the chosen version. Do not mix files from versions.
+- Restart Home Assistant and fully reload the browser. The desktop panel header
+  and integration diagnostics show the installed version.
+- To roll back, install the earlier tagged version or restore the previous folder
+  from your backup, then restart and reload again.
+
+## First check
+
+Analyze an entity you know appears in an automation or dashboard. Confirm the
+source IDs and paths against that configuration. Open Graph and try a removal
+preview. Preview buttons only generate reports; they never perform the change.
+
+An unresolved count is not a count of broken entities. It covers expressions and
+selectors the scanner cannot resolve across the entire snapshot. The detailed
+warning list includes unresolved expressions in affected configurations; for a
+dashboard, that can include other cards in the same dashboard.
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| Integration not found | Verify the folder path and HA version, then restart HA |
+| Sidebar entry absent | Confirm the integration was added and you are an administrator |
+| Old UI or missing sidebar icon | Restart HA after updating, then reload the browser or reopen the app |
+| Analysis fails | Reload the integration and retry; record versions and a synthetic reproduction |
+| Expected reference absent | Expand coverage warnings; unloaded YAML, blueprint bodies and several source types are outside coverage |
+| Many unrelated unresolved entries | Counts cover the whole snapshot; they are not all dependencies of the selected entity |
+| Empty result | Check spelling and coverage; no detected reference is not proof removal is safe |
+
+## Removal
+
+Remove the integration through Devices & services, then uninstall its files through
+HACS or remove only `<config>/custom_components/blast_radius/`. Restart HA. Your
+automations, scripts, entities and dashboards are not modified by the integration.
+
+Report bugs at https://github.com/artur-panek/ha-blast-radius/issues.
+Share only redacted reports and minimal synthetic examples, not full household
+configuration, access tokens or `.storage` files.

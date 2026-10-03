@@ -980,7 +980,7 @@ var _e = o`
     <path fill="currentColor" d=${Z.rings}></path>
     <path class="radius" d=${Z.radius}></path>
   </svg>
-`, ve = "0.1.2", $ = {
+`, ve = "0.1.3", $ = {
 	explicit: "Explicit",
 	template_literal: "Template literal",
 	dynamic: "Dynamic",
@@ -1037,6 +1037,7 @@ var _e = o`
 		let n = ++this.requestId;
 		this.loading = !0, this.error = "", this.status = "", this.copyFallback = !1;
 		try {
+			this.report = void 0;
 			let r = {
 				type: e ? "blast_radius/preview" : "blast_radius/analyze",
 				entity_id: t,
@@ -1189,7 +1190,7 @@ var _e = o`
       </header>
       <main>
         <div class="eyebrow">Configuration impact analysis</div>
-        <h1>Know what breaks before you touch it.</h1>
+        <h1>Check dependencies before you make a change.</h1>
         <p class="muted intro">
           Inspect references. Follow dependencies. Preview the change.
         </p>

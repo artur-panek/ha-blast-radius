@@ -305,3 +305,89 @@ def test_template_reads_in_action_data_are_not_downstream_writes():
     assert analyzer.analyze("script.notify")["summary"]["downstream"] == 0
     assert len(analyzer.analyze("sensor.temperature")["references"]) == 1
     assert all(ref.role == Role.READ for ref in analyzer.references if ref.target)
+
+
+@pytest.mark.parametrize(
+    "template",
+    [
+        "{{ 'red' }}",
+        "{{ 1 + 2 }}",
+        "{# a comment #}",
+        "{% if true %}red{% else %}blue{% endif %}",
+        "{{ states('sensor.temperature') | float(0) | round(1) }}",
+        "{{ states['sensor.temperature'].state }}",
+    ],
+)
+def test_resolved_templates_do_not_invent_dynamic_dependencies(template):
+    assert not inspect_template(template).dynamic
+
+
+@pytest.mark.parametrize("key", ["entity_id", "action", "service"])
+def test_templated_targets_remain_unresolved_without_rendering(key):
+    source = Source(
+        "script.test", "script", "Test", {"sequence": [{key: "{{ states('input_text.target') }}"}]}
+    )
+    refs = scan_sources((source,), {"input_text.target"}).references
+    assert any(ref.target == "input_text.target" and ref.role == Role.READ for ref in refs)
+    assert any(ref.target is None and ref.confidence == Confidence.DYNAMIC for ref in refs)
+
+
+def test_graph_expands_shortest_path_before_longer_dependent_path():
+    def ref(source, target, role):
+        return Reference(source, source.split(".")[0], target, "test", Confidence.EXPLICIT, role)
+
+    graph = DependencyGraph(
+        (
+            ref("automation.z", "sensor.root", Role.READ),
+            ref("script.a", "automation.z", Role.READ),
+            ref("script.b", "script.a", Role.READ),
+            ref("script.c", "script.b", Role.READ),
+            ref("automation.z", "script.c", Role.CALL),
+            ref("script.c", "script.effect", Role.CALL),
+            ref("script.effect", "fan.office", Role.WRITE),
+        )
+    ).impact("sensor.root", 4)
+    nodes = {node["id"]: node for node in graph["nodes"]}
+    assert nodes["script.effect"]["depth"] == 3
+    assert nodes["fan.office"]["depth"] == 4
+    assert not graph["truncated"]
+
+
+def test_closed_cycle_at_depth_limit_is_not_incomplete():
+    graph = DependencyGraph(
+        tuple(
+            Reference(a, "script", b, "sequence[0].action", Confidence.EXPLICIT, Role.CALL)
+            for a, b in [("script.a", "script.b"), ("script.b", "script.a")]
+        )
+    ).impact("script.a", 1)
+    assert len(graph["edges"]) == 2
+    assert graph["cycles"]
+    assert not graph["truncated"]
+
+
+def test_local_variables_are_not_downstream_action_targets():
+    source = Source(
+        "script.test",
+        "script",
+        "Test",
+        {"sequence": [{"variables": {"entity_id": "light.office"}}]},
+    )
+    report = Analyzer((source,), {"light.office"}).analyze("script.test")
+    assert report["summary"]["downstream"] == 0
+
+
+def test_deep_template_cannot_abort_other_reference_discovery():
+    source = Source(
+        "script.test",
+        "script",
+        "Test",
+        {
+            "sequence": [
+                {"value": "{{ " + "(" * 1500 + "0" + ")" * 1500 + " }}"},
+                {"target": {"entity_id": "light.office"}},
+            ]
+        },
+    )
+    refs = scan_sources((source,), {"light.office"}).references
+    assert any(ref.target == "light.office" for ref in refs)
+    assert any(ref.target is None for ref in refs)

@@ -54,6 +54,7 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     "until",
                     "wait_template",
                     "wait_for_trigger",
+                    "variables",
                 }:
                     next_role = Role.READ
                 elif field in {"action", "actions", "sequence", "then", "else"}:
@@ -74,7 +75,12 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     # Even templated targets can read one entity to select another.
                     # Keep their visible literals as dependencies, never guessed effects.
                     emit(source, target, path, Confidence.TEMPLATE_LITERAL, Role.READ)
-                if result.dynamic:
+                if result.dynamic or key in _ENTITY_KEYS | {
+                    "action",
+                    "service",
+                    "service_template",
+                    "target",
+                }:
                     emit(
                         source,
                         None,
@@ -99,7 +105,11 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                             "Non-literal entity target",
                         )
             elif key in {"action", "service"}:
-                if value.startswith("script.") and value[7:] not in _SCRIPT_SERVICES:
+                if (
+                    value.startswith("script.")
+                    and value[7:] not in _SCRIPT_SERVICES
+                    and ENTITY_RE.fullmatch(value)
+                ):
                     emit(source, value, path, Confidence.EXPLICIT, Role.CALL)
             elif key in {"area_id", "device_id", "floor_id", "label_id"}:
                 emit(source, None, path, Confidence.DYNAMIC, role, f"Unexpanded {key} target")

@@ -5,6 +5,10 @@ from enum import StrEnum
 from typing import Any
 
 
+class InvalidInput(ValueError):
+    """A validated request error whose message is safe to return to the client."""
+
+
 class Confidence(StrEnum):
     EXPLICIT = "explicit"
     TEMPLATE_LITERAL = "template_literal"

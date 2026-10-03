@@ -92,6 +92,7 @@ export class BlastRadiusPanel extends LitElement {
     this.status = "";
     this.copyFallback = false;
     try {
+      this.report = undefined;
       const message: Record<string, unknown> = {
         type: operation ? "blast_radius/preview" : "blast_radius/analyze",
         entity_id: entityId,
@@ -289,7 +290,7 @@ export class BlastRadiusPanel extends LitElement {
       </header>
       <main>
         <div class="eyebrow">Configuration impact analysis</div>
-        <h1>Know what breaks before you touch it.</h1>
+        <h1>Check dependencies before you make a change.</h1>
         <p class="muted intro">
           Inspect references. Follow dependencies. Preview the change.
         </p>

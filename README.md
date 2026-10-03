@@ -5,23 +5,28 @@
 
 # HA Blast Radius
 
-**Know what breaks before you touch it.**
+**Check dependencies before you make a change.**
 
-Dependency and impact analysis for Home Assistant. A small, read-only answer to
-“what else uses this entity?” — with paths, confidence levels and change previews.
+Read-only dependency and impact analysis for Home Assistant. Find where an entity
+is referenced, follow structural dependencies, and preview a rename or removal
+before changing your configuration. Every result includes source paths and confidence.
+
+**v0.1.3 · Experimental alpha · Admin only · MIT**
+
+Requires Home Assistant **2026.9.4+**; tested against **2026.9.4**. Later releases
+need compatibility testing. This is a static configuration inspector, not a runtime
+simulator: an empty report does not guarantee that a change is safe.
 
 ```mermaid
 flowchart TD
-  button["binary_sensor.wall_button"] --> automation["automation.wall_button"]
-  automation --> script["script.music_toggle"]
-  script --> speaker["media_player.speaker"]
-  script --> tablet["media_player.tablet"]
+  automation["automation.wall_button"] -->|trigger references| button["binary_sensor.wall_button"]
+  automation -->|calls| script["script.music_toggle"]
+  script -->|targets| speaker["media_player.speaker"]
+  script -->|targets| tablet["media_player.tablet"]
 ```
 
-Rename an entity? Retire a helper? Clean up that integration you stopped using?
-Inspect its references before the lights mysteriously stop working.
-
-**v0.1.2 · Experimental alpha · Home Assistant 2026.9.4+ · Admin only · MIT**
+This synthetic example shows configuration references, not a guaranteed execution
+sequence. Analyzing the button finds its dependent automation and the script's targets.
 
 ![The actual panel in its synthetic demo harness](docs/panel-light.png)
 
@@ -52,7 +57,7 @@ conditional branch will run tonight. That would be a different project.
 4. Open **Settings → Devices & services → Add integration → HA Blast Radius**.
 5. Confirm setup. **Blast Radius** appears in the administrator sidebar.
 
-HACS default-list submission is out of scope for this alpha. All runtime files,
+This is a **custom repository**, not a HACS default-directory listing. All runtime files,
 including the compiled frontend, are in `custom_components/blast_radius/`.
 Users do not need Node.js or a frontend build.
 
@@ -61,6 +66,11 @@ Users do not need Node.js or a frontend build.
 Copy `custom_components/blast_radius/` into your HA configuration directory's
 `custom_components/` folder. Restart HA, then follow steps 4–5 above.
 Uninstall through Devices & services first, then remove the integration files.
+
+See [installation, updates and troubleshooting](docs/installation.md) for exact
+paths, backups, rollback and common problems. No YAML configuration or credentials
+are needed. A manifest version is not a GitHub release; see the repository's
+[Releases page](https://github.com/artur-panek/ha-blast-radius/releases) for tagged builds.
 
 ## Usage
 
@@ -96,7 +106,10 @@ adjustable from 1 to 12. Graphs cap at 500 nodes and 2,000 edges; scans cap at
 | Dynamic | `{{ states('light.' ~ room) }}` | Final target cannot be resolved |
 | Unclassified | Known ID in an untyped field | Candidate requiring manual review |
 
-Dynamic references have **no guessed target**. The UI separates unresolved
+Dynamic references have **no guessed target**. Plain constant templates and common
+value-only filters do not automatically count as unresolved dependencies. A templated
+action or target remains unresolved even if it contains readable literal IDs: its
+rendered destination is unknown. The UI separates unresolved
 references inside affected configurations from the count across the whole
 snapshot. Zero references is not a guarantee that removal is safe.
 
@@ -115,23 +128,23 @@ snapshot. Zero references is not a guarantee that removal is safe.
 - The adapter uses version-sensitive HA component interfaces. Tested against
   2026.9.4; later HA releases need compatibility testing despite the minimum-version declaration.
 
-See [architecture and API](docs/architecture.md) for exact source access and upstream links.
+See [architecture and API](docs/architecture.md) for source access and
+[validation](docs/validation.md) for tested versions and evidence.
 
 ## Architecture
 
-```mermaid
-flowchart TD
-  HA["HA loaded configuration"] --> Adapter["HA adapter"]
-  Adapter --> Sources["Normalized sources"]
-  Sources --> Engine["Pure analyzer + graph"]
-  Engine --> API["Admin-only WebSocket API"]
-  API --> Panel["Lit sidebar panel"]
-  Panel --> Export["Markdown / JSON report"]
-```
+| Layer | Responsibility |
+| --- | --- |
+| HA adapter | Read loaded configuration and copy bounded, normalized snapshots |
+| Pure analysis engine | Extract references, classify uncertainty and traverse dependencies |
+| Coordinator and WebSocket API | Serialize fresh snapshots and enforce administrator access |
+| Lit sidebar panel | Inspect results, preview changes and export reports |
 
 The pure engine has no HA imports. The adapter copies config on the event loop;
 analysis runs in HA's executor. Jinja is parsed, never rendered. The API has
-three read-only commands and no mutation service. Diagnostics contain counts only.
+three read-only commands and no mutation service. Diagnostics contain version,
+timestamp and aggregate counts, not source configuration. Exports do contain
+entity IDs, names and structure: review them before sharing.
 
 ## Local development
 
@@ -142,10 +155,11 @@ The frontend requires Node.js 22.12+; CI uses Node 24.
 python3.14 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev,ha]'
-pytest -q --cov
+pytest -q --cov --timeout=60
 ruff check .
 ruff format --check .
 mypy
+python scripts/check_package.py
 
 cd frontend
 npm ci
@@ -167,12 +181,14 @@ npm run dev
 Open Vite's local URL. Demo reports come from the real engine; the mock transport
 is excluded from the integration bundle. Rebuild and commit
 `custom_components/blast_radius/frontend/blast-radius.js` after panel changes.
-CI checks that the bundle matches the source.
+CI checks that the bundle matches the source. The browser suite regenerates
+the synthetic screenshots in `docs/`; inspect their layout before committing.
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Small synthetic fixtures beat full config
-dumps. Security reports: [SECURITY.md](SECURITY.md).
+dumps. Security reports: [SECURITY.md](SECURITY.md). Preparing a release:
+[release checklist](docs/releasing.md).
 
 ## Roadmap
 
@@ -180,5 +196,4 @@ dumps. Security reports: [SECURITY.md](SECURITY.md).
 - Source filtering, editor deep links and richer graph navigation.
 - Compatibility checks against future HA releases.
 
-Automatic rewriting is not planned. Historical recording belongs to the
-separate **HA Black Box** idea.
+Automatic rewriting and runtime recording are outside this project's scope.
