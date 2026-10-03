@@ -1,0 +1,33 @@
+[project]
+name = "ha-blast-radius"
+version = "0.1.0"
+description = "Read-only dependency and impact analysis for Home Assistant"
+requires-python = ">=3.12"
+dependencies = ["jinja2>=3.1.6,<4"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "pytest-asyncio>=1,<2", "pytest-cov>=6,<8", "ruff>=0.12,<1", "mypy>=1.16,<2"]
+ha = ["homeassistant==2026.9.4; python_version >= '3.14'"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+files = ["custom_components/blast_radius/analysis"]
+strict = true
+follow_imports = "silent"
+
+[tool.coverage.run]
+source = ["custom_components/blast_radius/analysis"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 85
