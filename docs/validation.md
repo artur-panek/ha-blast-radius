@@ -30,11 +30,11 @@ ran on 2026-10-03 at commit `3684c907efa7916f5218e566016906e4fa7a2b36`.
 | Python | Passed: 40 tests, 97.13% engine coverage, Ruff, mypy and package audit |
 | Frontend | Passed: formatting, TypeScript/build, committed bundle consistency and 5 browser tests |
 | Official hassfest | Passed |
-| HACS | Failed: repository description and topics are not set |
+| HACS | Passed: all 8 checks after adding the repository description and topics |
 
-HACS passed its license, information, issues, archived, integration manifest and
-`hacs.json` checks. Its remaining failures concern the GitHub repository's About
-metadata. Add a description and topics, then rerun the HACS job.
+HACS initially failed because the GitHub repository's About metadata was empty.
+After adding a description and topics, [attempt 2](https://github.com/artur-panek/ha-blast-radius/actions/runs/37157836225/attempts/2)
+passed all eight HACS checks. All four jobs are now green.
 
 The HACS action intentionally excludes the upstream `brands` check for the custom
 repository alpha. Remove that exclusion before a future default-list submission.
