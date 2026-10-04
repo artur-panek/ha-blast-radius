@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.9 — 2026-10-04
+
+- Show incomplete results above the counts when traversal hits a depth/size limit
+  or a snapshot cannot fully inspect a source. This also applies to empty reports.
+- Distinguish depth, node and edge limits. Offer deeper inspection only when a
+  larger depth can help; provide a direct control to open and focus coverage details.
+- Keep skipped-source, blueprint and scanner warnings separate from the general
+  static-analysis note. Preserve all warnings in exports and put an incomplete
+  notice near the top of Markdown reports.
+- Test graph size boundaries, coverage gaps through the HA adapter, deeper analysis,
+  empty reports, mobile layout, export and compatibility with older report fields.
+- Add README quick links, correct stale UI labels and roadmap items, and improve
+  the bug form for first-time testers.
+
 ## 0.1.8 — 2026-10-04
 
 - Restore the last successful entity search, traversal depth, analysis tab and

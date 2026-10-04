@@ -511,6 +511,56 @@ export class BlastRadiusPanel extends LitElement {
       </details>`;
   }
 
+  private showCoverage() {
+    const details =
+      this.renderRoot.querySelector<HTMLDetailsElement>("#coverage");
+    if (!details) return;
+    details.open = true;
+    details.querySelector("summary")?.focus();
+    details.scrollIntoView({ block: "start" });
+  }
+
+  private completeness(report: Report) {
+    const limits = report.graph.limits_reached || [];
+    const coverageWarnings = report.coverage.warnings || [];
+    if (!report.graph.truncated && !coverageWarnings.length) return nothing;
+    const sizeLimited = limits.includes("nodes") || limits.includes("edges");
+    const nextDepth = [1, 2, 3, 4, 6, 8, 12].find(
+      (depth) => depth > report.graph.max_depth,
+    );
+    return html`<section
+      class="notice incomplete"
+      role="status"
+      aria-label="Incomplete results"
+    >
+      <h3>Results are incomplete</h3>
+      ${limits.includes("depth") ? html`<p>The dependency map reached depth ${report.graph.max_depth}. More dependencies may exist beyond this depth.</p>` : nothing}
+      ${sizeLimited ? html`<p>The dependency map reached its ${limits.includes("nodes") ? "node" : "edge"} limit. Increasing depth will not remove this cap.</p>` : nothing}
+      ${report.graph.truncated && !limits.length ? html`<p>The dependency map reached a depth or size limit. More dependencies may exist.</p>` : nothing}
+      ${coverageWarnings.length ? html`<p>Some configuration could not be fully inspected. Review ${coverageWarnings.length === 1 ? "the coverage warning" : `the ${coverageWarnings.length} coverage warnings`} before changing this entity.</p>` : nothing}
+      <p>
+        Counts below describe only what was found, not everything that may
+        depend on this entity.
+      </p>
+      <div class="controls">
+        ${
+          limits.includes("depth") && !sizeLimited && nextDepth
+            ? html`<button
+                ?disabled=${this.loading}
+                @click=${() => {
+                  this.depth = nextDepth;
+                  void this.run();
+                }}
+              >
+                Inspect to depth ${nextDepth}
+              </button>`
+            : nothing
+        }
+        <button @click=${this.showCoverage}>Review coverage</button>
+      </div>
+    </section>`;
+  }
+
   private graph(report: Report) {
     const selected = report.graph.nodes.find(
       (node) => node.relationship === "selected",
@@ -750,6 +800,7 @@ export class BlastRadiusPanel extends LitElement {
                   <code>${report.entity_id}</code>
                 </div>
                 ${!report.exists ? html`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>` : nothing}
+                ${this.completeness(report)}
                 <div class="stats">
                   <div class="stat">
                     <strong>${report.summary.references}</strong
@@ -846,7 +897,7 @@ export class BlastRadiusPanel extends LitElement {
                     </div>
                   </details>
                 </div>
-                <details class="card">
+                <details class="card" id="coverage">
                   <summary>
                     Coverage and limitations · ${report.coverage.sources}
                     sources inspected

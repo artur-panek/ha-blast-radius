@@ -83,7 +83,11 @@ Graph nodes include `id`, `depth`, `relationship`, and a traversal predecessor
 `via`, reference `path` and `confidence` where applicable. Edges retain the original
 **source references target** direction; `via` need not be the edge source.
 `cycles` lists detected back-edge paths (up to 50), not every possible simple cycle.
-`truncated` identifies depth/size limits. Forward expansion processes the shortest
+`truncated` identifies depth/size limits. Since v0.1.9, `limits_reached` lists the
+specific bounds reached (`depth`, `nodes`, `edges`). Reaching a bound exactly is
+not truncation unless an otherwise reachable link is omitted. The panel offers
+deeper inspection only for a depth limit below 12 without a node/edge limit.
+Forward expansion processes the shortest
 discovered depth first, so a longer dependent path cannot hide a reachable target.
 Closing an already known cycle does not by itself make the result incomplete.
 When equal-depth references reach the same node with the same relationship, its
@@ -139,6 +143,15 @@ dashboards. The two arrays partition unresolved entries from affected sources;
 neither establishes a dependency or runtime branch. Expressions in unaffected
 sources still contribute to `unresolved_total` only.
 
+Since v0.1.9, `coverage.warnings` retains specific snapshot and scanner gaps,
+including skipped sources, unexpanded blueprint bodies and scan bounds. It excludes
+the routine explanation of unsupported source types; that explanation remains in
+the report's top-level `warnings`. These gaps trigger a visible incomplete-results
+notice even when the selected entity has zero references and its graph is not
+truncated. The gaps apply to the snapshot, not necessarily to this entity.
+Markdown exports place an incomplete-results notice before the references, with
+full warnings below. JSON retains the graph limits and coverage warning list.
+
 The panel presents both scopes in collapsed groups by source and reason; the main
 summary focuses on known references. Both arrays are retained in JSON and Markdown
 exports. `source_names` maps affected source IDs to display names; raw IDs and paths
@@ -175,5 +188,6 @@ templates, bounds, missing IDs and previews. HA tests load real automations/scri
 and use the authenticated WebSocket transport. Browser tests use clearly labelled
 synthetic data, checking previews, exports, errors, escaping and dark/mobile layout.
 
-HACS default-directory acceptance still requires upstream branding/default-list
-requirements and a public release. This repository does not submit itself.
+HACS default-directory acceptance is separate from the numbered releases in this
+repository and still requires upstream branding/default-list requirements.
+This repository does not submit itself.

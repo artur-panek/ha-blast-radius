@@ -4,6 +4,12 @@ from dataclasses import asdict, dataclass
 from enum import StrEnum
 from typing import Any
 
+BASE_COVERAGE_NOTE = (
+    "Coverage excludes helper configuration without exposed membership, template "
+    "integration definitions, external integrations and unexpanded "
+    "device/area/floor/label targets."
+)
+
 
 class InvalidInput(ValueError):
     """A validated request error whose message is safe to return to the client."""

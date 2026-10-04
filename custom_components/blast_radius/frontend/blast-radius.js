@@ -981,6 +981,23 @@ var Se = {
   .error {
     border-color: var(--error-color, #db4437);
   }
+  .incomplete {
+    font-size: 14px;
+    background: var(--br-card);
+    border: 1px solid var(--br-border);
+    border-left: 3px solid var(--warning-color, #9b6600);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .incomplete p {
+    margin: 6px 0;
+  }
+  .incomplete .controls {
+    margin-top: 12px;
+  }
+  #coverage {
+    scroll-margin-top: 80px;
+  }
   .empty {
     padding: 36px 12px;
     text-align: center;
@@ -1567,7 +1584,7 @@ function Ke(e, t) {
 }
 //#endregion
 //#region package.json
-var qe = "0.1.8", Je = {
+var qe = "0.1.9", Je = {
 	explicit: "Explicit",
 	template_literal: "Template literal",
 	dynamic: "Dynamic",
@@ -1876,6 +1893,49 @@ var qe = "0.1.8", Je = {
         </ul>
       </details>`;
 	}
+	showCoverage() {
+		let e = this.renderRoot.querySelector("#coverage");
+		e && (e.open = !0, e.querySelector("summary")?.focus(), e.scrollIntoView({ block: "start" }));
+	}
+	completeness(e) {
+		let t = e.graph.limits_reached || [], n = e.coverage.warnings || [];
+		if (!e.graph.truncated && !n.length) return F;
+		let r = t.includes("nodes") || t.includes("edges"), i = [
+			1,
+			2,
+			3,
+			4,
+			6,
+			8,
+			12
+		].find((t) => t > e.graph.max_depth);
+		return N`<section
+      class="notice incomplete"
+      role="status"
+      aria-label="Incomplete results"
+    >
+      <h3>Results are incomplete</h3>
+      ${t.includes("depth") ? N`<p>The dependency map reached depth ${e.graph.max_depth}. More dependencies may exist beyond this depth.</p>` : F}
+      ${r ? N`<p>The dependency map reached its ${t.includes("nodes") ? "node" : "edge"} limit. Increasing depth will not remove this cap.</p>` : F}
+      ${e.graph.truncated && !t.length ? N`<p>The dependency map reached a depth or size limit. More dependencies may exist.</p>` : F}
+      ${n.length ? N`<p>Some configuration could not be fully inspected. Review ${n.length === 1 ? "the coverage warning" : `the ${n.length} coverage warnings`} before changing this entity.</p>` : F}
+      <p>
+        Counts below describe only what was found, not everything that may
+        depend on this entity.
+      </p>
+      <div class="controls">
+        ${t.includes("depth") && !r && i ? N`<button
+                ?disabled=${this.loading}
+                @click=${() => {
+			this.depth = i, this.run();
+		}}
+              >
+                Inspect to depth ${i}
+              </button>` : F}
+        <button @click=${this.showCoverage}>Review coverage</button>
+      </div>
+    </section>`;
+	}
 	graph(e) {
 		let t = e.graph.nodes.find((e) => e.relationship === "selected"), n = e.graph.nodes.filter((e) => e.relationship === "dependent"), r = e.graph.nodes.filter((e) => e.relationship === "downstream");
 		return N`<h2>Dependency map</h2>
@@ -2084,6 +2144,7 @@ var qe = "0.1.8", Je = {
                   <code>${e.entity_id}</code>
                 </div>
                 ${e.exists ? F : N`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>`}
+                ${this.completeness(e)}
                 <div class="stats">
                   <div class="stat">
                     <strong>${e.summary.references}</strong
@@ -2180,7 +2241,7 @@ var qe = "0.1.8", Je = {
                     </div>
                   </details>
                 </div>
-                <details class="card">
+                <details class="card" id="coverage">
                   <summary>
                     Coverage and limitations · ${e.coverage.sources}
                     sources inspected

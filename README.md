@@ -11,11 +11,15 @@ Read-only dependency and impact analysis for Home Assistant. Find where an entit
 is referenced, follow structural dependencies, and preview a rename or removal
 before changing your configuration. Every result includes source paths and confidence.
 
-**v0.1.8 · Experimental alpha · Admin only · MIT**
+**v0.1.9 · Experimental alpha · Admin only · MIT**
 
 Requires Home Assistant **2026.9.4+**; tested against **2026.9.4**. Later releases
 need compatibility testing. This is a static configuration inspector, not a runtime
 simulator: an empty report does not guarantee that a change is safe.
+
+[Install with HACS](#hacs-custom-repository) · [Usage](#usage) ·
+[Known limitations](#known-limitations) ·
+[Report a bug](https://github.com/artur-panek/ha-blast-radius/issues/new?template=bug.yml)
 
 ```mermaid
 flowchart TD
@@ -39,7 +43,8 @@ The screenshot uses synthetic fixtures, not a real household's configuration.
 - Recursive script calls, action targets, scene membership and exposed group membership.
 - Configured Lovelace dashboards, including YAML, through HA's own loader.
 - Jinja literals found without executing templates; unresolved expressions kept separate.
-- Bounded dependency view with cycle detection and adjustable depth.
+- Bounded dependency view with cycle detection and adjustable depth. Visible
+  notices for incomplete results, with deeper inspection when a depth limit is reached.
 - Clickable sources: inspect loaded automations/scripts in HA's read-only view,
   open scenes in their editor, dashboards in their view, and entities in details.
 - Return to your last search, depth and tab after opening a source. Reopen any of
@@ -112,7 +117,12 @@ actions on other cards do not become downstream effects of the selected entity.
 Different locations remain separate references; identical references are deduplicated.
 Nodes appear once and the edge list retains alternative paths. Default depth is 6,
 adjustable from 1 to 12. Graphs cap at 500 nodes and 2,000 edges; scans cap at
-50,000 references and 80 nested levels. Limits produce incompleteness warnings.
+50,000 references and 80 nested levels. Depth/size limits and specific snapshot
+coverage gaps produce a **Results are incomplete** notice above the counts.
+The notice offers a deeper search for depth-only limits below 12, and opens the
+coverage details for skipped sources, unexpanded blueprint bodies and scan limits.
+Warnings also appear in Markdown and JSON exports. The static-analysis limitations
+below apply even when no warning is shown.
 
 ### Confidence model
 
@@ -144,8 +154,8 @@ configuration may refer to something else. Zero references is not a guarantee th
 removal is safe. The main summary counts known references and linked configurations.
 
 The panel shows friendly names and readable, one-based locations such as
-**View 2 › Card 3**. Expand **Configuration paths** for exact zero-based paths;
-the raw-reference view and exports retain the original identifiers and paths.
+**View 2 › Card 3**. Expand **Reference details** or **Connection details** for exact
+zero-based paths; the raw-reference view and exports retain the original identifiers and paths.
 
 ## Known limitations
 
@@ -202,7 +212,8 @@ npx playwright install chromium
 npm test
 ```
 
-Engine-only: install `.[dev]` and run `pytest tests/test_analysis.py --cov`.
+Engine-only: install `.[dev]` and run `pytest -q --cov --timeout=60`;
+the HA integration tests are skipped when HA dependencies are unavailable.
 For the interactive synthetic demo:
 
 ```bash
@@ -227,7 +238,7 @@ dumps. Security reports: [SECURITY.md](SECURITY.md). Preparing a release:
 ## Roadmap
 
 - More helper and blueprint coverage through HA interfaces.
-- Source filtering, editor deep links and richer graph navigation.
+- Source filtering and richer graph navigation.
 - Compatibility checks against future HA releases.
 
 Automatic rewriting and runtime recording are outside this project's scope.

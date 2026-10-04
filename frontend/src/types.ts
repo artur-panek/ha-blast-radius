@@ -33,6 +33,7 @@ export interface Report {
     edges: Reference[];
     cycles: string[][];
     truncated: boolean;
+    limits_reached?: ("depth" | "nodes" | "edges")[];
     max_depth: number;
   };
   summary: {
@@ -47,6 +48,7 @@ export interface Report {
     sources: number;
     entities: number;
     source_types: Record<string, number>;
+    warnings?: string[];
   };
   warnings: string[];
   markdown: string;

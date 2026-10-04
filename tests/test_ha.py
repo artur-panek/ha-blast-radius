@@ -87,6 +87,7 @@ async def test_real_automation_script_adapter_and_non_mutation(hass):
             },
         )
     assert report["summary"]["explicit"] == 1
+    assert report["coverage"]["warnings"] == []
     assert report["preview"]["changes_applied"] is False
     assert "media_player.speaker" in {n["id"] for n in report["graph"]["nodes"]}
     assert (await collect_snapshot(hass))[0] == sources
@@ -157,6 +158,12 @@ async def test_dashboard_failure_is_partial_coverage(hass):
     assert sources[0].source_id == "dashboard.lovelace"
     assert any("dashboard.broken" in warning for warning in warnings)
     assert not any("private-secret" in warning for warning in warnings)
+    report = await BlastRadiusCoordinator(hass).request("analyze", {"entity_id": "light.desk"})
+    assert report["coverage"]["warnings"] == [
+        "dashboard.broken: configuration unavailable or generated automatically."
+    ]
+    assert "Results are incomplete" in report["markdown"]
+    assert "private-secret" not in str(report)
     good.async_save.assert_not_called()
     bad.async_save.assert_not_called()
 

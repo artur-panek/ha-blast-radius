@@ -35,12 +35,11 @@ class DependencyGraph:
             entity_id: {"id": entity_id, "depth": 0, "relationship": "selected"}
         }
         edges: dict[Reference, None] = {}
-        truncated = False
+        limits_reached: set[str] = set()
 
         def follow(origin: str, ref: Reference, target: str, depth: int, relation: str) -> bool:
-            nonlocal truncated
             if ref not in edges and len(edges) >= MAX_EDGES:
-                truncated = True
+                limits_reached.add("edges")
                 return False
             # Closing a known path adds no depth or nodes. Keep back/alternative
             # edges without claiming a fully explored cycle was truncated.
@@ -57,10 +56,10 @@ class DependencyGraph:
                     node.update(via=origin, path=ref.path, confidence=ref.confidence)
                 return False
             if depth > max_depth:
-                truncated = True
+                limits_reached.add("depth")
                 return False
             if target not in nodes and len(nodes) >= MAX_NODES:
-                truncated = True
+                limits_reached.add("nodes")
                 return False
             edges[ref] = None
             if target not in nodes or nodes[target]["depth"] > depth:
@@ -111,7 +110,8 @@ class DependencyGraph:
             "edges": [ref.as_dict() for ref in edge_list],
             "cycles": self._cycles(edge_list),
             "max_depth": max_depth,
-            "truncated": truncated,
+            "truncated": bool(limits_reached),
+            "limits_reached": sorted(limits_reached),
         }
 
     @staticmethod

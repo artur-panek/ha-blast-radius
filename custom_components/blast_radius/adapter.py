@@ -14,7 +14,7 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_component import DATA_INSTANCES
 from homeassistant.helpers.template import Template
 
-from .analysis.models import Source
+from .analysis.models import BASE_COVERAGE_NOTE, Source
 
 
 def navigation_targets(
@@ -147,9 +147,5 @@ async def collect_snapshot(
                     f"{source_id}: configuration unavailable or generated automatically."
                 )
 
-    warnings.append(
-        "Coverage excludes helper configuration without exposed membership, template "
-        "integration definitions, external integrations and unexpanded "
-        "device/area/floor/label targets."
-    )
+    warnings.append(BASE_COVERAGE_NOTE)
     return tuple(sources), names, tuple(warnings)

@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 from br_analysis.analyzer import Analyzer, markdown_report
-from br_analysis.graph import DependencyGraph
-from br_analysis.models import Confidence, Reference, Role, Source
+from br_analysis.graph import MAX_EDGES, MAX_NODES, DependencyGraph
+from br_analysis.models import BASE_COVERAGE_NOTE, Confidence, Reference, Role, Source
 from br_analysis.references import scan_sources
 from br_analysis.templates import inspect_template
 
@@ -159,11 +159,73 @@ def test_cycles_and_duplicates():
 
 
 def test_depth_limit(analyzer):
-    graph = analyzer.analyze("binary_sensor.wall_button", 1)["graph"]
+    report = analyzer.analyze("binary_sensor.wall_button", 1)
+    graph = report["graph"]
     assert graph["truncated"]
+    assert graph["limits_reached"] == ["depth"]
+    assert "Results are incomplete" in markdown_report(report)
+    assert "depth limit (1)" in markdown_report(report)
     assert all(n["depth"] <= 1 for n in graph["nodes"])
     with pytest.raises(ValueError):
         analyzer.analyze("light.desk", 0)
+
+
+@pytest.mark.parametrize("limit", ["nodes", "edges"])
+@pytest.mark.parametrize("overflow", [0, 1])
+def test_graph_size_limits_distinguish_exact_boundary_from_omitted_links(limit, overflow):
+    count = (MAX_NODES - 1 if limit == "nodes" else MAX_EDGES) + overflow
+    source = Source(
+        "script.large",
+        "script",
+        "Large synthetic script",
+        {
+            "sequence": [
+                {
+                    "target": {
+                        "entity_id": [
+                            f"light.target_{index if limit == 'nodes' else 0}"
+                            for index in range(count)
+                        ]
+                    }
+                }
+            ]
+        },
+    )
+    report = Analyzer((source,), {source.source_id}).analyze(source.source_id, 1)
+    graph = report["graph"]
+    assert graph["truncated"] == bool(overflow)
+    assert graph["limits_reached"] == ([limit] if overflow else [])
+    assert len(graph["nodes"]) <= MAX_NODES
+    assert len(graph["edges"]) <= MAX_EDGES
+    exported = markdown_report(report)
+    assert ("Results are incomplete" in exported) == bool(overflow)
+    if overflow:
+        assert ("node limit (500)" if limit == "nodes" else "edge limit (2000)") in exported
+
+
+def test_coverage_gaps_remain_separate_from_routine_static_analysis_note():
+    warning = "dashboard.broken: configuration unavailable or generated automatically."
+    complete = Analyzer((), {"light.desk"}, (BASE_COVERAGE_NOTE,)).analyze("light.desk")
+    partial = Analyzer((), {"light.desk"}, (BASE_COVERAGE_NOTE, warning)).preview(
+        "light.desk", "delete"
+    )
+    assert not complete["coverage"]["warnings"]
+    assert "Results are incomplete" not in markdown_report(complete)
+    assert partial["coverage"]["warnings"] == [warning]
+    assert BASE_COVERAGE_NOTE in partial["warnings"]
+    assert not partial["graph"]["truncated"]
+    assert "Results are incomplete" in markdown_report(partial)
+    assert warning in markdown_report(partial)
+
+
+def test_scanner_limit_is_a_coverage_gap_even_without_graph_truncation(monkeypatch):
+    monkeypatch.setattr("br_analysis.references.MAX_REFERENCES", 1)
+    source = Source("scene.test", "scene", "Test", {"entity_id": ["light.a", "light.b"]})
+    report = Analyzer((source,), {"light.b"}).analyze("light.b")
+    assert not report["references"]
+    assert not report["graph"]["truncated"]
+    assert report["coverage"]["warnings"] == ["Reference limit reached; analysis is incomplete."]
+    assert "Results are incomplete" in markdown_report(report)
 
 
 def test_rename_and_delete_never_mutate(analyzer):
@@ -351,6 +413,7 @@ def test_graph_expands_shortest_path_before_longer_dependent_path():
     assert nodes["script.effect"]["depth"] == 3
     assert nodes["fan.office"]["depth"] == 4
     assert not graph["truncated"]
+    assert not graph["limits_reached"]
 
 
 def test_closed_cycle_at_depth_limit_is_not_incomplete():

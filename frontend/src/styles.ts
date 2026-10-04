@@ -361,6 +361,23 @@ export const styles = css`
   .error {
     border-color: var(--error-color, #db4437);
   }
+  .incomplete {
+    font-size: 14px;
+    background: var(--br-card);
+    border: 1px solid var(--br-border);
+    border-left: 3px solid var(--warning-color, #9b6600);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .incomplete p {
+    margin: 6px 0;
+  }
+  .incomplete .controls {
+    margin-top: 12px;
+  }
+  #coverage {
+    scroll-margin-top: 80px;
+  }
   .empty {
     padding: 36px 12px;
     text-align: center;

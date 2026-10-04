@@ -28,7 +28,7 @@ entities = {s.source_id for s in sources if s.source_type != "dashboard"} | {
     "light.desk",
     "sensor.unused",
 }
-engine = Analyzer(sources, entities, ("Synthetic demo snapshot. No Home Assistant connection.",))
+engine = Analyzer(sources, entities)
 names = {source.source_id: source.name for source in sources}
 names.update(
     {
@@ -44,6 +44,7 @@ reports = {}
 for entity in sorted(entities | {"light.removed"}):
     for depth in (1, 2, 3, 4, 6, 8, 12):
         report = engine.analyze(entity, depth)
+        report["warnings"].append("Synthetic demo snapshot. No Home Assistant connection.")
         report["snapshot_at"] = "2026-10-03T12:00:00+00:00"
         report["markdown"] = markdown_report(report)
         reports[f"{entity}:{depth}"] = report

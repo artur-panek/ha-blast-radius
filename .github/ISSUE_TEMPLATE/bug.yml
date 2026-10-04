@@ -9,8 +9,8 @@ body:
   - type: textarea
     id: reproduction
     attributes:
-      label: Minimal synthetic configuration and steps
-      description: Remove credentials, household details and installation paths.
+      label: Steps to reproduce
+      description: For incorrect references, include a small synthetic configuration. Remove credentials, household details and installation paths.
     validations: {required: true}
   - type: textarea
     id: result
@@ -18,4 +18,11 @@ body:
     validations: {required: true}
   - type: textarea
     id: coverage
-    attributes: {label: Relevant coverage warnings or redacted report}
+    attributes:
+      label: Relevant coverage warnings or redacted report
+      description: Include the selected entity and depth using synthetic names. Review exports and screenshots before attaching them.
+  - type: input
+    id: browser
+    attributes:
+      label: Browser or HA companion app
+      description: For panel issues, include the browser/app version and whether this happens on desktop or mobile.

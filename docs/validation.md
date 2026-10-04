@@ -1,5 +1,28 @@
 # Validation
 
+## v0.1.9
+
+Local validation on 2026-10-04: **122 Python tests passed**, with **98.69%** engine
+coverage; **30 Chromium tests passed**. Ruff lint/format, engine mypy, frontend
+formatting, TypeScript, production build and package checks passed against
+Home Assistant Core 2026.9.4 / Python 3.14.7.
+
+New engine cases check the exact 500-node/2,000-edge boundaries and one link beyond
+each, scanner truncation with zero selected-entity references, and the distinction
+between specific coverage gaps and the routine static-analysis note. A real HA
+adapter test verifies that an unavailable dashboard produces structured coverage
+warnings and an incomplete Markdown report without disclosing its exception.
+
+Six new browser tests cover visible depth warnings, deeper fresh analysis, hard
+size/max-depth limits, empty reports with coverage gaps, keyboard focus when opening
+coverage, JSON export, mobile overflow and older reports without structured limits.
+Existing navigation, Back, session isolation, previews and contrast checks pass.
+Light/dark/mobile layouts and the new incomplete-results notice were visually
+reviewed with synthetic data. The user's HA installation has not been tested remotely.
+
+The 24-file local installation ZIP has SHA-256:
+`e18e069edbcec4ee2ae276375e36d25f027921776ac45b6205fe67eb9436e91d`.
+
 ## v0.1.8
 
 Local validation on 2026-10-04: **116 Python tests passed**, with **97.07%** engine
