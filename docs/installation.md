@@ -57,10 +57,12 @@ Analyze an entity you know appears in an automation or dashboard. Confirm the
 source IDs and paths against that configuration. Open Graph and try a removal
 preview. Preview buttons only generate reports; they never perform the change.
 
-An unresolved count is not a count of broken entities. It covers expressions and
-selectors the scanner cannot resolve across the entire snapshot. The detailed
-warning list includes unresolved expressions in affected configurations; for a
-dashboard, that can include other cards in the same dashboard.
+An unresolved count is not a count of broken entities. **Unresolved in affected
+sources** counts expressions and selectors in the configurations reached by this
+analysis. Their targets are unknown; some may be unrelated to the selected entity.
+For a dashboard, this can include other cards in that dashboard. The total across
+the entire snapshot is shown separately under **Coverage and limitations**. A zero
+local count does not establish complete coverage.
 
 ## Troubleshooting
 
@@ -71,7 +73,7 @@ dashboard, that can include other cards in the same dashboard.
 | Old UI or missing sidebar icon | Restart HA after updating, then reload the browser or reopen the app |
 | Analysis fails | Reload the integration and retry; record versions and a synthetic reproduction |
 | Expected reference absent | Expand coverage warnings; unloaded YAML, blueprint bodies and several source types are outside coverage |
-| Many unrelated unresolved entries | Counts cover the whole snapshot; they are not all dependencies of the selected entity |
+| Unresolved entries seem unrelated | The main count covers affected configurations, including their other branches/cards; the global total is in coverage details |
 | Empty result | Check spelling and coverage; no detected reference is not proof removal is safe |
 
 ## Removal

@@ -391,3 +391,81 @@ def test_deep_template_cannot_abort_other_reference_discovery():
     refs = scan_sources((source,), {"light.office"}).references
     assert any(ref.target == "light.office" for ref in refs)
     assert any(ref.target is None for ref in refs)
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_graph_prefers_explicit_reference_for_a_source_with_mixed_fields(reverse):
+    actions = [
+        {"data": {"lights": ["light.example"]}},
+        {"target": {"entity_id": "light.example"}},
+    ]
+    if reverse:
+        actions.reverse()
+    source = Source("automation.example", "automation", "Example", {"actions": actions})
+    report = Analyzer((source,), {"light.example"}).analyze("light.example")
+    node = next(n for n in report["graph"]["nodes"] if n["id"] == source.source_id)
+    assert node["confidence"] == Confidence.EXPLICIT
+    assert node["path"].endswith("target.entity_id")
+    assert node["via"] == "light.example"
+    assert len(report["graph"]["edges"]) == len(report["references"]) == 2
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+@pytest.mark.parametrize(
+    ("weaker", "stronger"),
+    [
+        (Confidence.UNKNOWN, Confidence.TEMPLATE_LITERAL),
+        (Confidence.TEMPLATE_LITERAL, Confidence.EXPLICIT),
+    ],
+)
+def test_graph_prefers_stronger_reference_without_losing_alternative_edges(
+    reverse, weaker, stronger
+):
+    refs = [
+        Reference("script.a", "script", "sensor.root", "weaker", weaker, Role.READ),
+        Reference("script.a", "script", "sensor.root", "stronger", stronger, Role.READ),
+    ]
+    graph = DependencyGraph(tuple(reversed(refs) if reverse else refs)).impact("sensor.root")
+    node = next(n for n in graph["nodes"] if n["id"] == "script.a")
+    assert (node["confidence"], node["path"], node["depth"]) == (stronger, "stronger", 1)
+    assert len(graph["edges"]) == 2
+
+
+def test_graph_upgrades_path_and_predecessor_together_at_equal_depth():
+    refs = (
+        Reference("script.a", "script", "sensor.root", "root.a", Confidence.EXPLICIT, Role.READ),
+        Reference("script.b", "script", "sensor.root", "root.b", Confidence.EXPLICIT, Role.READ),
+        Reference("script.c", "script", "script.a", "weak", Confidence.UNKNOWN, Role.READ),
+        Reference("script.c", "script", "script.b", "strong", Confidence.EXPLICIT, Role.READ),
+    )
+    graph = DependencyGraph(refs).impact("sensor.root")
+    node = next(n for n in graph["nodes"] if n["id"] == "script.c")
+    assert (node["via"], node["path"], node["depth"]) == ("script.b", "strong", 2)
+    assert node["confidence"] == Confidence.EXPLICIT
+    assert len(graph["edges"]) == 4
+
+
+def test_stronger_evidence_does_not_replace_a_shorter_path():
+    graph = DependencyGraph(
+        (
+            Reference("script.a", "script", "sensor.root", "short", Confidence.UNKNOWN, Role.READ),
+            Reference("script.b", "script", "sensor.root", "other", Confidence.EXPLICIT, Role.READ),
+            Reference("script.a", "script", "script.b", "longer", Confidence.EXPLICIT, Role.READ),
+        )
+    ).impact("sensor.root")
+    node = next(n for n in graph["nodes"] if n["id"] == "script.a")
+    assert (node["confidence"], node["depth"], node["path"]) == (Confidence.UNKNOWN, 1, "short")
+
+
+def test_confidence_upgrade_does_not_reclassify_a_dependent_or_selected_node():
+    graph = DependencyGraph(
+        (
+            Reference("script.a", "script", "script.root", "read", Confidence.UNKNOWN, Role.READ),
+            Reference("script.root", "script", "script.a", "call", Confidence.EXPLICIT, Role.CALL),
+        )
+    ).impact("script.root")
+    nodes = {node["id"]: node for node in graph["nodes"]}
+    assert nodes["script.a"]["relationship"] == "dependent"
+    assert nodes["script.a"]["path"] == "read"
+    assert nodes["script.root"] == {"id": "script.root", "depth": 0, "relationship": "selected"}
+    assert len(graph["edges"]) == 2 and graph["cycles"]

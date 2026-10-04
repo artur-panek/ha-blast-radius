@@ -178,8 +178,8 @@ export class BlastRadiusPanel extends LitElement {
           ? html`<div class="notice">
               <strong>Unresolved references in affected configurations</strong>
               <p>
-                These expressions may refer to other entities at runtime. Their
-                targets are unknown.
+                These expressions occur in affected configurations. Their
+                targets are unknown; some may be unrelated to this entity.
               </p>
               ${this.references(report.uncertain_references)}
             </div>`
@@ -368,8 +368,8 @@ export class BlastRadiusPanel extends LitElement {
                     ><span>References to review</span>
                   </div>
                   <div class="stat">
-                    <strong>${report.unresolved_total}</strong
-                    ><span>Unresolved across snapshot</span>
+                    <strong>${report.uncertain_references.length}</strong
+                    ><span>Unresolved in affected sources</span>
                   </div>
                 </div>
                 <div class="columns">
@@ -452,8 +452,9 @@ export class BlastRadiusPanel extends LitElement {
                   <ul>
                     ${report.warnings.map((warning) => html`<li>${warning}</li>`)}
                     <li>
-                      ${report.unresolved_total} unresolved references in the
-                      entire snapshot cannot be attributed to this entity.
+                      ${report.unresolved_total} unresolved references across
+                      the full snapshot. Their targets are unknown; they cannot
+                      be attributed to this entity.
                     </li>
                     <li>
                       Conditional branches are not evaluated. A reference does

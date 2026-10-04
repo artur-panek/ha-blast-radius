@@ -4348,8 +4348,8 @@
             "depth": 1,
             "relationship": "dependent",
             "via": "media_player.speaker",
-            "path": "sequence[0].choose[0].conditions",
-            "confidence": "template_literal"
+            "path": "sequence[0].choose[0].sequence[0].target.entity_id[0]",
+            "confidence": "explicit"
           }
         ],
         "edges": [
@@ -4509,8 +4509,8 @@
             "depth": 1,
             "relationship": "dependent",
             "via": "media_player.speaker",
-            "path": "sequence[0].choose[0].conditions",
-            "confidence": "template_literal"
+            "path": "sequence[0].choose[0].sequence[0].target.entity_id[0]",
+            "confidence": "explicit"
           },
           {
             "id": "automation.wall_button",
@@ -4729,8 +4729,8 @@
             "depth": 1,
             "relationship": "dependent",
             "via": "media_player.speaker",
-            "path": "sequence[0].choose[0].conditions",
-            "confidence": "template_literal"
+            "path": "sequence[0].choose[0].sequence[0].target.entity_id[0]",
+            "confidence": "explicit"
           },
           {
             "id": "automation.wall_button",
@@ -4949,8 +4949,8 @@
             "depth": 1,
             "relationship": "dependent",
             "via": "media_player.speaker",
-            "path": "sequence[0].choose[0].conditions",
-            "confidence": "template_literal"
+            "path": "sequence[0].choose[0].sequence[0].target.entity_id[0]",
+            "confidence": "explicit"
           },
           {
             "id": "automation.wall_button",
@@ -5169,8 +5169,8 @@
             "depth": 1,
             "relationship": "dependent",
             "via": "media_player.speaker",
-            "path": "sequence[0].choose[0].conditions",
-            "confidence": "template_literal"
+            "path": "sequence[0].choose[0].sequence[0].target.entity_id[0]",
+            "confidence": "explicit"
           },
           {
             "id": "automation.wall_button",
@@ -5389,8 +5389,8 @@
             "depth": 1,
             "relationship": "dependent",
             "via": "media_player.speaker",
-            "path": "sequence[0].choose[0].conditions",
-            "confidence": "template_literal"
+            "path": "sequence[0].choose[0].sequence[0].target.entity_id[0]",
+            "confidence": "explicit"
           },
           {
             "id": "automation.wall_button",
@@ -5609,8 +5609,8 @@
             "depth": 1,
             "relationship": "dependent",
             "via": "media_player.speaker",
-            "path": "sequence[0].choose[0].conditions",
-            "confidence": "template_literal"
+            "path": "sequence[0].choose[0].sequence[0].target.entity_id[0]",
+            "confidence": "explicit"
           },
           {
             "id": "automation.wall_button",

@@ -684,14 +684,43 @@ var _e = o`
     color: var(--br-muted);
   }
   .explicit {
-    color: var(--success-color, #288048);
-    border-color: currentColor;
+    --br-confidence-accent: var(--success-color, #288048);
   }
   .template_literal,
   .dynamic,
   .unknown {
-    color: var(--warning-color, #9b6600);
-    border-color: currentColor;
+    --br-confidence-accent: var(--warning-color, #9b6600);
+  }
+  .badge.explicit,
+  .badge.template_literal,
+  .badge.dynamic,
+  .badge.unknown {
+    color: var(--primary-text-color, #212121);
+    background: color-mix(
+      in srgb,
+      var(--br-card) 92%,
+      var(--br-confidence-accent)
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--br-border) 65%,
+      var(--br-confidence-accent)
+    );
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .badge.explicit::before,
+  .badge.template_literal::before,
+  .badge.dynamic::before,
+  .badge.unknown::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: 1px;
+    background: var(--br-confidence-accent);
   }
   .stats {
     display: grid;
@@ -980,7 +1009,7 @@ var _e = o`
     <path fill="currentColor" d=${Z.rings}></path>
     <path class="radius" d=${Z.radius}></path>
   </svg>
-`, ve = "0.1.3", $ = {
+`, ve = "0.1.4", $ = {
 	explicit: "Explicit",
 	template_literal: "Template literal",
 	dynamic: "Dynamic",
@@ -1093,8 +1122,8 @@ var _e = o`
       ${e.uncertain_references.length ? z`<div class="notice">
               <strong>Unresolved references in affected configurations</strong>
               <p>
-                These expressions may refer to other entities at runtime. Their
-                targets are unknown.
+                These expressions occur in affected configurations. Their
+                targets are unknown; some may be unrelated to this entity.
               </p>
               ${this.references(e.uncertain_references)}
             </div>` : V}
@@ -1268,8 +1297,8 @@ var _e = o`
                     ><span>References to review</span>
                   </div>
                   <div class="stat">
-                    <strong>${e.unresolved_total}</strong
-                    ><span>Unresolved across snapshot</span>
+                    <strong>${e.uncertain_references.length}</strong
+                    ><span>Unresolved in affected sources</span>
                   </div>
                 </div>
                 <div class="columns">
@@ -1350,8 +1379,9 @@ var _e = o`
                   <ul>
                     ${e.warnings.map((e) => z`<li>${e}</li>`)}
                     <li>
-                      ${e.unresolved_total} unresolved references in the
-                      entire snapshot cannot be attributed to this entity.
+                      ${e.unresolved_total} unresolved references across
+                      the full snapshot. Their targets are unknown; they cannot
+                      be attributed to this entity.
                     </li>
                     <li>
                       Conditional branches are not evaluated. A reference does

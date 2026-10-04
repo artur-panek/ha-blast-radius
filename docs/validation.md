@@ -1,5 +1,22 @@
 # Validation
 
+## v0.1.4
+
+Local validation on 2026-10-04: 90 Python tests passed, with 97.65% engine coverage;
+11 Chromium browser tests passed. Ruff, mypy, TypeScript and the production build
+passed. The integration remains tested against Home Assistant Core 2026.9.4.
+
+New graph tests cover confidence ordering in either input order, consistent path
+and predecessor updates, preserved shortest paths and dependent/selected node roles.
+All alternative references remain available in the edge list.
+
+Browser tests measure confidence-label text contrast at **at least 4.5:1** on light,
+dark and custom dark surfaces with deliberately low-contrast semantic accent colors.
+This checks the tested labels and themes, not accessibility certification of the
+whole panel or arbitrary themes. Other tests distinguish 0 or 1 unresolved references
+in affected sources from a synthetic global total of 170. The global total remains
+visible in expanded coverage details.
+
 ## v0.1.3
 
 Release-preparation validation on 2026-10-04 against Home Assistant 2026.9.4 /

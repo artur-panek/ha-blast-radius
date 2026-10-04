@@ -60,6 +60,11 @@ Graph nodes include `id`, `depth`, `relationship`, and a traversal predecessor
 `truncated` identifies depth/size limits. Forward expansion processes the shortest
 discovered depth first, so a longer dependent path cannot hide a reachable target.
 Closing an already known cycle does not by itself make the result incomplete.
+When equal-depth references reach the same node with the same relationship, its
+displayed path prefers explicit references, then template literals, then unclassified
+candidates. `via`, `path` and `confidence` change together. This does not change
+reachability, replace shorter paths or reclassify dependents as downstream targets;
+the complete edge list retains alternative references.
 
 Dashboards are terminal dependents: their direct entity and script references stay
 visible, but forward impact traversal does not expand dashboard actions. Cards are
@@ -95,6 +100,9 @@ visible literal candidates and an unresolved warning instead of aborting the rep
 Snapshot warnings describe overall coverage. `unresolved_total` counts uncertainty
 throughout the snapshot; `uncertain_references` narrows it to affected source
 configurations, not individual execution branches or dashboard cards.
+The panel's main unresolved count uses `uncertain_references.length`. The global
+`unresolved_total` remains available in coverage details and exports; a zero local
+count does not imply that every dependency has been resolved.
 
 ## Safety and privacy
 

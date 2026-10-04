@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.4 — 2026-10-04
+
+- Prefer stronger reference evidence for graph paths at the same depth and with
+  the same relationship. Preserve alternative edges, shortest paths and graph scope.
+- Improve confidence-label readability with theme text colors, subtle tinted
+  backgrounds and semantic-color markers, including custom dark themes.
+- Show unresolved references in affected source configurations in the main summary;
+  keep the full-snapshot total in coverage details and exports.
+- Add graph regression tests, measured label-contrast checks and local/global
+  counter tests. Refresh the synthetic demo screenshots and documentation.
+
 ## 0.1.3 — 2026-10-04
 
 - Publish numbered GitHub releases automatically after all Quality checks pass,

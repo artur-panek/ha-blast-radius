@@ -174,14 +174,43 @@ export const styles = css`
     color: var(--br-muted);
   }
   .explicit {
-    color: var(--success-color, #288048);
-    border-color: currentColor;
+    --br-confidence-accent: var(--success-color, #288048);
   }
   .template_literal,
   .dynamic,
   .unknown {
-    color: var(--warning-color, #9b6600);
-    border-color: currentColor;
+    --br-confidence-accent: var(--warning-color, #9b6600);
+  }
+  .badge.explicit,
+  .badge.template_literal,
+  .badge.dynamic,
+  .badge.unknown {
+    color: var(--primary-text-color, #212121);
+    background: color-mix(
+      in srgb,
+      var(--br-card) 92%,
+      var(--br-confidence-accent)
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--br-border) 65%,
+      var(--br-confidence-accent)
+    );
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .badge.explicit::before,
+  .badge.template_literal::before,
+  .badge.dynamic::before,
+  .badge.unknown::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: 1px;
+    background: var(--br-confidence-accent);
   }
   .stats {
     display: grid;

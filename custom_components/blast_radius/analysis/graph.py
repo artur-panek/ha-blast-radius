@@ -4,11 +4,17 @@ from collections import defaultdict, deque
 from heapq import heapify, heappop, heappush
 from typing import Any
 
-from .models import InvalidInput, Reference, Role
+from .models import Confidence, InvalidInput, Reference, Role
 
 MAX_NODES = 500
 MAX_EDGES = 2_000
 EFFECT_ROLES = {Role.WRITE, Role.CALL, Role.MEMBER}
+CONFIDENCE_ORDER = {
+    Confidence.EXPLICIT: 0,
+    Confidence.TEMPLATE_LITERAL: 1,
+    Confidence.UNKNOWN: 2,
+    Confidence.DYNAMIC: 3,
+}
 
 
 class DependencyGraph:
@@ -40,6 +46,15 @@ class DependencyGraph:
             # edges without claiming a fully explored cycle was truncated.
             if target in nodes and nodes[target]["depth"] <= depth:
                 edges[ref] = None
+                node = nodes[target]
+                if (
+                    node["depth"] == depth
+                    and node["relationship"] == relation
+                    and CONFIDENCE_ORDER[ref.confidence] < CONFIDENCE_ORDER[node["confidence"]]
+                ):
+                    # Prefer stronger evidence at the same distance and relationship.
+                    # This only changes the displayed reference, not graph reachability.
+                    node.update(via=origin, path=ref.path, confidence=ref.confidence)
                 return False
             if depth > max_depth:
                 truncated = True

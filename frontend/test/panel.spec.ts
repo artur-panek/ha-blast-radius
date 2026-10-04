@@ -1,5 +1,15 @@
 import { test, expect } from "@playwright/test";
 
+function luminance(rgb: number[]) {
+  const values = rgb.slice(0, 3).map((value) => {
+    const channel = value / 255;
+    return channel <= 0.04045
+      ? channel / 12.92
+      : ((channel + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * values[0] + 0.7152 * values[1] + 0.0722 * values[2];
+}
+
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("Start with one entity")).toBeVisible();
@@ -143,3 +153,109 @@ test("a failed refresh does not leave a stale report available to export", async
     page.getByText("triggers[0].entity_id", { exact: true }),
   ).toHaveCount(0);
 });
+
+for (const related of [0, 1]) {
+  test(`summary shows ${related} affected-source unknowns while coverage retains the global count`, async ({
+    page,
+  }) => {
+    await page
+      .getByRole("combobox", { name: "Entity", exact: true })
+      .fill("binary_sensor.wall_button");
+    await page.getByRole("button", { name: "Analyze", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Export JSON" }),
+    ).toBeVisible();
+    await page.locator("blast-radius-panel").evaluate((panel: any, count) => {
+      panel.report = {
+        ...panel.report,
+        uncertain_references: panel.report.uncertain_references.slice(0, count),
+        unresolved_total: 170,
+      };
+    }, related);
+    const stat = page
+      .locator(".stat")
+      .filter({ hasText: "Unresolved in affected sources" });
+    await expect(stat.locator("strong")).toHaveText(String(related));
+    await expect(page.locator(".stats")).not.toContainText("170");
+    await page.getByText("Coverage and limitations", { exact: false }).click();
+    await expect(
+      page.getByText("170 unresolved references across the full snapshot", {
+        exact: false,
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("they cannot be attributed to this entity", {
+        exact: false,
+      }),
+    ).toBeVisible();
+  });
+}
+
+for (const theme of ["light", "dark", "custom-dark"]) {
+  test(`confidence labels remain readable in ${theme} with low-contrast semantic colors`, async ({
+    page,
+  }) => {
+    if (theme !== "light")
+      await page.getByRole("button", { name: "Toggle theme" }).click();
+    await page
+      .locator("blast-radius-panel")
+      .evaluate((panel: HTMLElement, currentTheme) => {
+        panel.style.setProperty(
+          "--success-color",
+          currentTheme === "light" ? "#00e676" : "#008000",
+        );
+        panel.style.setProperty("--warning-color", "#ffc107");
+        if (currentTheme === "custom-dark") {
+          panel.style.setProperty("--card-background-color", "#24252e");
+          panel.style.setProperty("--primary-text-color", "#e8e8ed");
+        }
+      }, theme);
+    await page
+      .getByRole("combobox", { name: "Entity", exact: true })
+      .fill("binary_sensor.wall_button");
+    await page.getByRole("button", { name: "Analyze", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Export JSON" }),
+    ).toBeVisible();
+    await page.locator("blast-radius-panel").evaluate((panel: any) => {
+      panel.report = {
+        ...panel.report,
+        references: [
+          ...panel.report.references,
+          { ...panel.report.references[0], confidence: "unknown" },
+        ],
+      };
+    });
+    for (const confidence of [
+      "explicit",
+      "template_literal",
+      "dynamic",
+      "unknown",
+    ]) {
+      const badge = page.locator(`.badge.${confidence}`).first();
+      await expect(badge).toBeVisible();
+      const colors = await badge.evaluate((element) => {
+        const context = document.createElement("canvas").getContext("2d")!;
+        const rgb = (color: string) => {
+          context.clearRect(0, 0, 1, 1);
+          context.fillStyle = color;
+          context.fillRect(0, 0, 1, 1);
+          return Array.from(context.getImageData(0, 0, 1, 1).data);
+        };
+        const style = getComputedStyle(element);
+        return {
+          text: rgb(style.color),
+          background: rgb(style.backgroundColor),
+        };
+      });
+      expect(colors.background[3]).toBe(255);
+      const values = [
+        luminance(colors.text),
+        luminance(colors.background),
+      ].sort((a, b) => b - a);
+      expect((values[0] + 0.05) / (values[1] + 0.05)).toBeGreaterThanOrEqual(
+        4.5,
+      );
+    }
+  });
+}

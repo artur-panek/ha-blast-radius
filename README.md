@@ -11,7 +11,7 @@ Read-only dependency and impact analysis for Home Assistant. Find where an entit
 is referenced, follow structural dependencies, and preview a rename or removal
 before changing your configuration. Every result includes source paths and confidence.
 
-**v0.1.3 · Experimental alpha · Admin only · MIT**
+**v0.1.4 · Experimental alpha · Admin only · MIT**
 
 Requires Home Assistant **2026.9.4+**; tested against **2026.9.4**. Later releases
 need compatibility testing. This is a static configuration inspector, not a runtime
@@ -113,9 +113,10 @@ adjustable from 1 to 12. Graphs cap at 500 nodes and 2,000 edges; scans cap at
 Dynamic references have **no guessed target**. Plain constant templates and common
 value-only filters do not automatically count as unresolved dependencies. A templated
 action or target remains unresolved even if it contains readable literal IDs: its
-rendered destination is unknown. The UI separates unresolved
-references inside affected configurations from the count across the whole
-snapshot. Zero references is not a guarantee that removal is safe.
+rendered destination is unknown. The main unresolved count covers only affected
+source configurations. The total across the snapshot appears under **Coverage and
+limitations**. Expressions in affected configurations can still be unrelated to
+the selected entity. Zero references is not a guarantee that removal is safe.
 
 ## Known limitations
 
