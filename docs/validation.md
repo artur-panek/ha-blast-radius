@@ -35,7 +35,37 @@ contrast in the existing light/dark/custom-dark checks. Updated synthetic screen
 were visually inspected. The added GitHub social preview is 1280×640 PNG under 1 MB.
 No household data is used in tests, screenshots or branding.
 
-Release and GitHub CI verification will be recorded here after publication.
+[PR #12](https://github.com/artur-panek/ha-blast-radius/pull/12) passed the complete
+Quality and HA-next workflows before squash merge. The merged commit
+`0f7d72e2b1cca28cc482adbe62b42058f154e054` then passed all six jobs in the
+[main Quality run](https://github.com/artur-panek/ha-blast-radius/actions/runs/37179707650):
+Python 3.12 (112 passed, 2 intentionally skipped, 97.90% engine coverage), stable
+HA 2026.9.4 / Python 3.14 (143 passed, 98.30%), frontend (46 Chromium tests),
+hassfest (0 invalid integrations), HACS (**all 9 checks, no ignored validations**)
+and automatic publication. Formatting, type checks, generated frontend/brand
+consistency and packaging also passed in that run. The separate
+[main HA-next run](https://github.com/artur-panek/ha-blast-radius/actions/runs/37179707651)
+passed against **HA 2026.10.0b0**, with 143 tests and 98.30% engine coverage.
+
+The published [v0.2.1](https://github.com/artur-panek/ha-blast-radius/releases/tag/v0.2.1)
+is GitHub's latest normal release (`draft: false`, `prerelease: false`). The tag points
+to the tested merge commit above. Both the installation ZIP and `SHA256SUMS` were
+downloaded from the release; the ZIP contains 24 files, passes ZIP integrity checks
+and is byte-for-byte identical to the local package. Its SHA-256 is:
+`a0eab804648f1a652fa546a6c488b929ac65b3a7337f10522d2d0143c827328e`.
+That digest also matches the checksum file and GitHub's asset digest.
+
+HACS release discovery was checked with the upstream repository implementation at
+[`adb7d83e33d24325535fb43b8226572405143757`](https://github.com/hacs/integration/blob/adb7d83e33d24325535fb43b8226572405143757/custom_components/hacs/repositories/base.py).
+Its real `get_releases(prerelease=False)` method called the live public GitHub API
+and returned `v0.2.1` first. Applying that normal-channel result as `last_version`,
+as `common_update_data` does, made `version_to_download()` select `v0.2.1`.
+The tagged integration manifest is version `0.2.1`; the tagged `hacs.json`, parsed
+by HACS's `HacsManifest`, retains `hide_default_branch: true`, and `main` is absent
+from the release list. This verifies discovery/selection and the branch-hiding
+setting, not installation or refresh behavior on the user's running HA server.
+The post-release repository check found no open issues or unintended pull requests;
+only the existing Dependabot PRs #7, #8 and #9 remain open.
 
 ## v0.2.0
 
