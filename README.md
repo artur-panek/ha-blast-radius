@@ -7,7 +7,7 @@
 
 **Check dependencies before you make a change.**
 
-By [Artur Panek](https://artur.panek.tech/) · [Project page](https://artur.panek.tech/work/ha-blast-radius/)
+By [Artur Panek](https://artur.panek.tech/) · [Project page](https://artur.panek.tech/work/ha-blast-radius/) · [Releases](https://github.com/artur-panek/ha-blast-radius/releases)
 
 Read-only dependency and impact analysis for Home Assistant. Find where an entity
 is referenced, follow structural dependencies, and preview a rename or removal
