@@ -262,6 +262,7 @@ for (const theme of ["light", "dark", "custom-dark"]) {
       ".source-meta",
       ".stat span",
       "button.primary",
+      '.filter-row button[aria-pressed="true"]',
     ]) {
       const badge = page.locator(selector).first();
       await expect(badge).toBeVisible();

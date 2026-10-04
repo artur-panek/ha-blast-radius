@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.1 — 2026-10-04
+
+- Verify loaded automation/script blueprint expansion against real HA interfaces;
+  inspect substituted entity/action targets and retain honest, redacted failure warnings.
+- Supplement missing structural references with reviewable HA-native metadata,
+  without duplicate references or inferred runtime actions. Verify common helper IDs.
+- Show device/area/floor/label selector identity from HA registries. Keep entity
+  membership unresolved and preserve explicit targets in mixed target selections.
+- Add compact source/confidence filters for impact, graph and raw-reference views;
+  keep full totals, coverage and exports unchanged.
+- Add graph **Analyze this** actions, separate from native **Open →**, with fresh
+  snapshots, preview reset, Recent history and stale-response protection.
+- Add visible advisory HA-next CI for Core 2026.10.0b0, alongside the required
+  2026.9.4 stable lane, and document promotion of future stable baselines.
+- Add a privacy-preserving bug-report shortcut and updated synthetic screenshots.
+
 ## 0.2.0 — 2026-10-04
 
 - Mark the first public-testing release and add one-click HACS installation through

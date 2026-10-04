@@ -1,5 +1,42 @@
 # Validation
 
+## v0.2.1
+
+Local pre-release validation on 2026-10-04:
+
+| Check | Result |
+| --- | --- |
+| Python 3.12 engine/release suite | 112 passed; 2 HA modules intentionally skipped |
+| Stable HA Core 2026.9.4 / Python 3.14.7 | 143 passed; 98.30% engine coverage |
+| HA-next Core 2026.10.0b0 / Python 3.14.7 | 143 passed; 98.30% engine coverage |
+| HA-next test environment | pytest-homeassistant-custom-component 0.13.368, frontend 20260930.0; dependency check passed |
+| Chromium browser suite | 46 passed |
+| Ruff lint/format, engine mypy, TypeScript/build | Passed |
+| Version/package/mutation-call checks | Passed |
+
+The next version was selected from the official HA release list on 2026-10-04;
+2026.10.0b0 was the latest published 2026.10 prerelease. Stable support remains
+2026.9.4; a passing beta run is early compatibility evidence, not a support promise.
+
+Real-HA regressions verify substituted automation/script blueprint `raw_config`
+through the native config WebSocket commands, separate input bags and blueprint
+provenance, failure warnings and privacy. Device/area/floor/label registries are
+populated and checked without adding their members to entity graphs. Native metadata
+supplements unlocated references conservatively, deduplicates known targets and
+fails with a redacted warning. Eight common helper domains use ordinary entity
+references, with no helper-definition parsing.
+
+Browser regressions cover all source types, confidence/review filters, empty results,
+keyboard activation, new-root and session resets, full unfiltered exports, matching
+graph paths, Analyze this from dependents and targets, preview reset, Recent history,
+stale responses, selector text, mobile overflow and separate native Open navigation.
+Existing Back/account isolation tests pass. Active filter text is checked at 4.5:1
+contrast in the existing light/dark/custom-dark checks. Updated synthetic screenshots
+were visually inspected. The added GitHub social preview is 1280×640 PNG under 1 MB.
+No household data is used in tests, screenshots or branding.
+
+Release and GitHub CI verification will be recorded here after publication.
+
 ## v0.2.0
 
 Public-alpha release preparation changed packaging, HACS onboarding and manifest
@@ -350,3 +387,11 @@ git diff --exit-code -- ../custom_components/blast_radius/frontend/blast-radius.
 
 The official hassfest run used the `script.hassfest` module from HA Core tag
 `2026.9.4`, with `--integration-path` pointing to this custom component.
+
+## HA-next policy
+
+The separate **HA next compatibility** workflow is advisory and runs on pull requests,
+main updates and weekly. It uses a reproducible HA/pytest-fixture/frontend pairing
+from `requirements/ha-next.txt`; it runs the full suite without `continue-on-error`.
+Failures remain visible in a separate workflow. Stable HA 2026.9.4 in Quality is
+still required by the release job. See [promotion process](releasing.md#maintaining-ha-compatibility).

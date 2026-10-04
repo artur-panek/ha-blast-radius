@@ -48,7 +48,7 @@ Passing these checks does not establish compatibility with untested HA versions.
 
 ## Scope and reporting
 
-The v0.1 boundary is read-only. Rewrites, runtime recorders and external automation
+The v0.2 boundary is read-only. Rewrites, runtime recorders and external automation
 parsers require a separate scope discussion. Never render templates to improve
 coverage or infer a runtime action from a visible template literal.
 
@@ -57,3 +57,6 @@ versus actual behavior and the smallest synthetic example. Redact report exports
 entity names and reference paths can still identify people, rooms and routines.
 For vulnerabilities, follow [SECURITY.md](SECURITY.md) instead of a public bug report.
 For versioning and packaging, follow the [release checklist](docs/releasing.md).
+
+Run the advisory next-version suite in its own environment; see
+[HA compatibility maintenance](docs/releasing.md#maintaining-ha-compatibility).

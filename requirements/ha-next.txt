@@ -1,0 +1,5 @@
+# Advisory pairing, verified against the latest official prerelease on 2026-10-04.
+# Keep in step with official HA releases and the matching pytest fixture package.
+homeassistant==2026.10.0b0
+pytest-homeassistant-custom-component==0.13.368
+home-assistant-frontend==20260930.0

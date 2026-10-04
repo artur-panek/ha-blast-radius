@@ -19,6 +19,13 @@ import {
   type RecentSearch,
   type SavedView,
 } from "./session";
+import {
+  sourceTypes,
+  matchesReference,
+  visibleNodes,
+  type SourceType,
+  type ReviewFilter,
+} from "./filters";
 import { version } from "../package.json";
 import type {
   Confidence,
@@ -53,6 +60,8 @@ export class BlastRadiusPanel extends LitElement {
     status: { state: true },
     copyFallback: { state: true },
     recentSearches: { state: true },
+    sourceFilters: { state: true },
+    reviewFilters: { state: true },
   };
   declare hass: Hass;
   narrow = false;
@@ -67,6 +76,9 @@ export class BlastRadiusPanel extends LitElement {
   depth = 6;
   status = "";
   copyFallback = false;
+  sourceFilters: SourceType[] = [];
+  reviewFilters: ReviewFilter[] = [];
+  private analyzedRoot = "";
   private initialized = false;
   private requestId = 0;
   private storageKey?: string;
@@ -122,6 +134,17 @@ export class BlastRadiusPanel extends LitElement {
     void this.run();
   }
 
+  private async analyzeNode(entityId: string) {
+    this.query = entityId;
+    this.replacement = "";
+    await this.run(undefined, 0);
+    if (this.report?.entity_id !== entityId || !this.isConnected) return;
+    await this.updateComplete;
+    this.renderRoot
+      .querySelector<HTMLElement>(".result-heading h2")
+      ?.focus({ preventScroll: true });
+  }
+
   private clearRecentSearches() {
     this.recentSearches = [];
     this.lastView = undefined;
@@ -141,6 +164,9 @@ export class BlastRadiusPanel extends LitElement {
       this.depth = saved.last?.depth || 6;
       this.tab = saved.last?.tab || "impact";
       this.report = undefined;
+      this.sourceFilters = [];
+      this.reviewFilters = [];
+      this.analyzedRoot = "";
       this.entities = [];
       this.replacement = "";
       this.status = "";
@@ -193,6 +219,12 @@ export class BlastRadiusPanel extends LitElement {
       this.error = "Enter an entity ID such as light.office.";
       return;
     }
+    if (entityId !== this.analyzedRoot) {
+      this.sourceFilters = [];
+      this.reviewFilters = [];
+      this.replacement = "";
+    }
+    this.analyzedRoot = entityId;
     const id = ++this.requestId;
     this.loading = true;
     this.error = "";
@@ -356,9 +388,11 @@ export class BlastRadiusPanel extends LitElement {
 
   private references(refs: Reference[], unresolved = false) {
     const groups = new Map<string, Reference[]>();
-    refs.forEach((ref) =>
-      groups.set(ref.source_id, [...(groups.get(ref.source_id) || []), ref]),
-    );
+    refs
+      .filter(this.matchesFilter)
+      .forEach((ref) =>
+        groups.set(ref.source_id, [...(groups.get(ref.source_id) || []), ref]),
+      );
     return [...groups].map(
       ([source, references]) =>
         html`<article class="reference source-row" data-source=${source}>
@@ -413,14 +447,16 @@ export class BlastRadiusPanel extends LitElement {
             ${reason} <span class="count">${references.length}</span>
           </summary>
           <p>${explainReason(reason)}</p>
-          ${references.map((ref) => html`<div class="unresolved-row"><span>${readablePath(ref.path)}</span><code>${ref.path}</code>${this.badge(ref.confidence)}</div>`)}
+          ${references.map((ref) => html`<div class="unresolved-row"><span>${readablePath(ref.path)}</span><code>${ref.path}</code>${this.badge(ref.confidence)}${this.selectorDetail(ref)}</div>`)}
         </details>`,
     );
   }
 
   private uncertainty(report: Report) {
-    const local = report.uncertain_references;
-    const elsewhere = report.other_dashboard_references || [];
+    const local = report.uncertain_references.filter(this.matchesFilter);
+    const elsewhere = (report.other_dashboard_references || []).filter(
+      this.matchesFilter,
+    );
     if (!local.length && !elsewhere.length) return nothing;
     return html`<section
       class="uncertainty"
@@ -468,22 +504,79 @@ export class BlastRadiusPanel extends LitElement {
     </section>`;
   }
 
+  private get filtersActive() {
+    return !!(this.sourceFilters.length || this.reviewFilters.length);
+  }
+
+  private matchesFilter = (ref: Reference) =>
+    matchesReference(ref, this.sourceFilters, this.reviewFilters);
+
+  private filters(report: Report) {
+    const reviewLabels: Record<ReviewFilter, string> = {
+      explicit: "Explicit",
+      template_literal: "Template literal",
+      review: "Needs review",
+    };
+    const count = report.references.filter(this.matchesFilter).length;
+    return html`<section class="result-filters" aria-label="Result filters">
+      <div role="group" aria-label="Source types" class="filter-row">
+        <span class="filter-label">Sources</span>
+        <button
+          aria-pressed=${!this.sourceFilters.length}
+          @click=${() => (this.sourceFilters = [])}
+        >
+          All sources
+        </button>
+        ${sourceTypes.map((kind) => html`<button aria-pressed=${this.sourceFilters.includes(kind)} @click=${() => (this.sourceFilters = this.sourceFilters.includes(kind) ? this.sourceFilters.filter((item) => item !== kind) : [...this.sourceFilters, kind])}>${sourceLabels[kind]}</button>`)}
+      </div>
+      <div role="group" aria-label="Reference confidence" class="filter-row">
+        <span class="filter-label">Confidence</span>
+        <button
+          aria-pressed=${!this.reviewFilters.length}
+          @click=${() => (this.reviewFilters = [])}
+        >
+          All confidence
+        </button>
+        ${(Object.keys(reviewLabels) as ReviewFilter[]).map((kind) => html`<button aria-pressed=${this.reviewFilters.includes(kind)} @click=${() => (this.reviewFilters = this.reviewFilters.includes(kind) ? this.reviewFilters.filter((item) => item !== kind) : [...this.reviewFilters, kind])}>${reviewLabels[kind]}</button>`)}
+      </div>
+      <p class="filter-note" role="status">
+        ${count} of ${report.references.length} direct references visible. Needs
+        review includes unclassified references and unresolved expressions.
+        Exports and coverage always include the full analysis.
+      </p>
+    </section>`;
+  }
+
+  private selectorDetail(ref: Reference) {
+    if (!ref.selector) return nothing;
+    const selector = ref.selector;
+    return html`<p class="selector-detail">
+      <strong>${selector.kind.replace("_id", "")} selector</strong>
+      <code>${selector.value}</code>
+      ${selector.exists === true ? "Identity found in HA registry." : selector.exists === false ? "Identity not found in HA registry; this does not establish a broken target." : "Registry identity not checked."}
+      Entity membership and runtime eligibility are not expanded.
+    </p>`;
+  }
+
   private impact(report: Report) {
+    const refs = report.references.filter(this.matchesFilter);
     return html`<h2>
         Where this entity is used
-        <span class="badge">${report.summary.sources} sources</span>
+        <span class="badge"
+          >${new Set(refs.map((ref) => ref.source_id)).size} visible
+          sources</span
+        >
       </h2>
       ${
-        report.references.length
-          ? html`<div class="source-grid">
-              ${this.references(report.references)}
-            </div>`
+        refs.length
+          ? html`<div class="source-grid">${this.references(refs)}</div>`
           : html`<div class="empty">
               <div class="symbol">${brandMark()}</div>
-              <h3>No direct references found</h3>
+              <h3>
+                ${this.filtersActive ? "No matching direct references" : "No direct references found"}
+              </h3>
               <p class="muted">
-                Nothing in the inspected sources points to this entity. Check
-                coverage and unresolved references before changing it.
+                ${this.filtersActive ? "Try All sources or All confidence to show more results. Full totals and exports are unchanged." : "Nothing in the inspected sources points to this entity. Check coverage and unresolved references before changing it."}
               </p>
             </div>`
       }
@@ -504,8 +597,9 @@ export class BlastRadiusPanel extends LitElement {
             statically.
           </li>
           <li>
-            <strong>Unclassified:</strong> a known entity ID in a field with
-            unknown semantics.
+            <strong>Unclassified:</strong> a candidate in a field with unknown
+            semantics, or HA-native metadata without a verified location and
+            role.
           </li>
         </ul>
       </details>`;
@@ -562,13 +656,15 @@ export class BlastRadiusPanel extends LitElement {
   }
 
   private graph(report: Report) {
-    const selected = report.graph.nodes.find(
-      (node) => node.relationship === "selected",
-    )!;
-    const dependents = report.graph.nodes.filter(
+    const nodes = this.filtersActive
+      ? visibleNodes(report, this.matchesFilter)
+      : report.graph.nodes;
+    const edges = report.graph.edges.filter(this.matchesFilter);
+    const selected = nodes.find((node) => node.relationship === "selected")!;
+    const dependents = nodes.filter(
       (node) => node.relationship === "dependent",
     );
-    const downstream = report.graph.nodes.filter(
+    const downstream = nodes.filter(
       (node) => node.relationship === "downstream",
     );
     return html`<h2>Dependency map</h2>
@@ -577,6 +673,7 @@ export class BlastRadiusPanel extends LitElement {
         targets. Conditions are not evaluated; these links do not prove an
         action will run.
       </p>
+      ${this.filtersActive ? html`<p class="filter-note">Showing ${nodes.length - 1} of ${report.graph.nodes.length - 1} linked nodes. Paths may pass through hidden configurations; filtering does not recalculate the graph.</p>` : nothing}
       <div class="tree dependency-map">
         <div class="map-selected">
           <span class="map-label">Selected entity</span
@@ -589,7 +686,7 @@ export class BlastRadiusPanel extends LitElement {
               Configurations that reference the selected entity, directly or
               through another configuration.
             </p>
-            ${dependents.length ? dependents.map((node) => this.graphNode(node)) : html`<p>No linked configurations found.</p>`}
+            ${dependents.length ? dependents.map((node) => this.graphNode(node)) : html`<p>${this.filtersActive ? "No matching linked configurations. Try All sources or All confidence." : "No linked configurations found."}</p>`}
           </section>
           <section class="map-group">
             <h3>
@@ -599,14 +696,17 @@ export class BlastRadiusPanel extends LitElement {
               Action and membership targets reached through those
               configurations.
             </p>
-            ${downstream.length ? downstream.map((node) => this.graphNode(node)) : html`<p>No downstream targets found.</p>`}
+            ${downstream.length ? downstream.map((node) => this.graphNode(node)) : html`<p>${this.filtersActive ? "No matching possible targets. Try All sources or All confidence." : "No downstream targets found."}</p>`}
           </section>
         </div>
       </div>
       ${report.graph.cycles.length ? html`<div class="notice">Cycles detected. Nodes are shown once.${report.graph.cycles.map((cycle) => html`<p><code>${cycle.join(" → ")}</code></p>`)}</div>` : nothing}
       <details>
-        <summary>All ${report.graph.edges.length} graph edges</summary>
-        ${report.graph.edges.map((edge) => html`<div class="edge"><strong>${this.sourceName(edge.source_id)} → ${this.sourceName(edge.target!)}</strong><code>${edge.source_id} → ${edge.target}</code><code>${edge.path}</code><span class="badge">${edge.role}</span> ${this.badge(edge.confidence)}</div>`)}
+        <summary>
+          ${edges.length} visible graph edges / ${report.graph.edges.length}
+          total
+        </summary>
+        ${edges.map((edge) => html`<div class="edge"><strong>${this.sourceName(edge.source_id)} → ${this.sourceName(edge.target!)}</strong><code>${edge.source_id} → ${edge.target}</code><code>${edge.path}</code><span class="badge">${edge.role}</span> ${this.badge(edge.confidence)}</div>`)}
       </details>`;
   }
 
@@ -626,7 +726,10 @@ export class BlastRadiusPanel extends LitElement {
             >
           </div>
         </div>
-        ${this.sourceControl(node.id, true)}
+        <div class="node-actions">
+          ${this.sourceControl(node.id, true)}
+          ${/^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/.test(node.id) ? html`<button class="analyze-node" aria-label=${`Analyze this: ${node.id}`} @click=${() => this.analyzeNode(node.id)}>Analyze this</button>` : nothing}
+        </div>
       </div>
       ${node.via ? html`<p class="via">${node.relationship === "dependent" ? "References" : "Target of"} ${this.sourceControl(node.via)}</p>` : nothing}
       <details class="technical">
@@ -648,7 +751,13 @@ export class BlastRadiusPanel extends LitElement {
   }
 
   private raw(report: Report) {
+    const refs = [
+      ...report.references,
+      ...report.uncertain_references,
+      ...(report.other_dashboard_references || []),
+    ].filter(this.matchesFilter);
     return html`<h2>Raw references</h2>
+      ${!refs.length ? html`<p>No matching references. Try All sources or All confidence.</p>` : nothing}
       <div class="table-wrap">
         <table>
           <thead>
@@ -659,7 +768,7 @@ export class BlastRadiusPanel extends LitElement {
             </tr>
           </thead>
           <tbody>
-            ${report.references.map(
+            ${refs.map(
               (ref) =>
                 html`<tr>
                   <td>
@@ -668,7 +777,9 @@ export class BlastRadiusPanel extends LitElement {
                     >
                   </td>
                   <td>${ref.role}</td>
-                  <td>${this.badge(ref.confidence)}</td>
+                  <td>
+                    ${this.badge(ref.confidence)}${ref.reason ? html`<p>${explainReason(ref.reason)}</p>` : nothing}${this.selectorDetail(ref)}
+                  </td>
                 </tr>`,
             )}
           </tbody>
@@ -796,11 +907,15 @@ export class BlastRadiusPanel extends LitElement {
           report
             ? html`
                 <div class="result-heading">
-                  <h2>${this.sourceName(report.entity_id)}</h2>
+                  <h2 tabindex="-1">${this.sourceName(report.entity_id)}</h2>
                   <code>${report.entity_id}</code>
                 </div>
                 ${!report.exists ? html`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>` : nothing}
                 ${this.completeness(report)}
+                <p class="muted totals-label">
+                  Full analysis totals · filters below affect visible results
+                  only
+                </p>
                 <div class="stats">
                   <div class="stat">
                     <strong>${report.summary.references}</strong
@@ -825,6 +940,7 @@ export class BlastRadiusPanel extends LitElement {
                     <nav role="tablist" aria-label="Analysis views">
                       ${(["impact", "graph", "raw"] as const).map((tab) => html`<button role="tab" id=${`tab-${tab}`} aria-controls="analysis-view" aria-selected=${this.tab === tab} tabindex=${this.tab === tab ? 0 : -1} @keydown=${this.tabKeydown} @click=${() => (this.tab = tab)}>${tab === "impact" ? "Impact" : tab === "graph" ? "Graph" : "Raw references"}</button>`)}
                     </nav>
+                    ${this.filters(report)}
                     <div
                       role="tabpanel"
                       id="analysis-view"
@@ -842,6 +958,13 @@ export class BlastRadiusPanel extends LitElement {
                         Refresh snapshot
                       </button>
                     </div>
+                    <a
+                      class="issue-link"
+                      href="https://github.com/artur-panek/ha-blast-radius/issues/new?template=bug.yml"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      >Report issue ↗</a
+                    >
                     <p class="status" role="status">${this.status}</p>
                     ${this.copyFallback ? html`<textarea aria-label="Markdown report" readonly .value=${report.markdown}></textarea>` : nothing}
                   </section>

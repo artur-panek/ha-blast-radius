@@ -24,3 +24,12 @@ The integration packages brand images through Home Assistant's
 The sidebar module uses the documented
 [custom icon set API](https://developers.home-assistant.io/blog/2020/05/09/custom-iconsets/).
 All artwork is original to this project and distributed under its MIT license.
+
+## GitHub social preview
+
+`social-preview.png` is the 1280×640 upload asset for repository Settings → General
+→ Social preview. It uses the existing radius mark, a dark engineering grid and
+the project's read-only description. It is a static promotional image, not a
+screenshot or a dependency diagram. Generated with the built-in image tool, with
+the existing dark icon as a reference; only its export size was normalized.
+The source prompt is in `social-preview-prompt.txt`.

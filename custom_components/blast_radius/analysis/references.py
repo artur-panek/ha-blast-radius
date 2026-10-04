@@ -1,8 +1,9 @@
 """Walk normalized configuration with explicit field semantics."""
 
+import re
 from typing import Any
 
-from .models import Confidence, Reference, Role, Scan, Source
+from .models import Confidence, Reference, Role, Scan, Selector, Source
 from .templates import ENTITY_RE, inspect_template, is_template
 
 MAX_NESTING = 80
@@ -10,11 +11,14 @@ MAX_REFERENCES = 50_000
 _SKIP = {"alias", "description", "name", "icon", "unique_id", "id"}
 _ENTITY_KEYS = {"entity_id", "entity", "entities", "entity_ids"}
 _SCRIPT_SERVICES = {"turn_on", "turn_off", "toggle", "reload"}
+_SELECTOR_KEYS = {"area_id", "device_id", "floor_id", "label_id"}
 
 
 def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
     found: dict[Reference, None] = {}
     warnings: set[str] = set()
+    located_by_source: dict[str, set[str]] = {}
+    selectors_by_source: dict[str, set[tuple[str, str]]] = {}
 
     def emit(
         source: Source,
@@ -23,13 +27,44 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
         confidence: Confidence,
         role: Role,
         reason: str = "",
+        selector: Selector | None = None,
     ) -> None:
         if len(found) >= MAX_REFERENCES:
             warnings.add("Reference limit reached; analysis is incomplete.")
             return
         found[
-            Reference(source.source_id, source.source_type, target, path, confidence, role, reason)
+            Reference(
+                source.source_id,
+                source.source_type,
+                target,
+                path,
+                confidence,
+                role,
+                reason,
+                selector,
+            )
         ] = None
+        if target is not None:
+            located_by_source.setdefault(source.source_id, set()).add(target)
+
+    def emit_selector(source: Source, kind: str, value: str, path: str, role: Role) -> None:
+        selectors_by_source.setdefault(source.source_id, set()).add((kind, value))
+        # Registry presence confirms only the selector identity, not membership
+        # or service-specific runtime eligibility. Never create entity edges here.
+        # Do not serialize arbitrary data accidentally stored in selector fields.
+        # A path, URL or other non-ID remains a generic unresolved reference.
+        selector = (
+            Selector(
+                kind,
+                value,
+                (kind, value) in source.selector_registry
+                if source.selector_registry is not None
+                else None,
+            )
+            if re.fullmatch(r"[a-zA-Z0-9_-]{1,512}", value)
+            else None
+        )
+        emit(source, None, path, Confidence.DYNAMIC, role, f"Unexpanded {kind} target", selector)
 
     def walk(source: Source, value: Any, path: str, key: str, role: Role, depth: int) -> None:
         if depth > MAX_NESTING:
@@ -75,12 +110,17 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     # Even templated targets can read one entity to select another.
                     # Keep their visible literals as dependencies, never guessed effects.
                     emit(source, target, path, Confidence.TEMPLATE_LITERAL, Role.READ)
-                templated_target = key in _ENTITY_KEYS | {
-                    "action",
-                    "service",
-                    "service_template",
-                    "target",
-                }
+                templated_target = (
+                    key
+                    in _ENTITY_KEYS
+                    | {
+                        "action",
+                        "service",
+                        "service_template",
+                        "target",
+                    }
+                    | _SELECTOR_KEYS
+                )
                 if result.dynamic or templated_target:
                     emit(
                         source,
@@ -115,8 +155,8 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     and ENTITY_RE.fullmatch(value)
                 ):
                     emit(source, value, path, Confidence.EXPLICIT, Role.CALL)
-            elif key in {"area_id", "device_id", "floor_id", "label_id"}:
-                emit(source, None, path, Confidence.DYNAMIC, role, f"Unexpanded {key} target")
+            elif key in _SELECTOR_KEYS:
+                emit_selector(source, key, value, path, role)
             elif value in known_entities:
                 emit(
                     source,
@@ -132,4 +172,21 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
             source.source_type, Role.READ
         )
         walk(source, source.config, "", "", initial, 0)
+        # HA metadata has no location, role or execution guarantee. Supplement
+        # only missing targets as reviewable reads, never duplicate a located ref
+        # or manufacture a downstream effect from the native set.
+        located = located_by_source.get(source.source_id, set())
+        for target in sorted(source.native_entities - located):
+            if ENTITY_RE.fullmatch(target):
+                emit(
+                    source,
+                    target,
+                    "metadata.referenced_entities",
+                    Confidence.UNKNOWN,
+                    Role.READ,
+                    "HA-native reference; location and role unavailable",
+                )
+        selectors = selectors_by_source.get(source.source_id, set())
+        for kind, value in sorted(source.native_selectors - selectors):
+            emit_selector(source, kind, value, f"metadata.{kind}", Role.READ)
     return Scan(tuple(found), tuple(sorted(warnings)))

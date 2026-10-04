@@ -36,6 +36,19 @@ class Source:
     source_type: str
     name: str
     config: dict[str, Any]
+    native_entities: frozenset[str] = frozenset()
+    native_selectors: frozenset[tuple[str, str]] = frozenset()
+    selector_registry: frozenset[tuple[str, str]] | None = None
+    blueprint: bool = False
+
+
+@dataclass(frozen=True)
+class Selector:
+    """A literal selector, never an inferred set of entity targets."""
+
+    kind: str
+    value: str
+    exists: bool | None
 
 
 @dataclass(frozen=True)
@@ -47,9 +60,13 @@ class Reference:
     confidence: Confidence
     role: Role
     reason: str = ""
+    selector: Selector | None = None
 
     def as_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        result = asdict(self)
+        if self.selector is None:
+            result.pop("selector")
+        return result
 
 
 @dataclass(frozen=True)

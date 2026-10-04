@@ -6,12 +6,12 @@ executes analysis outside HA's event loop. Reports omit raw configs and template
 
 ## Source access
 
-Verified against **Home Assistant Core 2026.9.4** on 2026-10-03:
+Verified against **Home Assistant Core 2026.9.4** on 2026-10-04:
 
 | Source | Access | Limitation |
 | --- | --- | --- |
 | Entities | State machine + entity registry | Registry-only entities count as known |
-| Automations/scripts | `DATA_INSTANCES` → entities → `raw_config` | Loaded configs; blueprint inputs only |
+| Automations/scripts | `DATA_INSTANCES` → entities → `raw_config` | Loaded configs, including substituted blueprint bodies |
 | Scenes/legacy groups | Exposed `entity_id` state attribute | Membership only |
 | Lovelace | `LOVELACE_DATA.dashboards` → `async_load(False)` | Generated configs may be unavailable |
 
@@ -30,6 +30,73 @@ Upstream references:
 - [Custom panels](https://developers.home-assistant.io/docs/frontend/custom-ui/creating-custom-panels/)
 - [WebSocket extensions](https://developers.home-assistant.io/docs/frontend/extending/websocket-api/)
 - [HACS requirements](https://www.hacs.xyz/docs/publish/integration/)
+
+## Blueprints, native metadata and selectors (v0.2.1)
+
+Real HA tests load synthetic automation **and** script blueprints through normal
+component setup and query the native `automation/config` / `script/config` commands.
+In Core 2026.9.4, validation calls `BlueprintInputs.async_substitute()` before
+assigning `raw_config`. It contains the blueprint body with substituted entity and
+action-target inputs; `use_blueprint` is absent after success. The separate
+`raw_blueprint_inputs` / entity `_blueprint_inputs` retain the instance's
+`use_blueprint` input bag. `referenced_blueprint` is the blueprint path, not its body.
+Blast Radius records only a boolean provenance flag and the aggregate
+`coverage.loaded_blueprints` count. It does not export blueprint paths or input bags.
+
+Unavailable HA entities may retain original inputs or a partially validated config.
+If `use_blueprint` remains, the adapter explicitly warns that expansion is unavailable;
+missing `raw_config`, unavailable entities and metadata failures also produce generic
+coverage warnings. Exception text, validation errors and blueprint paths are never
+copied into those warnings. No blueprint file parsing or substitution is performed
+by Blast Radius; it reads HA's already loaded result.
+
+`referenced_entities` and `referenced_devices/areas/floors/labels` are static sets
+from HA's validated runtime configuration. They are **not complete runtime traces**:
+HA skips template destinations and does not report a reference's location, role or
+branch execution. The structural scanner stays authoritative for located references.
+A native-only entity ID is added once with `confidence: unknown`, `role: read` and
+path `metadata.referenced_entities`, requiring review without creating a guessed
+write edge. Existing located references are not duplicated or upgraded. Regression
+coverage includes HA's scene shorthand, which the generic structural scanner can
+otherwise miss when the scene has no state/registry entry.
+
+Literal selector fields retain their exact configuration location and, where it is
+a bounded identifier, a `selector: {kind, value, exists}` record. `exists` checks
+identity in HA's device/area/floor/label registry (`null` in a pure-engine snapshot
+without registries). Native-only selectors supplement missing structural entries.
+The entity target remains `null` and confidence remains dynamic because **the entity
+set is unresolved**, even when the selector's own identity is known. Templates remain
+unresolved; they are never rendered. Arbitrary non-ID selector text is not exported.
+
+No device, area, floor or label selector is expanded. HA action/service eligibility,
+entity capabilities, disabled entities, label placement, registry changes and runtime
+selection prevent a selector's static membership from establishing definite entity
+actions. Tests populate a real device/area/floor/label membership and prove it does
+not leak into graph edges; a mixed explicit entity + selector keeps only the explicit
+entity edge. Missing registry identity is reported without claiming breakage.
+
+Input helpers, counters, timers and schedules work through normal explicit entity
+references in loaded configurations. No bespoke helper-definition parsers were added.
+Internal helper/template integration definitions remain outside guaranteed coverage.
+
+## Presentation filters and graph navigation
+
+Source and confidence chips affect only cards, displayed graph nodes/edges and the
+raw-reference view (which also includes linked unresolved expressions). Full totals,
+coverage, previews and JSON/Markdown reports retain the complete analysis. Needs
+review combines `unknown` and `dynamic`. Graph filtering uses matching source edges,
+not the target entity's domain; when an alternative matching edge supplies a node's
+connection, `via`, path and confidence change together. The root remains visible;
+paths can pass through hidden configurations. Filtering never reruns graph traversal.
+
+Filters remain in panel memory, survive same-root refresh/depth/preview requests and
+reset for a new root, remount or HA account change. They are intentionally not added
+to session storage. The analysis tab and existing user-scoped Recent history remain.
+`Analyze this` runs a fresh request using the node's ID and current depth, resets the
+preview and reuses stale-request protection; `Open →` separately invokes native HA
+navigation. Nodes whose IDs cannot be accepted by the entity-ID API (for example a
+dashboard URL with a hyphen) retain Open but do not offer an invalid analysis action.
+The issue shortcut links to the bug form without adding any report or entity data.
 
 ## WebSocket API
 
@@ -144,7 +211,7 @@ neither establishes a dependency or runtime branch. Expressions in unaffected
 sources still contribute to `unresolved_total` only.
 
 Since v0.1.9, `coverage.warnings` retains specific snapshot and scanner gaps,
-including skipped sources, unexpanded blueprint bodies and scan bounds. It excludes
+including skipped sources, failed blueprint expansion and scan bounds. It excludes
 the routine explanation of unsupported source types; that explanation remains in
 the report's top-level `warnings`. These gaps trigger a visible incomplete-results
 notice even when the selected entity has zero references and its graph is not

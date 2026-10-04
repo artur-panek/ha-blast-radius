@@ -101,7 +101,7 @@ the exact zero-based path (`cards[2]`), or use **Raw references** and the export
 | Old UI or missing sidebar icon | Restart HA after updating, then reload the browser or reopen the app |
 | Error loading automation (500) after Open | Update to v0.1.7+, restart HA and reload. Open now uses HA's loaded-config view. A 500 in HA's separate edit screen still needs investigation in HA logs; Blast Radius does not repair configuration files |
 | Analysis fails | Reload the integration and retry; record versions and a synthetic reproduction |
-| Expected reference absent | Expand coverage warnings; unloaded YAML, blueprint bodies and several source types are outside coverage |
+| Expected reference absent | Expand coverage warnings; unloaded YAML, failed blueprint expansion and unsupported source types can leave gaps |
 | Many unresolved entries | Expand the reason groups; runtime variables, patterns and selectors need more context. Other dashboard cards are listed separately, not attributed to this entity |
 | Empty result | Check spelling and coverage; no detected reference is not proof removal is safe |
 
@@ -114,3 +114,15 @@ automations, scripts, entities and dashboards are not modified by the integratio
 Report bugs at https://github.com/artur-panek/ha-blast-radius/issues.
 Share only redacted reports and minimal synthetic examples, not full household
 configuration, access tokens or `.storage` files.
+
+## v0.2.1 exploration controls
+
+Source/confidence chips filter the displayed results. Full totals, coverage and
+exports remain complete. **Analyze this** changes the graph root inside Blast
+Radius; **Open →** opens Home Assistant's own inspector. Filters reset for a new
+root or when the panel is reopened. Recent searches and the selected tab retain
+existing session behavior. After updating, reload the browser to load the new panel.
+
+Successful loaded automation/script blueprints are inspected with HA-substituted
+inputs. Selector identity status is checked against registries; their entity members
+are not inferred. Supported stable baseline: Core 2026.9.4. HA-next CI is advisory.
