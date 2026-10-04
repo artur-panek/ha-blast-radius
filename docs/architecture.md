@@ -50,7 +50,8 @@ Referenced IDs absent from state/registry have `exists: false`.
 ```
 
 Returns `entity_id`, `exists`, `read_only`, `references`, `graph`,
-`uncertain_references`, `unresolved_total`, `summary`, `coverage`, `warnings`,
+`uncertain_references`, `other_dashboard_references`, `source_names`,
+`unresolved_total`, `summary`, `coverage`, `warnings`,
 `snapshot_at`, `markdown`.
 
 Graph nodes include `id`, `depth`, `relationship`, and a traversal predecessor
@@ -92,17 +93,33 @@ write targets. Templated entity/action/target fields also produce an unresolved
 entry because their final destination is unknown.
 
 Constant-only text and styling are not automatically unresolved. A small allowlist
-of value-only filters is recognized; unknown calls, custom filters and variable
-lookups remain conservative unresolved candidates. Entity-like strings in variables
+of value-only filters and tests is recognized. Syntax-only tracking recognizes
+simple local assignments and loop variables; branch assignments do not escape
+their block in this analysis. This does not compile or render templates or resolve
+variable values into entity targets. External variables, unknown calls/filters/tests,
+imports and broad state collections remain conservative unresolved candidates.
+`reason` describes the missing information rather than returning raw template text.
+Entity-like strings in variables
 are reads, not downstream writes. Malformed or excessively nested templates retain
 visible literal candidates and an unresolved warning instead of aborting the report.
 
 Snapshot warnings describe overall coverage. `unresolved_total` counts uncertainty
-throughout the snapshot; `uncertain_references` narrows it to affected source
-configurations, not individual execution branches or dashboard cards.
-The panel's main unresolved count uses `uncertain_references.length`. The global
-`unresolved_total` remains available in coverage details and exports; a zero local
-count does not imply that every dependency has been resolved.
+throughout the snapshot. Since v0.1.5, `uncertain_references` includes affected
+non-dashboard configurations and linked dashboard cards. The nearest standard
+`cards[n]` boundary groups a dashboard reference; its parent/child card scopes are
+included conservatively. Sibling cards do not inherit a link merely by sharing a
+dashboard. Unknown custom card layouts and dashboard-level expressions remain in
+`other_dashboard_references`, as do expressions in unlinked cards of affected
+dashboards. The two arrays partition unresolved entries from affected sources;
+neither establishes a dependency or runtime branch. Expressions in unaffected
+sources still contribute to `unresolved_total` only.
+
+The panel presents both scopes in collapsed groups by source and reason; the main
+summary focuses on known references. Both arrays are retained in JSON and Markdown
+exports. `source_names` maps affected source IDs to display names; raw IDs and paths
+are unchanged. Readable UI locations are one-based; raw paths remain zero-based.
+The global total is in coverage details; a zero local count does not establish
+complete coverage.
 
 ## Safety and privacy
 

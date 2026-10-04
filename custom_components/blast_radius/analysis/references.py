@@ -75,19 +75,21 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     # Even templated targets can read one entity to select another.
                     # Keep their visible literals as dependencies, never guessed effects.
                     emit(source, target, path, Confidence.TEMPLATE_LITERAL, Role.READ)
-                if result.dynamic or key in _ENTITY_KEYS | {
+                templated_target = key in _ENTITY_KEYS | {
                     "action",
                     "service",
                     "service_template",
                     "target",
-                }:
+                }
+                if result.dynamic or templated_target:
                     emit(
                         source,
                         None,
                         path,
                         Confidence.DYNAMIC,
                         role,
-                        "Unsupported template syntax" if result.invalid else "Runtime expression",
+                        result.reason
+                        or ("Templated target" if templated_target else "Runtime expression"),
                     )
             elif key in _ENTITY_KEYS:
                 # HA accepts comma-separated entity targets as well as arrays.
@@ -102,7 +104,9 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                             path,
                             Confidence.DYNAMIC,
                             role,
-                            "Non-literal entity target",
+                            "Entity pattern"
+                            if any(char in target for char in "*?[")
+                            else "Non-literal entity target",
                         )
             elif key in {"action", "service"}:
                 if (

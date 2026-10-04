@@ -57,12 +57,17 @@ Analyze an entity you know appears in an automation or dashboard. Confirm the
 source IDs and paths against that configuration. Open Graph and try a removal
 preview. Preview buttons only generate reports; they never perform the change.
 
-An unresolved count is not a count of broken entities. **Unresolved in affected
-sources** counts expressions and selectors in the configurations reached by this
-analysis. Their targets are unknown; some may be unrelated to the selected entity.
-For a dashboard, this can include other cards in that dashboard. The total across
-the entire snapshot is shown separately under **Coverage and limitations**. A zero
-local count does not establish complete coverage.
+An unresolved count is not a count of broken entities. Expand **Unresolved
+expressions** to review groups by source and reason. **In linked configurations**
+covers affected automation/script configurations and linked dashboard cards.
+**Elsewhere in linked dashboards** retains expressions outside those cards or at
+dashboard level without attributing them to this entity. Their targets remain
+unknown. The total across the snapshot is under **Coverage and limitations**;
+a zero local count does not establish complete coverage.
+
+Friendly names and readable locations make the result easier to scan. Locations
+use one-based numbers (for example, Card 3). Expand **Configuration paths** for
+the exact zero-based path (`cards[2]`), or use **Raw references** and the exports.
 
 ## Troubleshooting
 
@@ -73,7 +78,7 @@ local count does not establish complete coverage.
 | Old UI or missing sidebar icon | Restart HA after updating, then reload the browser or reopen the app |
 | Analysis fails | Reload the integration and retry; record versions and a synthetic reproduction |
 | Expected reference absent | Expand coverage warnings; unloaded YAML, blueprint bodies and several source types are outside coverage |
-| Unresolved entries seem unrelated | The main count covers affected configurations, including their other branches/cards; the global total is in coverage details |
+| Many unresolved entries | Expand the reason groups; runtime variables, patterns and selectors need more context. Other dashboard cards are listed separately, not attributed to this entity |
 | Empty result | Check spelling and coverage; no detected reference is not proof removal is safe |
 
 ## Removal

@@ -24,6 +24,8 @@ export interface Report {
   snapshot_at: string;
   references: Reference[];
   uncertain_references: Reference[];
+  other_dashboard_references?: Reference[];
+  source_names?: Record<string, string>;
   unresolved_total: number;
   graph: {
     nodes: GraphNode[];

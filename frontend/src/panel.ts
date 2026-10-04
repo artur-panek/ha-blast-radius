@@ -1,6 +1,7 @@
 import { LitElement, html, nothing } from "lit";
 import { styles } from "./styles";
 import { brandMark } from "./brand";
+import { readablePath, explainReason } from "./presentation";
 import { version } from "../package.json";
 import type { Confidence, Entity, Hass, Reference, Report } from "./types";
 
@@ -139,7 +140,31 @@ export class BlastRadiusPanel extends LitElement {
     return html`<span class="badge ${confidence}">${labels[confidence]}</span>`;
   }
 
-  private references(refs: Reference[]) {
+  private tabKeydown(event: KeyboardEvent) {
+    const tabs = ["impact", "graph", "raw"] as const;
+    let index = tabs.indexOf(this.tab);
+    if (event.key === "ArrowRight") index = (index + 1) % tabs.length;
+    else if (event.key === "ArrowLeft")
+      index = (index + tabs.length - 1) % tabs.length;
+    else if (event.key === "Home") index = 0;
+    else if (event.key === "End") index = tabs.length - 1;
+    else return;
+    event.preventDefault();
+    this.tab = tabs[index];
+    this.renderRoot
+      .querySelector<HTMLButtonElement>(`#tab-${this.tab}`)
+      ?.focus();
+  }
+
+  private sourceName(id: string) {
+    return (
+      this.report?.source_names?.[id] ||
+      this.entities.find((entity) => entity.entity_id === id)?.name ||
+      id
+    );
+  }
+
+  private references(refs: Reference[], unresolved = false) {
     const groups = new Map<string, Reference[]>();
     refs.forEach((ref) =>
       groups.set(ref.source_id, [...(groups.get(ref.source_id) || []), ref]),
@@ -148,17 +173,100 @@ export class BlastRadiusPanel extends LitElement {
       ([source, references]) =>
         html`<div class="reference">
           <div class="reference-title">
-            <code>${source}</code
-            ><span class="badge">${references[0].source_type}</span>
+            <div>
+              <h3>${this.sourceName(source)}</h3>
+              <code>${source}</code>
+            </div>
+            <span class="badge"
+              >${references[0].source_type} · ${references.length}</span
+            >
           </div>
-          ${references.map((ref) => html`<div class="path"><code>${ref.path}</code>${this.badge(ref.confidence)}</div>`)}
+          ${
+            unresolved
+              ? this.unresolvedGroups(references)
+              : html` ${references.map((ref) => html`<div class="path"><span>${readablePath(ref.path)}</span>${this.badge(ref.confidence)}</div>`)}
+                  <details class="technical">
+                    <summary>
+                      Configuration paths (${references.length})
+                    </summary>
+                    ${references.map((ref) => html`<div class="technical-row"><code>${ref.path}</code>${this.badge(ref.confidence)}</div>`)}
+                  </details>`
+          }
         </div>`,
     );
   }
 
+  private unresolvedGroups(refs: Reference[]) {
+    const groups = new Map<string, Reference[]>();
+    for (const ref of refs) {
+      const reason = ref.reason || "Runtime expression";
+      groups.set(reason, [...(groups.get(reason) || []), ref]);
+    }
+    return [...groups].map(
+      ([reason, references]) =>
+        html` <details class="reason-group">
+          <summary>
+            ${reason} <span class="count">${references.length}</span>
+          </summary>
+          <p>${explainReason(reason)}</p>
+          ${references.map((ref) => html`<div class="unresolved-row"><span>${readablePath(ref.path)}</span><code>${ref.path}</code>${this.badge(ref.confidence)}</div>`)}
+        </details>`,
+    );
+  }
+
+  private uncertainty(report: Report) {
+    const local = report.uncertain_references;
+    const elsewhere = report.other_dashboard_references || [];
+    if (!local.length && !elsewhere.length) return nothing;
+    return html`<section
+      class="uncertainty"
+      aria-label="Unresolved expressions"
+    >
+      <h2>Unresolved expressions</h2>
+      <p>
+        These are limits of static analysis, not a count of broken entities.
+        Dynamic targets may still be relevant to this entity.
+      </p>
+      ${
+        local.length
+          ? html`<details class="uncertainty-scope">
+              <summary>
+                In linked configurations
+                <span class="count">${local.length}</span>
+              </summary>
+              <p>
+                Expressions in linked automation/script configurations or
+                dashboard cards. Their targets are unknown; a shared
+                configuration does not prove a dependency.
+              </p>
+              ${this.references(local, true)}
+            </details>`
+          : html`<p class="muted">
+              No unresolved expressions in the linked configurations or cards.
+            </p>`
+      }
+      ${
+        elsewhere.length
+          ? html`<details class="uncertainty-scope dashboard-context">
+              <summary>
+                Elsewhere in linked dashboards
+                <span class="count">${elsewhere.length}</span>
+              </summary>
+              <p>
+                Outside cards with known links, or at dashboard level. Kept for
+                context; these expressions are not attributed to the selected
+                entity.
+              </p>
+              ${this.references(elsewhere, true)}
+            </details>`
+          : nothing
+      }
+    </section>`;
+  }
+
   private impact(report: Report) {
     return html`<h2>
-        Direct references
+        Where this entity is used
         <span class="badge">${report.summary.sources} sources</span>
       </h2>
       ${
@@ -173,18 +281,7 @@ export class BlastRadiusPanel extends LitElement {
               </p>
             </div>`
       }
-      ${
-        report.uncertain_references.length
-          ? html`<div class="notice">
-              <strong>Unresolved references in affected configurations</strong>
-              <p>
-                These expressions occur in affected configurations. Their
-                targets are unknown; some may be unrelated to this entity.
-              </p>
-              ${this.references(report.uncertain_references)}
-            </div>`
-          : nothing
-      }
+      ${this.uncertainty(report)}
       <details>
         <summary>How to read confidence</summary>
         <ul>
@@ -221,19 +318,25 @@ export class BlastRadiusPanel extends LitElement {
               class=${node.relationship}
               style=${`margin-left:${Math.min(node.depth, 4) * 14}px`}
             >
+              <div class="node-title">
+                <strong>${this.sourceName(node.id)}</strong
+                ><span class="badge"
+                  >${node.relationship === "selected" ? "Selected" : node.relationship === "dependent" ? "Uses entity" : "Target"}
+                  · Depth ${node.depth}</span
+                >
+              </div>
               <code>${node.id}</code
               ><small
-                >${node.relationship === "selected" ? "Selected entity" : node.relationship === "dependent" ? `References ${node.via}` : `Action or membership target of ${node.via}`}
-                · depth ${node.depth}</small
+                >${node.relationship === "selected" ? "Starting point" : node.relationship === "dependent" ? `References ${this.sourceName(node.via!)}` : `Action or membership target of ${this.sourceName(node.via!)}`}</small
               >
-              ${node.path ? html`<small>${node.path}</small>` : nothing}${node.confidence ? this.badge(node.confidence) : nothing}
+              ${node.path ? html`<div class="node-path">${readablePath(node.path)}</div>` : nothing}${node.confidence ? this.badge(node.confidence) : nothing}
             </li>`,
         )}
       </ol>
       ${report.graph.cycles.length ? html`<div class="notice">Cycles detected. Nodes are shown once.${report.graph.cycles.map((cycle) => html`<p><code>${cycle.join(" → ")}</code></p>`)}</div>` : nothing}
       <details>
         <summary>All ${report.graph.edges.length} graph edges</summary>
-        ${report.graph.edges.map((edge) => html`<code>${edge.source_id} → ${edge.target} (${edge.role}, ${labels[edge.confidence]})<br />${edge.path}</code>`)}
+        ${report.graph.edges.map((edge) => html`<div class="edge"><strong>${this.sourceName(edge.source_id)} → ${this.sourceName(edge.target!)}</strong><code>${edge.source_id} → ${edge.target}</code><code>${edge.path}</code><span class="badge">${edge.role}</span> ${this.badge(edge.confidence)}</div>`)}
       </details>`;
   }
 
@@ -289,10 +392,9 @@ export class BlastRadiusPanel extends LitElement {
         >
       </header>
       <main>
-        <div class="eyebrow">Configuration impact analysis</div>
-        <h1>Check dependencies before you make a change.</h1>
+        <h1>Entity dependencies</h1>
         <p class="muted intro">
-          Inspect references. Follow dependencies. Preview the change.
+          Inspect references before renaming or removing an entity.
         </p>
         <form
           class="search"
@@ -351,12 +453,19 @@ export class BlastRadiusPanel extends LitElement {
         ${
           report
             ? html`
-                <h2><code>${report.entity_id}</code></h2>
+                <div class="result-heading">
+                  <h2>${this.sourceName(report.entity_id)}</h2>
+                  <code>${report.entity_id}</code>
+                </div>
                 ${!report.exists ? html`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>` : nothing}
                 <div class="stats">
                   <div class="stat">
                     <strong>${report.summary.references}</strong
                     ><span>Direct references</span>
+                  </div>
+                  <div class="stat">
+                    <strong>${report.summary.sources}</strong
+                    ><span>Linked configurations</span>
                   </div>
                   <div class="stat">
                     <strong>${report.summary.downstream}</strong
@@ -367,17 +476,17 @@ export class BlastRadiusPanel extends LitElement {
                       >${report.summary.template_literal + report.summary.unknown}</strong
                     ><span>References to review</span>
                   </div>
-                  <div class="stat">
-                    <strong>${report.uncertain_references.length}</strong
-                    ><span>Unresolved in affected sources</span>
-                  </div>
                 </div>
                 <div class="columns">
                   <section class="card">
                     <nav role="tablist" aria-label="Analysis views">
-                      ${(["impact", "graph", "raw"] as const).map((tab) => html`<button role="tab" aria-selected=${this.tab === tab} @click=${() => (this.tab = tab)}>${tab === "impact" ? "Impact" : tab === "graph" ? "Graph" : "Raw references"}</button>`)}
+                      ${(["impact", "graph", "raw"] as const).map((tab) => html`<button role="tab" id=${`tab-${tab}`} aria-controls="analysis-view" aria-selected=${this.tab === tab} tabindex=${this.tab === tab ? 0 : -1} @keydown=${this.tabKeydown} @click=${() => (this.tab = tab)}>${tab === "impact" ? "Impact" : tab === "graph" ? "Graph" : "Raw references"}</button>`)}
                     </nav>
-                    <div role="tabpanel">
+                    <div
+                      role="tabpanel"
+                      id="analysis-view"
+                      aria-labelledby=${`tab-${this.tab}`}
+                    >
                       ${this.tab === "impact" ? this.impact(report) : this.tab === "graph" ? this.graph(report) : this.raw(report)}
                     </div>
                     <div class="controls">
@@ -455,6 +564,13 @@ export class BlastRadiusPanel extends LitElement {
                       ${report.unresolved_total} unresolved references across
                       the full snapshot. Their targets are unknown; they cannot
                       be attributed to this entity.
+                    </li>
+                    <li>
+                      ${report.uncertain_references.length} unresolved
+                      expressions in linked configurations or cards;
+                      ${report.other_dashboard_references?.length || 0}
+                      elsewhere in linked dashboards. Counts refer to expression
+                      locations, not missing or broken entities.
                     </li>
                     <li>
                       Conditional branches are not evaluated. A reference does

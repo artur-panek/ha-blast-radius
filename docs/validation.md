@@ -1,5 +1,31 @@
 # Validation
 
+## v0.1.5
+
+Local validation on 2026-10-04: **111 Python tests passed**, with **97.07%** engine
+coverage; **13 Chromium tests passed**. Ruff lint/format, engine mypy, frontend
+formatting, TypeScript, the production build and package checks passed. Tested
+against Home Assistant Core 2026.9.4 / Python 3.14.7.
+
+New regression cases cover a synthetic dashboard with 51 unresolved expressions:
+one remains in the linked card and 50 are retained separately as dashboard context.
+Nested sibling cards, parent wrappers, dashboard-level expressions, previews and
+exports are checked. Simple local template bindings avoid false uncertainty while
+runtime lookups, external variables, imports, unknown filters/tests and broad state
+collections remain visible. A guard test rejects template compilation/rendering or
+filter execution during analysis.
+
+Browser tests verify collapsed groups with 51 entries, their explanations and exact
+paths, one-based readable locations, keyboard tabs, mobile overflow and contrast of
+confidence labels, secondary labels and the Analyze button (**at least 4.5:1**) in
+the three tested themes. A custom dark theme deliberately supplies low-contrast
+secondary/semantic colors. This is scoped verification, not whole-panel accessibility
+certification or a claim about every HA theme. Light, dark and mobile layouts were
+visually reviewed; screenshots and test reports use synthetic data only.
+
+The 24-file local installation ZIP has SHA-256:
+`9036ef291ec567b3eba2fe49f6a26922023e922f9870983f3a577f191d2c982a`.
+
 ## v0.1.4
 
 Local validation on 2026-10-04: 90 Python tests passed, with 97.65% engine coverage;

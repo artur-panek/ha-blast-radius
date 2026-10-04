@@ -13,9 +13,19 @@ export const styles = css`
       Arial,
       sans-serif
     );
-    --br-border: var(--divider-color, #dedede);
+    font-size: 15px;
+    line-height: 1.55;
     --br-card: var(--card-background-color, #fff);
-    --br-muted: var(--secondary-text-color, #616161);
+    --br-border: color-mix(
+      in srgb,
+      var(--primary-text-color, #212121) 22%,
+      var(--br-card)
+    );
+    --br-muted: color-mix(
+      in srgb,
+      var(--primary-text-color, #212121) 82%,
+      var(--br-card)
+    );
     --br-accent: var(--primary-color, #03a9f4);
   }
   * {
@@ -68,13 +78,6 @@ export const styles = css`
     margin: auto;
     padding: 30px 32px 50px;
   }
-  .eyebrow {
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--br-muted);
-  }
   h1 {
     font-size: 28px;
     font-weight: 500;
@@ -88,7 +91,7 @@ export const styles = css`
     margin: 0 0 16px;
   }
   h3 {
-    font-size: 15px;
+    font-size: 16px;
     margin: 0 0 8px;
   }
   p {
@@ -104,14 +107,14 @@ export const styles = css`
     display: flex;
     align-items: end;
     gap: 12px;
-    margin: 24px 0;
+    margin: 20px 0;
   }
   .search label {
     flex: 1;
   }
   label {
     display: block;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
   }
   input,
@@ -140,8 +143,8 @@ export const styles = css`
     font-weight: 500;
   }
   button.primary {
-    background: var(--br-accent);
-    color: var(--text-primary-color, #fff);
+    background: color-mix(in srgb, var(--br-card) 85%, var(--br-accent));
+    color: var(--primary-text-color, #212121);
     border-color: var(--br-accent);
   }
   button:disabled {
@@ -157,7 +160,7 @@ export const styles = css`
   }
   code {
     font:
-      12px/1.55 ui-monospace,
+      13px/1.65 ui-monospace,
       SFMono-Regular,
       Consolas,
       monospace;
@@ -165,7 +168,7 @@ export const styles = css`
   }
   .badge {
     display: inline-block;
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.25px;
     border: 1px solid var(--br-border);
     border-radius: 5px;
@@ -221,7 +224,7 @@ export const styles = css`
   .stat {
     border: 1px solid var(--br-border);
     border-radius: 10px;
-    padding: 18px;
+    padding: 16px;
     background: var(--br-card);
   }
   .stat strong {
@@ -231,7 +234,7 @@ export const styles = css`
     margin-bottom: 5px;
   }
   .stat span {
-    font-size: 12px;
+    font-size: 14px;
     color: var(--br-muted);
   }
   .columns {
@@ -258,15 +261,15 @@ export const styles = css`
     border-bottom: 3px solid transparent;
     border-radius: 0;
     background: transparent;
-    font-size: 13px;
+    font-size: 15px;
     padding: 14px;
   }
   nav button[aria-selected="true"] {
-    color: var(--br-accent);
+    color: var(--primary-text-color, #212121);
     border-bottom-color: var(--br-accent);
   }
   .reference {
-    padding: 14px 0;
+    padding: 20px 0;
     border-top: 1px solid var(--br-border);
   }
   .reference:first-of-type {
@@ -280,17 +283,21 @@ export const styles = css`
   }
   .reference-title code {
     font-size: 13px;
-    font-weight: 600;
+    color: var(--br-muted);
+  }
+  .reference-title h3 {
+    margin-bottom: 2px;
   }
   .path {
     display: flex;
     gap: 8px;
     align-items: center;
-    padding: 8px 0 0;
+    padding: 12px 0 0;
   }
-  .path code {
+  .path > span:first-child {
     flex: 1;
-    color: var(--br-muted);
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
   .notice {
     border-left: 3px solid var(--warning-color, #9b6600);
@@ -322,8 +329,8 @@ export const styles = css`
   }
   .tree li {
     border-left: 2px solid var(--br-border);
-    padding: 12px 14px;
-    margin: 6px 0;
+    padding: 16px;
+    margin: 12px 0;
   }
   .tree .selected {
     border-color: var(--br-accent);
@@ -335,6 +342,7 @@ export const styles = css`
     line-height: 1.5;
     color: var(--br-muted);
     overflow-wrap: anywhere;
+    font-size: 14px;
   }
   .tree code {
     font-size: 13px;
@@ -349,7 +357,7 @@ export const styles = css`
     margin-top: 18px;
   }
   .controls button {
-    font-size: 12px;
+    font-size: 13px;
   }
   aside label {
     margin: 18px 0;
@@ -359,7 +367,7 @@ export const styles = css`
     margin-top: 10px;
   }
   aside p {
-    font-size: 13px;
+    font-size: 14px;
   }
   .preview {
     margin-top: 20px;
@@ -377,18 +385,19 @@ export const styles = css`
   }
   details {
     margin: 16px 0 0;
-    font-size: 13px;
+    font-size: 14px;
   }
   summary {
     cursor: pointer;
     line-height: 1.5;
+    padding: 10px 0;
   }
   details ul {
     padding-left: 20px;
     line-height: 1.6;
     color: var(--br-muted);
   }
-  details code {
+  .edge code {
     display: block;
     margin: 8px 0;
   }
@@ -396,7 +405,7 @@ export const styles = css`
     display: flex;
     gap: 14px;
     justify-content: space-between;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--br-muted);
     margin-top: 20px;
     line-height: 1.6;
@@ -417,7 +426,7 @@ export const styles = css`
   table {
     border-collapse: collapse;
     width: 100%;
-    font-size: 12px;
+    font-size: 14px;
   }
   th,
   td {
@@ -431,6 +440,103 @@ export const styles = css`
   textarea {
     height: 200px;
     font-size: 12px;
+  }
+  .result-heading {
+    margin: 28px 0 16px;
+  }
+  .result-heading h2 {
+    margin-bottom: 3px;
+    font-size: 22px;
+  }
+  .result-heading code {
+    color: var(--br-muted);
+  }
+  .technical {
+    margin-top: 12px;
+    color: var(--br-muted);
+  }
+  .technical-row {
+    display: flex;
+    gap: 12px;
+    align-items: start;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-top: 1px solid var(--br-border);
+  }
+  .technical-row code {
+    min-width: 0;
+  }
+  .uncertainty {
+    border-top: 1px solid var(--br-border);
+    margin-top: 18px;
+    padding-top: 24px;
+  }
+  .uncertainty h2 {
+    margin-bottom: 8px;
+  }
+  .uncertainty p {
+    font-size: 14px;
+    color: var(--br-muted);
+    margin: 8px 0 14px;
+  }
+  .uncertainty-scope {
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    padding: 4px 14px;
+    margin-top: 12px;
+  }
+  .uncertainty-scope > summary {
+    font-weight: 600;
+  }
+  .count {
+    display: inline-block;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    border-radius: 5px;
+    padding: 1px 7px;
+    margin-left: 6px;
+    background: color-mix(
+      in srgb,
+      var(--primary-text-color, #212121) 9%,
+      var(--br-card)
+    );
+  }
+  .reason-group {
+    margin: 8px 0;
+  }
+  .unresolved-row {
+    display: grid;
+    gap: 8px;
+    justify-items: start;
+    padding: 14px 0;
+    border-top: 1px solid var(--br-border);
+    overflow-wrap: anywhere;
+  }
+  .unresolved-row code {
+    color: var(--br-muted);
+  }
+  .node-title {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 12px;
+    overflow-wrap: anywhere;
+  }
+  .node-title strong {
+    min-width: 0;
+  }
+  .node-title .badge {
+    margin: 0;
+  }
+  .node-path {
+    font-size: 14px;
+    margin-top: 8px;
+    overflow-wrap: anywhere;
+  }
+  .edge {
+    padding: 16px 0;
+    border-top: 1px solid var(--br-border);
+    overflow-wrap: anywhere;
   }
   @media (max-width: 850px) {
     .columns {
@@ -485,6 +591,11 @@ export const styles = css`
     }
     .reference-title {
       flex-wrap: wrap;
+    }
+    .technical-row,
+    .node-title {
+      flex-direction: column;
+      gap: 6px;
     }
     .foot {
       flex-direction: column;

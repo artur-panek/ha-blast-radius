@@ -11,7 +11,7 @@ Read-only dependency and impact analysis for Home Assistant. Find where an entit
 is referenced, follow structural dependencies, and preview a rename or removal
 before changing your configuration. Every result includes source paths and confidence.
 
-**v0.1.4 · Experimental alpha · Admin only · MIT**
+**v0.1.5 · Experimental alpha · Admin only · MIT**
 
 Requires Home Assistant **2026.9.4+**; tested against **2026.9.4**. Later releases
 need compatibility testing. This is a static configuration inspector, not a runtime
@@ -113,10 +113,26 @@ adjustable from 1 to 12. Graphs cap at 500 nodes and 2,000 edges; scans cap at
 Dynamic references have **no guessed target**. Plain constant templates and common
 value-only filters do not automatically count as unresolved dependencies. A templated
 action or target remains unresolved even if it contains readable literal IDs: its
-rendered destination is unknown. The main unresolved count covers only affected
-source configurations. The total across the snapshot appears under **Coverage and
-limitations**. Expressions in affected configurations can still be unrelated to
-the selected entity. Zero references is not a guarantee that removal is safe.
+rendered destination is unknown. Simple template-local assignments and value loops
+do not, by themselves, introduce unknown entity dependencies. Runtime variables,
+unknown helpers/filters/tests, imports and state collections remain unresolved.
+
+**Unresolved expressions** are grouped by source and reason, with two scopes:
+
+- **In linked configurations:** affected automation/script configurations and
+  dashboard cards with known reference links, including their parent/child cards.
+- **Elsewhere in linked dashboards:** expressions outside those cards or at
+  dashboard level. They remain visible and exported but are not attributed to the
+  selected entity. Custom card boundaries cannot always be inferred.
+
+The full-snapshot total remains under **Coverage and limitations**. These counts
+describe expression locations, not broken entities. Even expressions in a linked
+configuration may refer to something else. Zero references is not a guarantee that
+removal is safe. The main summary counts known references and linked configurations.
+
+The panel shows friendly names and readable, one-based locations such as
+**View 2 › Card 3**. Expand **Configuration paths** for exact zero-based paths;
+the raw-reference view and exports retain the original identifiers and paths.
 
 ## Known limitations
 

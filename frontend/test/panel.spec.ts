@@ -1,4 +1,18 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+async function screenshotPanel(page: Page, path: string) {
+  // The HA panel has its own scroll container. Expand it only for documentation
+  // capture so a full-page screenshot includes the report below the viewport.
+  await page.locator("blast-radius-panel").evaluate((panel: HTMLElement) => {
+    panel.scrollTop = 0;
+    panel.style.height = "auto";
+  });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path, fullPage: true });
+  await page
+    .locator("blast-radius-panel")
+    .evaluate((panel: HTMLElement) => panel.style.removeProperty("height"));
+}
 
 function luminance(rgb: number[]) {
   const values = rgb.slice(0, 3).map((value) => {
@@ -23,10 +37,10 @@ test("inspect, traverse, preview rename and removal, export JSON", async ({
     .fill("binary_sensor.wall_button");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
   await expect(
-    page.getByText("triggers[0].entity_id", { exact: true }),
+    page.getByText("Trigger 1 › Entity ID", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByText("Unresolved references in affected configurations", {
+    page.getByText("Unresolved expressions", {
       exact: true,
     }),
   ).toBeVisible();
@@ -76,7 +90,7 @@ test("dark mobile layout has no horizontal overflow", async ({ page }) => {
   await search.fill("binary_sensor.wall_button");
   await search.press("Enter");
   await expect(
-    page.getByText("triggers[0].entity_id", { exact: true }),
+    page.getByText("Trigger 1 › Entity ID", { exact: true }),
   ).toBeVisible();
   expect(
     await page
@@ -89,10 +103,7 @@ test("dark mobile layout has no horizontal overflow", async ({ page }) => {
       .first()
       .evaluate((el) => getComputedStyle(el).backgroundColor),
   ).toBe("rgb(28, 28, 28)");
-  await page.screenshot({
-    path: "../docs/panel-mobile-dark.png",
-    fullPage: true,
-  });
+  await screenshotPanel(page, "../docs/panel-mobile-dark.png");
 });
 
 test("desktop screenshots and depth change", async ({ page }) => {
@@ -101,12 +112,12 @@ test("desktop screenshots and depth change", async ({ page }) => {
   await search.fill("binary_sensor.wall_button");
   await search.press("Enter");
   await expect(
-    page.getByText("triggers[0].entity_id", { exact: true }),
+    page.getByText("Trigger 1 › Entity ID", { exact: true }),
   ).toBeVisible();
-  await page.screenshot({ path: "../docs/panel-light.png", fullPage: true });
+  await screenshotPanel(page, "../docs/panel-light.png");
   await page.getByRole("button", { name: "Toggle theme" }).click();
   await page.getByRole("tab", { name: "Graph", exact: true }).click();
-  await page.screenshot({ path: "../docs/panel-dark.png", fullPage: true });
+  await screenshotPanel(page, "../docs/panel-dark.png");
   await page.getByLabel("Traversal depth").selectOption("1");
   await expect(
     page.locator(".tree").getByText("media_player.tablet", { exact: true }),
@@ -172,10 +183,16 @@ for (const related of [0, 1]) {
         unresolved_total: 170,
       };
     }, related);
-    const stat = page
-      .locator(".stat")
-      .filter({ hasText: "Unresolved in affected sources" });
-    await expect(stat.locator("strong")).toHaveText(String(related));
+    const scope = page
+      .locator(".uncertainty-scope")
+      .filter({ hasText: "In linked configurations" });
+    if (related) {
+      await expect(scope.locator("summary .count").first()).toHaveText(
+        String(related),
+      );
+      await expect(scope).not.toHaveAttribute("open", "");
+    } else await expect(scope).toHaveCount(0);
+    await expect(page.locator(".stats")).not.toContainText("Unresolved");
     await expect(page.locator(".stats")).not.toContainText("170");
     await page.getByText("Coverage and limitations", { exact: false }).click();
     await expect(
@@ -208,6 +225,8 @@ for (const theme of ["light", "dark", "custom-dark"]) {
         if (currentTheme === "custom-dark") {
           panel.style.setProperty("--card-background-color", "#24252e");
           panel.style.setProperty("--primary-text-color", "#e8e8ed");
+          panel.style.setProperty("--secondary-text-color", "#55565d");
+          panel.style.setProperty("--primary-color", "#ee9800");
         }
       }, theme);
     await page
@@ -226,13 +245,18 @@ for (const theme of ["light", "dark", "custom-dark"]) {
         ],
       };
     });
-    for (const confidence of [
-      "explicit",
-      "template_literal",
-      "dynamic",
-      "unknown",
+    await page.locator(".uncertainty-scope > summary").first().click();
+    await page.locator(".reason-group > summary").first().click();
+    for (const selector of [
+      ".badge.explicit",
+      ".badge.template_literal",
+      ".badge.dynamic",
+      ".badge.unknown",
+      ".reference-title code",
+      ".stat span",
+      "button.primary",
     ]) {
-      const badge = page.locator(`.badge.${confidence}`).first();
+      const badge = page.locator(selector).first();
       await expect(badge).toBeVisible();
       const colors = await badge.evaluate((element) => {
         const context = document.createElement("canvas").getContext("2d")!;
@@ -243,9 +267,13 @@ for (const theme of ["light", "dark", "custom-dark"]) {
           return Array.from(context.getImageData(0, 0, 1, 1).data);
         };
         const style = getComputedStyle(element);
+        const background =
+          style.backgroundColor === "rgba(0, 0, 0, 0)"
+            ? getComputedStyle(element.closest(".card, .stat")!).backgroundColor
+            : style.backgroundColor;
         return {
           text: rgb(style.color),
-          background: rgb(style.backgroundColor),
+          background: rgb(background),
         };
       });
       expect(colors.background[3]).toBe(255);
@@ -259,3 +287,118 @@ for (const theme of ["light", "dark", "custom-dark"]) {
     }
   });
 }
+
+test("a large dashboard stays compact, explains unknowns and retains exact paths", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1360, height: 1000 });
+  await page.getByRole("button", { name: "Toggle theme" }).click();
+  await page
+    .getByRole("combobox", { name: "Entity", exact: true })
+    .fill("binary_sensor.wall_button");
+  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    panel.style.setProperty("--card-background-color", "#24252e");
+    panel.style.setProperty("--primary-text-color", "#e8e8ed");
+    panel.style.setProperty("--secondary-text-color", "#55565d");
+    panel.style.setProperty("--primary-color", "#ee9800");
+    panel.report = {
+      ...panel.report,
+      other_dashboard_references: Array.from({ length: 51 }, (_, index) => ({
+        source_id: "dashboard.home",
+        source_type: "dashboard",
+        target: null,
+        path: `views[1].sections[0].cards[${index}].secondary`,
+        confidence: "dynamic",
+        role: "display",
+        reason: "External template variable",
+      })),
+      unresolved_total: 170,
+    };
+  });
+  const elsewhere = page.locator(".dashboard-context");
+  await expect(elsewhere.locator("summary .count").first()).toHaveText("51");
+  await expect(elsewhere).not.toHaveAttribute("open", "");
+  await expect(page.locator(".stats")).not.toContainText("51");
+  await expect(
+    page.getByText("These are limits of static analysis", { exact: false }),
+  ).toBeVisible();
+  expect((await elsewhere.boundingBox())!.height).toBeLessThan(80);
+  await expect(page.getByText("Wall button", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("triggers[0].entity_id", { exact: true }),
+  ).not.toBeVisible();
+  await page.locator(".technical > summary").first().click();
+  await expect(
+    page.getByText("triggers[0].entity_id", { exact: true }),
+  ).toBeVisible();
+  await page.locator(".technical > summary").first().click();
+  await screenshotPanel(page, "/tmp/blast-radius-review-desktop.png");
+  await elsewhere.locator(":scope > summary").click();
+  await elsewhere.locator(".reason-group > summary").click();
+  await expect(elsewhere.locator(".unresolved-row")).toHaveCount(51);
+  await expect(
+    elsewhere.getByText("views[1].sections[0].cards[50].secondary", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    elsewhere.getByText("A variable comes from runtime context", {
+      exact: false,
+    }),
+  ).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await page
+      .locator("blast-radius-panel")
+      .evaluate((el) => el.scrollWidth <= el.clientWidth),
+  ).toBe(true);
+  await elsewhere.locator(":scope > summary").click();
+  await screenshotPanel(page, "/tmp/blast-radius-review-mobile.png");
+});
+
+test("analysis tabs support keyboard navigation and readable configuration locations", async ({
+  page,
+}) => {
+  await page
+    .getByRole("combobox", { name: "Entity", exact: true })
+    .fill("binary_sensor.wall_button");
+  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  const impact = page.getByRole("tab", { name: "Impact", exact: true });
+  await impact.focus();
+  await impact.press("ArrowRight");
+  await expect(
+    page.getByRole("tab", { name: "Graph", exact: true }),
+  ).toBeFocused();
+  await expect(page.getByRole("tabpanel")).toHaveAttribute(
+    "aria-labelledby",
+    "tab-graph",
+  );
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await page
+      .locator("blast-radius-panel")
+      .evaluate((el) => el.scrollWidth <= el.clientWidth),
+  ).toBe(true);
+  await page.keyboard.press("End");
+  await expect(
+    page.getByRole("tab", { name: "Raw references", exact: true }),
+  ).toBeFocused();
+  await expect(
+    page
+      .getByRole("tabpanel")
+      .getByText("triggers[0].entity_id", { exact: false }),
+  ).toBeVisible();
+  await page.keyboard.press("Home");
+  await expect(impact).toBeFocused();
+  await expect(
+    page.getByText("Trigger 1 › Entity ID", { exact: true }),
+  ).toBeVisible();
+  expect(
+    await page
+      .locator(".path > span")
+      .first()
+      .evaluate((el) => parseFloat(getComputedStyle(el).fontSize)),
+  ).toBeGreaterThanOrEqual(14);
+});

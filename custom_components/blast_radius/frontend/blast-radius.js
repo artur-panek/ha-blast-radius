@@ -254,34 +254,34 @@ var v = class extends HTMLElement {
 v.elementStyles = [], v.shadowRootOptions = { mode: "open" }, v[m("elementProperties")] = /* @__PURE__ */ new Map(), v[m("finalized")] = /* @__PURE__ */ new Map(), ie?.({ ReactiveElement: v }), (f.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var y = globalThis, b = (e) => e, x = y.trustedTypes, S = x ? x.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, C = "$lit$", w = `lit$${Math.random().toFixed(9).slice(2)}$`, T = "?" + w, ae = `<${T}>`, E = document, D = () => E.createComment(""), O = (e) => e === null || typeof e != "object" && typeof e != "function", k = Array.isArray, oe = (e) => k(e) || typeof e?.[Symbol.iterator] == "function", A = "[ 	\n\f\r]", j = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, M = /-->/g, N = />/g, P = RegExp(`>|${A}(?:([^\\s"'>=/]+)(${A}*=${A}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), F = /'/g, I = /"/g, L = /^(?:script|style|textarea|title)$/i, R = (e) => (t, ...n) => ({
+var y = globalThis, b = (e) => e, x = y.trustedTypes, S = x ? x.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, C = "$lit$", w = `lit$${Math.random().toFixed(9).slice(2)}$`, T = "?" + w, ae = `<${T}>`, E = document, D = () => E.createComment(""), O = (e) => e === null || typeof e != "object" && typeof e != "function", k = Array.isArray, oe = (e) => k(e) || typeof e?.[Symbol.iterator] == "function", A = "[ 	\n\f\r]", j = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, se = /-->/g, M = />/g, N = RegExp(`>|${A}(?:([^\\s"'>=/]+)(${A}*=${A}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), P = /'/g, F = /"/g, I = /^(?:script|style|textarea|title)$/i, L = (e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
-}), z = R(1), se = R(2), B = Symbol.for("lit-noChange"), V = Symbol.for("lit-nothing"), H = /* @__PURE__ */ new WeakMap(), U = E.createTreeWalker(E, 129);
-function W(e, t) {
+}), R = L(1), ce = L(2), z = Symbol.for("lit-noChange"), B = Symbol.for("lit-nothing"), V = /* @__PURE__ */ new WeakMap(), H = E.createTreeWalker(E, 129);
+function U(e, t) {
 	if (!k(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
 	return S === void 0 ? t : S.createHTML(t);
 }
-var ce = (e, t) => {
+var le = (e, t) => {
 	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = j;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
-		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === j ? c[1] === "!--" ? o = M : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = P) : (L.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = P) : o = N : o === P ? c[0] === ">" ? (o = i ?? j, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? P : c[3] === "\"" ? I : F) : o === I || o === F ? o = P : o === M || o === N ? o = j : (o = P, i = void 0);
-		let d = o === P && e[t + 1].startsWith("/>") ? " " : "";
+		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === j ? c[1] === "!--" ? o = se : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = N) : (I.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = N) : o = M : o === N ? c[0] === ">" ? (o = i ?? j, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? N : c[3] === "\"" ? F : P) : o === F || o === P ? o = N : o === se || o === M ? o = j : (o = N, i = void 0);
+		let d = o === N && e[t + 1].startsWith("/>") ? " " : "";
 		a += o === j ? n + ae : l >= 0 ? (r.push(s), n.slice(0, l) + C + n.slice(l) + w + d) : n + w + (l === -2 ? t : d);
 	}
-	return [W(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, G = class e {
+	return [U(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
+}, W = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
-		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = ce(t, n);
-		if (this.el = e.createElement(l, r), U.currentNode = this.el.content, n === 2 || n === 3) {
+		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = le(t, n);
+		if (this.el = e.createElement(l, r), H.currentNode = this.el.content, n === 2 || n === 3) {
 			let e = this.el.content.firstChild;
 			e.replaceWith(...e.childNodes);
 		}
-		for (; (i = U.nextNode()) !== null && c.length < s;) {
+		for (; (i = H.nextNode()) !== null && c.length < s;) {
 			if (i.nodeType === 1) {
 				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(C)) {
 					let t = u[o++], n = i.getAttribute(e).split(w), r = /([.?@])?(.*)/.exec(t);
@@ -290,17 +290,17 @@ var ce = (e, t) => {
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? ue : r[1] === "?" ? de : r[1] === "@" ? fe : J
+						ctor: r[1] === "." ? de : r[1] === "?" ? fe : r[1] === "@" ? pe : q
 					}), i.removeAttribute(e);
 				} else e.startsWith(w) && (c.push({
 					type: 6,
 					index: a
 				}), i.removeAttribute(e));
-				if (L.test(i.tagName)) {
+				if (I.test(i.tagName)) {
 					let e = i.textContent.split(w), t = e.length - 1;
 					if (t > 0) {
 						i.textContent = x ? x.emptyScript : "";
-						for (let n = 0; n < t; n++) i.append(e[n], D()), U.nextNode(), c.push({
+						for (let n = 0; n < t; n++) i.append(e[n], D()), H.nextNode(), c.push({
 							type: 2,
 							index: ++a
 						});
@@ -328,12 +328,12 @@ var ce = (e, t) => {
 		return n.innerHTML = e, n;
 	}
 };
-function K(e, t, n = e, r) {
-	if (t === B) return t;
+function G(e, t, n = e, r) {
+	if (t === z) return t;
 	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = O(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = K(e, i._$AS(e, t.values), i, r)), t;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = G(e, i._$AS(e, t.values), i, r)), t;
 }
-var le = class {
+var ue = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -345,27 +345,27 @@ var le = class {
 	}
 	u(e) {
 		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? E).importNode(t, !0);
-		U.currentNode = r;
-		let i = U.nextNode(), a = 0, o = 0, s = n[0];
+		H.currentNode = r;
+		let i = H.nextNode(), a = 0, o = 0, s = n[0];
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new q(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new pe(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new K(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new me(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
-			a !== s?.index && (i = U.nextNode(), a++);
+			a !== s?.index && (i = H.nextNode(), a++);
 		}
-		return U.currentNode = E, r;
+		return H.currentNode = E, r;
 	}
 	p(e) {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, q = class e {
+}, K = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
 	constructor(e, t, n, r) {
-		this.type = 2, this._$AH = V, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
+		this.type = 2, this._$AH = B, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
 	}
 	get parentNode() {
 		let e = this._$AA.parentNode, t = this._$AM;
@@ -378,7 +378,7 @@ var le = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = K(this, e, t), O(e) ? e === V || e == null || e === "" ? (this._$AH !== V && this._$AR(), this._$AH = V) : e !== this._$AH && e !== B && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? oe(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = G(this, e, t), O(e) ? e === B || e == null || e === "" ? (this._$AH !== B && this._$AR(), this._$AH = B) : e !== this._$AH && e !== z && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? oe(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -387,19 +387,19 @@ var le = class {
 		this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
 	}
 	_(e) {
-		this._$AH !== V && O(this._$AH) ? this._$AA.nextSibling.data = e : this.T(E.createTextNode(e)), this._$AH = e;
+		this._$AH !== B && O(this._$AH) ? this._$AA.nextSibling.data = e : this.T(E.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = G.createElement(W(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = W.createElement(U(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new le(r, this), n = e.u(this.options);
+			let e = new ue(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
-		let t = H.get(e.strings);
-		return t === void 0 && H.set(e.strings, t = new G(e)), t;
+		let t = V.get(e.strings);
+		return t === void 0 && V.set(e.strings, t = new W(e)), t;
 	}
 	k(t) {
 		k(this._$AH) || (this._$AH = [], this._$AR());
@@ -416,7 +416,7 @@ var le = class {
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, J = class {
+}, q = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -424,47 +424,47 @@ var le = class {
 		return this._$AM._$AU;
 	}
 	constructor(e, t, n, r, i) {
-		this.type = 1, this._$AH = V, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = V;
+		this.type = 1, this._$AH = B, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = B;
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = K(this, e, t, 0), a = !O(e) || e !== this._$AH && e !== B, a && (this._$AH = e);
+		if (i === void 0) e = G(this, e, t, 0), a = !O(e) || e !== this._$AH && e !== z, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = K(this, r[n + o], t, o), s === B && (s = this._$AH[o]), a ||= !O(s) || s !== this._$AH[o], s === V ? e = V : e !== V && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = G(this, r[n + o], t, o), s === z && (s = this._$AH[o]), a ||= !O(s) || s !== this._$AH[o], s === B ? e = B : e !== B && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
-		e === V ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
+		e === B ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, ue = class extends J {
+}, de = class extends q {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
-		this.element[this.name] = e === V ? void 0 : e;
+		this.element[this.name] = e === B ? void 0 : e;
 	}
-}, de = class extends J {
+}, fe = class extends q {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
-		this.element.toggleAttribute(this.name, !!e && e !== V);
+		this.element.toggleAttribute(this.name, !!e && e !== B);
 	}
-}, fe = class extends J {
+}, pe = class extends q {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = K(this, e, t, 0) ?? V) === B) return;
-		let n = this._$AH, r = e === V && n !== V || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== V && (n === V || r);
+		if ((e = G(this, e, t, 0) ?? B) === z) return;
+		let n = this._$AH, r = e === B && n !== B || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== B && (n === B || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, pe = class {
+}, me = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -472,18 +472,18 @@ var le = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		K(this, e);
+		G(this, e);
 	}
-}, me = y.litHtmlPolyfillSupport;
-me?.(G, q), (y.litHtmlVersions ??= []).push("3.3.3");
-var he = (e, t, n) => {
+}, he = y.litHtmlPolyfillSupport;
+he?.(W, K), (y.litHtmlVersions ??= []).push("3.3.3");
+var ge = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new q(t.insertBefore(D(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new K(t.insertBefore(D(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, Y = globalThis, X = class extends v {
+}, J = globalThis, Y = class extends v {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -493,7 +493,7 @@ var he = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = he(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = ge(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -502,15 +502,15 @@ var he = (e, t, n) => {
 		super.disconnectedCallback(), this._$Do?.setConnected(!1);
 	}
 	render() {
-		return B;
+		return z;
 	}
 };
-X._$litElement$ = !0, X.finalized = !0, Y.litElementHydrateSupport?.({ LitElement: X });
-var ge = Y.litElementPolyfillSupport;
-ge?.({ LitElement: X }), (Y.litElementVersions ??= []).push("4.2.2");
+Y._$litElement$ = !0, Y.finalized = !0, J.litElementHydrateSupport?.({ LitElement: Y });
+var _e = J.litElementPolyfillSupport;
+_e?.({ LitElement: Y }), (J.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region src/styles.ts
-var _e = o`
+var ve = o`
   :host {
     display: block;
     height: 100%;
@@ -523,9 +523,19 @@ var _e = o`
       Arial,
       sans-serif
     );
-    --br-border: var(--divider-color, #dedede);
+    font-size: 15px;
+    line-height: 1.55;
     --br-card: var(--card-background-color, #fff);
-    --br-muted: var(--secondary-text-color, #616161);
+    --br-border: color-mix(
+      in srgb,
+      var(--primary-text-color, #212121) 22%,
+      var(--br-card)
+    );
+    --br-muted: color-mix(
+      in srgb,
+      var(--primary-text-color, #212121) 82%,
+      var(--br-card)
+    );
     --br-accent: var(--primary-color, #03a9f4);
   }
   * {
@@ -578,13 +588,6 @@ var _e = o`
     margin: auto;
     padding: 30px 32px 50px;
   }
-  .eyebrow {
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--br-muted);
-  }
   h1 {
     font-size: 28px;
     font-weight: 500;
@@ -598,7 +601,7 @@ var _e = o`
     margin: 0 0 16px;
   }
   h3 {
-    font-size: 15px;
+    font-size: 16px;
     margin: 0 0 8px;
   }
   p {
@@ -614,14 +617,14 @@ var _e = o`
     display: flex;
     align-items: end;
     gap: 12px;
-    margin: 24px 0;
+    margin: 20px 0;
   }
   .search label {
     flex: 1;
   }
   label {
     display: block;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
   }
   input,
@@ -650,8 +653,8 @@ var _e = o`
     font-weight: 500;
   }
   button.primary {
-    background: var(--br-accent);
-    color: var(--text-primary-color, #fff);
+    background: color-mix(in srgb, var(--br-card) 85%, var(--br-accent));
+    color: var(--primary-text-color, #212121);
     border-color: var(--br-accent);
   }
   button:disabled {
@@ -667,7 +670,7 @@ var _e = o`
   }
   code {
     font:
-      12px/1.55 ui-monospace,
+      13px/1.65 ui-monospace,
       SFMono-Regular,
       Consolas,
       monospace;
@@ -675,7 +678,7 @@ var _e = o`
   }
   .badge {
     display: inline-block;
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.25px;
     border: 1px solid var(--br-border);
     border-radius: 5px;
@@ -731,7 +734,7 @@ var _e = o`
   .stat {
     border: 1px solid var(--br-border);
     border-radius: 10px;
-    padding: 18px;
+    padding: 16px;
     background: var(--br-card);
   }
   .stat strong {
@@ -741,7 +744,7 @@ var _e = o`
     margin-bottom: 5px;
   }
   .stat span {
-    font-size: 12px;
+    font-size: 14px;
     color: var(--br-muted);
   }
   .columns {
@@ -768,15 +771,15 @@ var _e = o`
     border-bottom: 3px solid transparent;
     border-radius: 0;
     background: transparent;
-    font-size: 13px;
+    font-size: 15px;
     padding: 14px;
   }
   nav button[aria-selected="true"] {
-    color: var(--br-accent);
+    color: var(--primary-text-color, #212121);
     border-bottom-color: var(--br-accent);
   }
   .reference {
-    padding: 14px 0;
+    padding: 20px 0;
     border-top: 1px solid var(--br-border);
   }
   .reference:first-of-type {
@@ -790,17 +793,21 @@ var _e = o`
   }
   .reference-title code {
     font-size: 13px;
-    font-weight: 600;
+    color: var(--br-muted);
+  }
+  .reference-title h3 {
+    margin-bottom: 2px;
   }
   .path {
     display: flex;
     gap: 8px;
     align-items: center;
-    padding: 8px 0 0;
+    padding: 12px 0 0;
   }
-  .path code {
+  .path > span:first-child {
     flex: 1;
-    color: var(--br-muted);
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
   .notice {
     border-left: 3px solid var(--warning-color, #9b6600);
@@ -832,8 +839,8 @@ var _e = o`
   }
   .tree li {
     border-left: 2px solid var(--br-border);
-    padding: 12px 14px;
-    margin: 6px 0;
+    padding: 16px;
+    margin: 12px 0;
   }
   .tree .selected {
     border-color: var(--br-accent);
@@ -845,6 +852,7 @@ var _e = o`
     line-height: 1.5;
     color: var(--br-muted);
     overflow-wrap: anywhere;
+    font-size: 14px;
   }
   .tree code {
     font-size: 13px;
@@ -859,7 +867,7 @@ var _e = o`
     margin-top: 18px;
   }
   .controls button {
-    font-size: 12px;
+    font-size: 13px;
   }
   aside label {
     margin: 18px 0;
@@ -869,7 +877,7 @@ var _e = o`
     margin-top: 10px;
   }
   aside p {
-    font-size: 13px;
+    font-size: 14px;
   }
   .preview {
     margin-top: 20px;
@@ -887,18 +895,19 @@ var _e = o`
   }
   details {
     margin: 16px 0 0;
-    font-size: 13px;
+    font-size: 14px;
   }
   summary {
     cursor: pointer;
     line-height: 1.5;
+    padding: 10px 0;
   }
   details ul {
     padding-left: 20px;
     line-height: 1.6;
     color: var(--br-muted);
   }
-  details code {
+  .edge code {
     display: block;
     margin: 8px 0;
   }
@@ -906,7 +915,7 @@ var _e = o`
     display: flex;
     gap: 14px;
     justify-content: space-between;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--br-muted);
     margin-top: 20px;
     line-height: 1.6;
@@ -927,7 +936,7 @@ var _e = o`
   table {
     border-collapse: collapse;
     width: 100%;
-    font-size: 12px;
+    font-size: 14px;
   }
   th,
   td {
@@ -941,6 +950,103 @@ var _e = o`
   textarea {
     height: 200px;
     font-size: 12px;
+  }
+  .result-heading {
+    margin: 28px 0 16px;
+  }
+  .result-heading h2 {
+    margin-bottom: 3px;
+    font-size: 22px;
+  }
+  .result-heading code {
+    color: var(--br-muted);
+  }
+  .technical {
+    margin-top: 12px;
+    color: var(--br-muted);
+  }
+  .technical-row {
+    display: flex;
+    gap: 12px;
+    align-items: start;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-top: 1px solid var(--br-border);
+  }
+  .technical-row code {
+    min-width: 0;
+  }
+  .uncertainty {
+    border-top: 1px solid var(--br-border);
+    margin-top: 18px;
+    padding-top: 24px;
+  }
+  .uncertainty h2 {
+    margin-bottom: 8px;
+  }
+  .uncertainty p {
+    font-size: 14px;
+    color: var(--br-muted);
+    margin: 8px 0 14px;
+  }
+  .uncertainty-scope {
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    padding: 4px 14px;
+    margin-top: 12px;
+  }
+  .uncertainty-scope > summary {
+    font-weight: 600;
+  }
+  .count {
+    display: inline-block;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    border-radius: 5px;
+    padding: 1px 7px;
+    margin-left: 6px;
+    background: color-mix(
+      in srgb,
+      var(--primary-text-color, #212121) 9%,
+      var(--br-card)
+    );
+  }
+  .reason-group {
+    margin: 8px 0;
+  }
+  .unresolved-row {
+    display: grid;
+    gap: 8px;
+    justify-items: start;
+    padding: 14px 0;
+    border-top: 1px solid var(--br-border);
+    overflow-wrap: anywhere;
+  }
+  .unresolved-row code {
+    color: var(--br-muted);
+  }
+  .node-title {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 12px;
+    overflow-wrap: anywhere;
+  }
+  .node-title strong {
+    min-width: 0;
+  }
+  .node-title .badge {
+    margin: 0;
+  }
+  .node-path {
+    font-size: 14px;
+    margin-top: 8px;
+    overflow-wrap: anywhere;
+  }
+  .edge {
+    padding: 16px 0;
+    border-top: 1px solid var(--br-border);
+    overflow-wrap: anywhere;
   }
   @media (max-width: 850px) {
     .columns {
@@ -996,30 +1102,79 @@ var _e = o`
     .reference-title {
       flex-wrap: wrap;
     }
+    .technical-row,
+    .node-title {
+      flex-direction: column;
+      gap: 6px;
+    }
     .foot {
       flex-direction: column;
     }
   }
-`, Z = {
+`, X = {
 	viewBox: "0 0 32 32",
 	rings: "M 28.943 12.532 A 13.399999999999999 13.399999999999999 0 1 1 19.468 3.057 A 1.2 1.2 0 0 1 18.847 5.375 A 11.0 11.0 0 1 0 26.625 13.153 A 1.2 1.2 0 0 1 28.943 12.532 Z M 23.921 13.878 A 8.2 8.2 0 1 1 18.122 8.079 A 1.2 1.2 0 0 1 17.501 10.398 A 5.8 5.8 0 1 0 21.602 14.499 A 1.2 1.2 0 0 1 23.921 13.878 Z",
 	radius: "M 15.222 15.222 L 23.849 6.595 L 25.405 8.151 L 16.778 16.778 Z M 13.600 16.000 a 2.4 2.4 0 1 1 4.8 0 a 2.4 2.4 0 1 1 -4.8 0 Z M 22.227 7.373 a 2.4 2.4 0 1 1 4.8 0 a 2.4 2.4 0 1 1 -4.8 0 Z"
-}, Q = () => se`
-  <svg class="brand-mark" viewBox=${Z.viewBox} aria-hidden="true" focusable="false">
-    <path fill="currentColor" d=${Z.rings}></path>
-    <path class="radius" d=${Z.radius}></path>
+}, Z = () => ce`
+  <svg class="brand-mark" viewBox=${X.viewBox} aria-hidden="true" focusable="false">
+    <path fill="currentColor" d=${X.rings}></path>
+    <path class="radius" d=${X.radius}></path>
   </svg>
-`, ve = "0.1.4", $ = {
+`, ye = {
+	views: "View",
+	sections: "Section",
+	cards: "Card",
+	card: "Content",
+	triggers: "Trigger",
+	trigger: "Trigger",
+	actions: "Action",
+	action: "Action",
+	sequence: "Step",
+	conditions: "Condition",
+	condition: "Condition",
+	choose: "Branch",
+	default: "Default",
+	target: "Target",
+	entity_id: "Entity ID",
+	entities: "Entity",
+	entity: "Entity",
+	value_template: "Template"
+};
+function Q(e) {
+	return e.split(".").map((e) => {
+		let t = /^(.*?)(?:\[(\d+)\])?$/.exec(e), n = t[1];
+		return `${ye[n] || n.replaceAll("_", " ").replace(/^./, (e) => e.toUpperCase())}${t[2] === void 0 ? "" : ` ${Number(t[2]) + 1}`}`;
+	}).join(" › ");
+}
+var be = {
+	"Computed entity lookup": "The entity ID is calculated at runtime.",
+	"External template variable": "A variable comes from runtime context or the card. Its value is not available here.",
+	"Template helper or macro": "A helper or macro may read additional entities that are not visible in this expression.",
+	"Unsupported template filter or test": "This filter or test may hide entity dependencies and is not resolved by the analyzer.",
+	"State collection or computed lookup": "The expression reads a collection of states or selects a state dynamically.",
+	"Computed value lookup": "A value is selected dynamically from a collection.",
+	"Template import": "Imported template content is not inspected.",
+	"Unsupported template syntax": "The expression could not be parsed. Visible entity IDs are still retained.",
+	"Templated target": "The final action or entity target is produced by a template that is not executed here.",
+	"Entity pattern": "A wildcard or pattern can match multiple entities; matches are not expanded.",
+	"Non-literal entity target": "This field does not contain a fixed entity ID."
+};
+function xe(e) {
+	return e.startsWith("Unexpanded ") ? "This selector targets a device, area, floor or label. Its entity membership is not expanded." : e.split("; ").map((e) => be[e] || e || "The target cannot be determined from the loaded configuration.").join(" ");
+}
+//#endregion
+//#region package.json
+var Se = "0.1.5", Ce = {
 	explicit: "Explicit",
 	template_literal: "Template literal",
 	dynamic: "Dynamic",
 	unknown: "Unclassified"
-}, ye = class extends X {
+}, $ = class extends Y {
 	constructor(...e) {
 		super(...e), this.narrow = !1, this.entities = [], this.query = "", this.loading = !1, this.error = "", this.tab = "impact", this.replacement = "", this.depth = 6, this.status = "", this.copyFallback = !1, this.initialized = !1, this.requestId = 0;
 	}
 	static {
-		this.styles = _e;
+		this.styles = ve;
 	}
 	static {
 		this.properties = {
@@ -1094,39 +1249,112 @@ var _e = o`
 		r.href = n, r.download = `blast-radius-${t.entity_id}.json`, r.click(), setTimeout(() => URL.revokeObjectURL(n), 1e3), this.status = "JSON report downloaded.";
 	}
 	badge(e) {
-		return z`<span class="badge ${e}">${$[e]}</span>`;
+		return R`<span class="badge ${e}">${Ce[e]}</span>`;
 	}
-	references(e) {
-		let t = /* @__PURE__ */ new Map();
-		return e.forEach((e) => t.set(e.source_id, [...t.get(e.source_id) || [], e])), [...t].map(([e, t]) => z`<div class="reference">
+	tabKeydown(e) {
+		let t = [
+			"impact",
+			"graph",
+			"raw"
+		], n = t.indexOf(this.tab);
+		if (e.key === "ArrowRight") n = (n + 1) % t.length;
+		else if (e.key === "ArrowLeft") n = (n + t.length - 1) % t.length;
+		else if (e.key === "Home") n = 0;
+		else if (e.key === "End") n = t.length - 1;
+		else return;
+		e.preventDefault(), this.tab = t[n], this.renderRoot.querySelector(`#tab-${this.tab}`)?.focus();
+	}
+	sourceName(e) {
+		return this.report?.source_names?.[e] || this.entities.find((t) => t.entity_id === e)?.name || e;
+	}
+	references(e, t = !1) {
+		let n = /* @__PURE__ */ new Map();
+		return e.forEach((e) => n.set(e.source_id, [...n.get(e.source_id) || [], e])), [...n].map(([e, n]) => R`<div class="reference">
           <div class="reference-title">
-            <code>${e}</code
-            ><span class="badge">${t[0].source_type}</span>
+            <div>
+              <h3>${this.sourceName(e)}</h3>
+              <code>${e}</code>
+            </div>
+            <span class="badge"
+              >${n[0].source_type} · ${n.length}</span
+            >
           </div>
-          ${t.map((e) => z`<div class="path"><code>${e.path}</code>${this.badge(e.confidence)}</div>`)}
+          ${t ? this.unresolvedGroups(n) : R` ${n.map((e) => R`<div class="path"><span>${Q(e.path)}</span>${this.badge(e.confidence)}</div>`)}
+                  <details class="technical">
+                    <summary>
+                      Configuration paths (${n.length})
+                    </summary>
+                    ${n.map((e) => R`<div class="technical-row"><code>${e.path}</code>${this.badge(e.confidence)}</div>`)}
+                  </details>`}
         </div>`);
 	}
+	unresolvedGroups(e) {
+		let t = /* @__PURE__ */ new Map();
+		for (let n of e) {
+			let e = n.reason || "Runtime expression";
+			t.set(e, [...t.get(e) || [], n]);
+		}
+		return [...t].map(([e, t]) => R` <details class="reason-group">
+          <summary>
+            ${e} <span class="count">${t.length}</span>
+          </summary>
+          <p>${xe(e)}</p>
+          ${t.map((e) => R`<div class="unresolved-row"><span>${Q(e.path)}</span><code>${e.path}</code>${this.badge(e.confidence)}</div>`)}
+        </details>`);
+	}
+	uncertainty(e) {
+		let t = e.uncertain_references, n = e.other_dashboard_references || [];
+		return !t.length && !n.length ? B : R`<section
+      class="uncertainty"
+      aria-label="Unresolved expressions"
+    >
+      <h2>Unresolved expressions</h2>
+      <p>
+        These are limits of static analysis, not a count of broken entities.
+        Dynamic targets may still be relevant to this entity.
+      </p>
+      ${t.length ? R`<details class="uncertainty-scope">
+              <summary>
+                In linked configurations
+                <span class="count">${t.length}</span>
+              </summary>
+              <p>
+                Expressions in linked automation/script configurations or
+                dashboard cards. Their targets are unknown; a shared
+                configuration does not prove a dependency.
+              </p>
+              ${this.references(t, !0)}
+            </details>` : R`<p class="muted">
+              No unresolved expressions in the linked configurations or cards.
+            </p>`}
+      ${n.length ? R`<details class="uncertainty-scope dashboard-context">
+              <summary>
+                Elsewhere in linked dashboards
+                <span class="count">${n.length}</span>
+              </summary>
+              <p>
+                Outside cards with known links, or at dashboard level. Kept for
+                context; these expressions are not attributed to the selected
+                entity.
+              </p>
+              ${this.references(n, !0)}
+            </details>` : B}
+    </section>`;
+	}
 	impact(e) {
-		return z`<h2>
-        Direct references
+		return R`<h2>
+        Where this entity is used
         <span class="badge">${e.summary.sources} sources</span>
       </h2>
-      ${e.references.length ? this.references(e.references) : z`<div class="empty">
-              <div class="symbol">${Q()}</div>
+      ${e.references.length ? this.references(e.references) : R`<div class="empty">
+              <div class="symbol">${Z()}</div>
               <h3>No direct references found</h3>
               <p class="muted">
                 Nothing in the inspected sources points to this entity. Check
                 coverage and unresolved references before changing it.
               </p>
             </div>`}
-      ${e.uncertain_references.length ? z`<div class="notice">
-              <strong>Unresolved references in affected configurations</strong>
-              <p>
-                These expressions occur in affected configurations. Their
-                targets are unknown; some may be unrelated to this entity.
-              </p>
-              ${this.references(e.uncertain_references)}
-            </div>` : V}
+      ${this.uncertainty(e)}
       <details>
         <summary>How to read confidence</summary>
         <ul>
@@ -1150,32 +1378,38 @@ var _e = o`
       </details>`;
 	}
 	graph(e) {
-		return z`<h2>Structural impact</h2>
+		return R`<h2>Structural impact</h2>
       <p class="muted">
         Affected configurations, followed by their action targets. This shows
         possible dependencies, not an execution trace.
       </p>
       <ol class="tree">
-        ${e.graph.nodes.map((e) => z`<li
+        ${e.graph.nodes.map((e) => R`<li
               class=${e.relationship}
               style=${`margin-left:${Math.min(e.depth, 4) * 14}px`}
             >
+              <div class="node-title">
+                <strong>${this.sourceName(e.id)}</strong
+                ><span class="badge"
+                  >${e.relationship === "selected" ? "Selected" : e.relationship === "dependent" ? "Uses entity" : "Target"}
+                  · Depth ${e.depth}</span
+                >
+              </div>
               <code>${e.id}</code
               ><small
-                >${e.relationship === "selected" ? "Selected entity" : e.relationship === "dependent" ? `References ${e.via}` : `Action or membership target of ${e.via}`}
-                · depth ${e.depth}</small
+                >${e.relationship === "selected" ? "Starting point" : e.relationship === "dependent" ? `References ${this.sourceName(e.via)}` : `Action or membership target of ${this.sourceName(e.via)}`}</small
               >
-              ${e.path ? z`<small>${e.path}</small>` : V}${e.confidence ? this.badge(e.confidence) : V}
+              ${e.path ? R`<div class="node-path">${Q(e.path)}</div>` : B}${e.confidence ? this.badge(e.confidence) : B}
             </li>`)}
       </ol>
-      ${e.graph.cycles.length ? z`<div class="notice">Cycles detected. Nodes are shown once.${e.graph.cycles.map((e) => z`<p><code>${e.join(" → ")}</code></p>`)}</div>` : V}
+      ${e.graph.cycles.length ? R`<div class="notice">Cycles detected. Nodes are shown once.${e.graph.cycles.map((e) => R`<p><code>${e.join(" → ")}</code></p>`)}</div>` : B}
       <details>
         <summary>All ${e.graph.edges.length} graph edges</summary>
-        ${e.graph.edges.map((e) => z`<code>${e.source_id} → ${e.target} (${e.role}, ${$[e.confidence]})<br />${e.path}</code>`)}
+        ${e.graph.edges.map((e) => R`<div class="edge"><strong>${this.sourceName(e.source_id)} → ${this.sourceName(e.target)}</strong><code>${e.source_id} → ${e.target}</code><code>${e.path}</code><span class="badge">${e.role}</span> ${this.badge(e.confidence)}</div>`)}
       </details>`;
 	}
 	raw(e) {
-		return z`<h2>Raw references</h2>
+		return R`<h2>Raw references</h2>
       <div class="table-wrap">
         <table>
           <thead>
@@ -1186,7 +1420,7 @@ var _e = o`
             </tr>
           </thead>
           <tbody>
-            ${e.references.map((e) => z`<tr>
+            ${e.references.map((e) => R`<tr>
                   <td>
                     <code>${e.source_id}<br />${e.path}</code>
                   </td>
@@ -1199,7 +1433,7 @@ var _e = o`
 	}
 	render() {
 		let e = this.report, t = this.entities.filter((e) => `${e.entity_id} ${e.name}`.toLowerCase().includes(this.query.toLowerCase())).slice(0, 80);
-		return z`<header>
+		return R`<header>
         <button
           class="menu"
           aria-label="Open sidebar"
@@ -1211,17 +1445,16 @@ var _e = o`
           ☰
         </button>
         <div class="brand-lockup">
-          ${Q()}<strong>HA Blast Radius</strong>
+          ${Z()}<strong>HA Blast Radius</strong>
         </div>
         <span class="badge"
-          >READ ONLY<span class="release-label"> · α ${ve}</span></span
+          >READ ONLY<span class="release-label"> · α ${Se}</span></span
         >
       </header>
       <main>
-        <div class="eyebrow">Configuration impact analysis</div>
-        <h1>Check dependencies before you make a change.</h1>
+        <h1>Entity dependencies</h1>
         <p class="muted intro">
-          Inspect references. Follow dependencies. Preview the change.
+          Inspect references before renaming or removing an entity.
         </p>
         <form
           class="search"
@@ -1240,7 +1473,7 @@ var _e = o`
               spellcheck="false"
           /></label>
           <datalist id="entities">
-            ${t.map((e) => z`<option value=${e.entity_id}>${e.name}${e.exists ? "" : " · missing"}</option>`)}
+            ${t.map((e) => R`<option value=${e.entity_id}>${e.name}${e.exists ? "" : " · missing"}</option>`)}
           </datalist>
           <label class="depth"
             >Depth<select
@@ -1258,7 +1491,7 @@ var _e = o`
 			6,
 			8,
 			12
-		].map((e) => z`<option value=${e} ?selected=${e === this.depth}>${e}</option>`)}
+		].map((e) => R`<option value=${e} ?selected=${e === this.depth}>${e}</option>`)}
             </select></label
           >
           <button
@@ -1268,8 +1501,8 @@ var _e = o`
             ${this.loading ? "Inspecting…" : "Analyze"}
           </button>
         </form>
-        ${this.loading ? z`<progress aria-label="Inspecting configuration"></progress>` : V}
-        ${this.error ? z`<div role="alert" class="notice error">
+        ${this.loading ? R`<progress aria-label="Inspecting configuration"></progress>` : B}
+        ${this.error ? R`<div role="alert" class="notice error">
                 ${this.error}
                 <div class="controls">
                   <button
@@ -1278,14 +1511,21 @@ var _e = o`
                     Retry
                   </button>
                 </div>
-              </div>` : V}
-        ${e ? z`
-                <h2><code>${e.entity_id}</code></h2>
-                ${e.exists ? V : z`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>`}
+              </div>` : B}
+        ${e ? R`
+                <div class="result-heading">
+                  <h2>${this.sourceName(e.entity_id)}</h2>
+                  <code>${e.entity_id}</code>
+                </div>
+                ${e.exists ? B : R`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>`}
                 <div class="stats">
                   <div class="stat">
                     <strong>${e.summary.references}</strong
                     ><span>Direct references</span>
+                  </div>
+                  <div class="stat">
+                    <strong>${e.summary.sources}</strong
+                    ><span>Linked configurations</span>
                   </div>
                   <div class="stat">
                     <strong>${e.summary.downstream}</strong
@@ -1296,10 +1536,6 @@ var _e = o`
                       >${e.summary.template_literal + e.summary.unknown}</strong
                     ><span>References to review</span>
                   </div>
-                  <div class="stat">
-                    <strong>${e.uncertain_references.length}</strong
-                    ><span>Unresolved in affected sources</span>
-                  </div>
                 </div>
                 <div class="columns">
                   <section class="card">
@@ -1308,9 +1544,13 @@ var _e = o`
 			"impact",
 			"graph",
 			"raw"
-		].map((e) => z`<button role="tab" aria-selected=${this.tab === e} @click=${() => this.tab = e}>${e === "impact" ? "Impact" : e === "graph" ? "Graph" : "Raw references"}</button>`)}
+		].map((e) => R`<button role="tab" id=${`tab-${e}`} aria-controls="analysis-view" aria-selected=${this.tab === e} tabindex=${this.tab === e ? 0 : -1} @keydown=${this.tabKeydown} @click=${() => this.tab = e}>${e === "impact" ? "Impact" : e === "graph" ? "Graph" : "Raw references"}</button>`)}
                     </nav>
-                    <div role="tabpanel">
+                    <div
+                      role="tabpanel"
+                      id="analysis-view"
+                      aria-labelledby=${`tab-${this.tab}`}
+                    >
                       ${this.tab === "impact" ? this.impact(e) : this.tab === "graph" ? this.graph(e) : this.raw(e)}
                     </div>
                     <div class="controls">
@@ -1324,7 +1564,7 @@ var _e = o`
                       </button>
                     </div>
                     <p class="status" role="status">${this.status}</p>
-                    ${this.copyFallback ? z`<textarea aria-label="Markdown report" readonly .value=${e.markdown}></textarea>` : V}
+                    ${this.copyFallback ? R`<textarea aria-label="Markdown report" readonly .value=${e.markdown}></textarea>` : B}
                   </section>
                   <aside class="card">
                     <h2>Change preview</h2>
@@ -1351,18 +1591,18 @@ var _e = o`
                     >
                       Preview removal
                     </button>
-                    ${e.preview ? z`<div class="preview" role="status">
+                    ${e.preview ? R`<div class="preview" role="status">
                             <h3>
                               ${e.preview.operation === "rename" ? "Rename preview" : "Removal preview"}
                             </h3>
                             <code>${e.entity_id}</code
-                            >${e.preview.new_entity_id ? z`<code>→ ${e.preview.new_entity_id}</code>` : V}
+                            >${e.preview.new_entity_id ? R`<code>→ ${e.preview.new_entity_id}</code>` : B}
                             <ul>
-                              ${Object.entries(e.preview.affected_sources).map(([e, t]) => z`<li>${t} ${e} source${t === 1 ? "" : "s"}</li>`)}
+                              ${Object.entries(e.preview.affected_sources).map(([e, t]) => R`<li>${t} ${e} source${t === 1 ? "" : "s"}</li>`)}
                             </ul>
                             <p>${e.preview.note}</p>
                             <strong>No changes have been made.</strong>
-                          </div>` : V}
+                          </div>` : B}
                     <p class="muted">
                       Analysis only. No configuration is written.
                     </p>
@@ -1377,11 +1617,18 @@ var _e = o`
                     ${Object.entries(e.coverage.source_types).map(([e, t]) => `${t} ${e}`).join(" · ")}
                   </p>
                   <ul>
-                    ${e.warnings.map((e) => z`<li>${e}</li>`)}
+                    ${e.warnings.map((e) => R`<li>${e}</li>`)}
                     <li>
                       ${e.unresolved_total} unresolved references across
                       the full snapshot. Their targets are unknown; they cannot
                       be attributed to this entity.
+                    </li>
+                    <li>
+                      ${e.uncertain_references.length} unresolved
+                      expressions in linked configurations or cards;
+                      ${e.other_dashboard_references?.length || 0}
+                      elsewhere in linked dashboards. Counts refer to expression
+                      locations, not missing or broken entities.
                     </li>
                     <li>
                       Conditional branches are not evaluated. A reference does
@@ -1397,8 +1644,8 @@ var _e = o`
                     >Static configuration analysis · No changes applied</span
                   >
                 </div>
-              ` : !this.loading && !this.error ? z`<section class="card empty">
-                  <div class="symbol">${Q()}</div>
+              ` : !this.loading && !this.error ? R`<section class="card empty">
+                  <div class="symbol">${Z()}</div>
                   <h2>Start with one entity</h2>
                   <p class="muted">
                     A button, a helper, an old light.<br />Find out what points
@@ -1408,10 +1655,10 @@ var _e = o`
                     ${this.entities.length} entity IDs available · Missing IDs
                     can be entered manually
                   </p>
-                </section>` : V}
+                </section>` : B}
       </main>`;
 	}
 };
-customElements.get("blast-radius-panel") || customElements.define("blast-radius-panel", ye);
+customElements.get("blast-radius-panel") || customElements.define("blast-radius-panel", $);
 //#endregion
-export { ye as BlastRadiusPanel };
+export { $ as BlastRadiusPanel };

@@ -29,6 +29,17 @@ entities = {s.source_id for s in sources if s.source_type != "dashboard"} | {
     "sensor.unused",
 }
 engine = Analyzer(sources, entities, ("Synthetic demo snapshot. No Home Assistant connection.",))
+names = {source.source_id: source.name for source in sources}
+names.update(
+    {
+        "binary_sensor.wall_button": "Music button",
+        "media_player.speaker": "Living room speaker",
+        "media_player.tablet": "Kitchen tablet",
+        "input_boolean.music_enabled": "Music enabled",
+        "light.desk": "Desk light",
+        "sensor.unused": "Unused sensor",
+    }
+)
 reports = {}
 for entity in sorted(entities | {"light.removed"}):
     for depth in (1, 2, 3, 4, 6, 8, 12):
@@ -38,7 +49,7 @@ for entity in sorted(entities | {"light.removed"}):
         reports[f"{entity}:{depth}"] = report
 output = {
     "entities": [
-        {"entity_id": entity, "name": entity.replace("_", " "), "exists": True}
+        {"entity_id": entity, "name": names.get(entity, entity), "exists": True}
         for entity in sorted(entities)
     ],
     "reports": reports,

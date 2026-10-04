@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.1.5 — 2026-10-04
+
+- Separate unresolved expressions in linked dashboard cards from those elsewhere
+  in the same dashboard. Retain both scopes in the panel and exports; do not treat
+  the whole dashboard as a dependency of one entity.
+- Recognize simple template-local variables and value loops without executing
+  templates. Keep runtime lookups, state collections, imports and unsupported
+  filters/tests unresolved, with specific reasons.
+- Improve panel readability with friendly names, larger text, stronger secondary
+  text contrast, readable locations and collapsible exact configuration paths.
+- Group uncertainty by source and reason instead of showing a long warning list.
+  Keep the full-snapshot total in coverage details and focus summary cards on known
+  references. Add keyboard navigation for analysis tabs.
+- Add regression tests for template classification, dashboard scope separation,
+  large uncertainty groups and keyboard interaction. Refresh synthetic screenshots.
+
 ## 0.1.4 — 2026-10-04
 
 - Prefer stronger reference evidence for graph paths at the same depth and with
