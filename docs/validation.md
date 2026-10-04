@@ -23,6 +23,14 @@ reviewed with synthetic data. The user's HA installation has not been tested rem
 The 24-file local installation ZIP has SHA-256:
 `e18e069edbcec4ee2ae276375e36d25f027921776ac45b6205fe67eb9436e91d`.
 
+All six jobs passed in the [v0.1.9 CI run](https://github.com/artur-panek/ha-blast-radius/actions/runs/37173053823)
+at `d6ffa29df16481b9f597f0138117be7688e6c5e9`: Python 3.12 (106 tests, HA module
+skipped), Python 3.14 (122 tests, 98.17% engine coverage), frontend (30 browser
+tests), hassfest, HACS and automatic publication. The published
+[v0.1.9](https://github.com/artur-panek/ha-blast-radius/releases/tag/v0.1.9) tag points
+to that tested commit, and its ZIP matches the local checksum. HACS discovery and
+installation on the user's server remain unverified remotely.
+
 ## v0.1.8
 
 Local validation on 2026-10-04: **116 Python tests passed**, with **97.07%** engine
