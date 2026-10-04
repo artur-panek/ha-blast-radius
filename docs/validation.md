@@ -1,5 +1,28 @@
 # Validation
 
+## v0.1.8
+
+Local validation on 2026-10-04: **116 Python tests passed**, with **97.07%** engine
+coverage; **24 Chromium tests passed**. Ruff lint/format, engine mypy, frontend
+formatting, TypeScript, production build and package checks passed against
+Home Assistant Core 2026.9.4 / Python 3.14.7.
+
+New browser tests click a native source link, remove the panel, use actual browser
+Back and recreate the element. They verify entity, depth, tab and scroll restoration,
+plus a fresh entities request and analysis. Reload and reconnect are also covered.
+Recent searches are checked for six-item limits, deduplication, saved depths,
+keyboard focus after reordering, Clear, per-user separation and mobile overflow.
+Malformed storage and blocked storage are exercised; serialized metadata is checked
+to exclude reports and configuration. Failed searches do not enter the recent list
+or leave stale reports available to export.
+
+Light and mobile layouts were visually reviewed using synthetic data. Browser
+tests simulate HA panel removal/recreation; this release has not been installed or
+tested directly on the user's server. No household screenshots are published.
+
+The 24-file local installation ZIP has SHA-256:
+`bfb824523adfc4052df7f7c70b35b2e6c719070a309633c949ecdd629a33baad`.
+
 ## v0.1.7
 
 Local validation on 2026-10-04: **116 Python tests passed**, with **97.07%** engine

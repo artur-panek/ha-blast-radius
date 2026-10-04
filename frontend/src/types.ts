@@ -67,5 +67,6 @@ export interface Entity {
   exists: boolean;
 }
 export interface Hass {
+  user?: { id: string };
   callWS<T>(message: Record<string, unknown>): Promise<T>;
 }

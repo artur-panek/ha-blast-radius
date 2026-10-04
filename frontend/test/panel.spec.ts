@@ -128,6 +128,7 @@ test("desktop screenshots and depth change", async ({ page }) => {
 test("configuration labels are rendered as text", async ({ page }) => {
   await page.locator("blast-radius-panel").evaluate((panel: any) => {
     panel.hass = {
+      ...panel.hass,
       callWS: async () => {
         throw new Error('<img src=x onerror="alert(1)">');
       },
@@ -151,6 +152,7 @@ test("a failed refresh does not leave a stale report available to export", async
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
   await page.locator("blast-radius-panel").evaluate((panel: any) => {
     panel.hass = {
+      ...panel.hass,
       callWS: async () => {
         throw new Error("Snapshot unavailable");
       },

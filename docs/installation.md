@@ -61,6 +61,16 @@ dashboards open their view and other entities open HA's details dialog. Scenes
 without an editor ID fall back to details; missing entities have no open button.
 Navigation does not run automations, scripts or scenes.
 
+Use browser **Back** after opening a source. The panel restores your last successful
+search, depth and tab, requests a fresh report and restores the scroll position as
+far as the refreshed layout allows. This also works after reloading the page.
+The **Recent** bar keeps six successful searches in this browser tab's session;
+click one to analyze it again at its saved depth. **Clear** forgets the history and
+saved view without removing the report currently on screen. Your next successful
+analysis starts the list again. History is separate for each HA user on this origin.
+Only entity IDs and view settings are saved locally, not reports or configuration.
+Closing the tab normally ends the session; browser session recovery can retain it.
+
 Open **Graph** for separate **Used by** and **Possible targets** columns. Expand
 **Preview a change** to try a removal preview. Preview buttons only generate
 reports; they never perform the change.

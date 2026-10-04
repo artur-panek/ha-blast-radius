@@ -7,6 +7,7 @@ const reports = data.reports as Record<string, unknown>;
 const panel = document.querySelector<BlastRadiusPanel>("blast-radius-panel")!;
 // This harness is not part of the distributable integration bundle.
 panel.hass = {
+  user: { id: "demo-admin" },
   async callWS<T>(message: Record<string, unknown>): Promise<T> {
     await new Promise((resolve) => setTimeout(resolve, 100));
     if (message.type === "blast_radius/entities")

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.8 — 2026-10-04
+
+- Restore the last successful entity search, traversal depth, analysis tab and
+  scroll position when returning from a linked source or reloading the panel.
+  Fetch a fresh analysis instead of persisting an old report.
+- Add a compact recent-search bar with six deduplicated searches, one-click
+  reopening at their saved depth and a Clear control.
+- Scope browser session metadata to the HA user and tab; retain no reports or
+  configuration contents. Handle unavailable storage and malformed saved values.
+- Test real browser Back with panel recreation, reconnect/reload, fresh requests,
+  recent-history limits, account isolation, invalid storage and mobile overflow.
+
 ## 0.1.7 — 2026-10-04
 
 - Open automations/scripts through HA's native read-only `/show` route using

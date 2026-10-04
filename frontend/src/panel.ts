@@ -1,4 +1,5 @@
-import { LitElement, html, nothing } from "lit";
+import { LitElement, html, nothing, type PropertyValues } from "lit";
+import { repeat } from "lit/directives/repeat.js";
 import { styles } from "./styles";
 import { brandMark } from "./brand";
 import {
@@ -9,6 +10,15 @@ import {
   safeNavigationPath,
 } from "./presentation";
 import { sourceIcon } from "./icons";
+import {
+  readSession,
+  writeSession,
+  sessionKey,
+  rememberSearch,
+  type AnalysisTab,
+  type RecentSearch,
+  type SavedView,
+} from "./session";
 import { version } from "../package.json";
 import type {
   Confidence,
@@ -42,6 +52,7 @@ export class BlastRadiusPanel extends LitElement {
     depth: { state: true },
     status: { state: true },
     copyFallback: { state: true },
+    recentSearches: { state: true },
   };
   declare hass: Hass;
   narrow = false;
@@ -50,33 +61,113 @@ export class BlastRadiusPanel extends LitElement {
   report?: Report;
   loading = false;
   error = "";
-  tab: "impact" | "graph" | "raw" = "impact";
+  tab: AnalysisTab = "impact";
+  recentSearches: RecentSearch[] = [];
   replacement = "";
   depth = 6;
   status = "";
   copyFallback = false;
   private initialized = false;
   private requestId = 0;
+  private storageKey?: string;
+  private lastView?: SavedView;
+  private scrollTimer?: ReturnType<typeof setTimeout>;
 
-  protected updated() {
-    if (this.hass && !this.initialized) {
+  connectedCallback() {
+    super.connectedCallback();
+    this.addEventListener("scroll", this.onScroll);
+    window.addEventListener("pagehide", this.saveSession);
+    this.requestUpdate();
+  }
+
+  disconnectedCallback() {
+    clearTimeout(this.scrollTimer);
+    this.saveSession();
+    this.requestId++;
+    this.initialized = false;
+    this.removeEventListener("scroll", this.onScroll);
+    window.removeEventListener("pagehide", this.saveSession);
+    super.disconnectedCallback();
+  }
+
+  private saveSession = () => {
+    writeSession(this.storageKey, {
+      recent: this.recentSearches,
+      last: this.lastView,
+    });
+  };
+
+  private rememberView(scrollTop = this.scrollTop) {
+    if (!this.report) return;
+    this.lastView = {
+      entityId: this.report.entity_id,
+      depth: this.report.graph.max_depth,
+      tab: this.tab,
+      scrollTop,
+    };
+    this.saveSession();
+  }
+
+  private onScroll = () => {
+    if (!this.report || !this.lastView) return;
+    this.lastView = { ...this.lastView, scrollTop: this.scrollTop };
+    clearTimeout(this.scrollTimer);
+    this.scrollTimer = setTimeout(this.saveSession, 150);
+  };
+
+  private reopenSearch(search: RecentSearch) {
+    this.query = search.entityId;
+    this.depth = search.depth;
+    this.replacement = "";
+    void this.run();
+  }
+
+  private clearRecentSearches() {
+    this.recentSearches = [];
+    this.lastView = undefined;
+    clearTimeout(this.scrollTimer);
+    this.saveSession();
+  }
+
+  protected updated(changed: PropertyValues) {
+    const key = sessionKey(this.hass?.user?.id);
+    if (this.hass && (!this.initialized || key !== this.storageKey)) {
       this.initialized = true;
+      this.storageKey = key;
+      const saved = readSession(key);
+      this.recentSearches = saved.recent;
+      this.lastView = saved.last;
+      this.query = saved.last?.entityId || "";
+      this.depth = saved.last?.depth || 6;
+      this.tab = saved.last?.tab || "impact";
+      this.report = undefined;
+      this.entities = [];
+      this.replacement = "";
+      this.status = "";
+      this.copyFallback = false;
       void this.loadEntities();
+    } else if (changed.has("tab") && this.lastView) {
+      this.rememberView();
     }
   }
 
   private async loadEntities() {
+    const id = ++this.requestId;
     this.loading = true;
     this.error = "";
     try {
       const result = await this.hass.callWS<{ entities: Entity[] }>({
         type: "blast_radius/entities",
       });
+      if (id !== this.requestId) return;
       this.entities = result.entities;
+      if (this.lastView && this.query === this.lastView.entityId) {
+        await this.run(undefined, this.lastView.scrollTop);
+      }
     } catch (error) {
-      this.error = this.message(error);
+      if (id === this.requestId) this.error = this.message(error);
     } finally {
-      this.loading = false;
+      if (id === this.requestId) this.loading = false;
     }
   }
 
@@ -96,7 +187,7 @@ export class BlastRadiusPanel extends LitElement {
     this.copyFallback = false;
   }
 
-  private async run(operation?: "rename" | "delete") {
+  private async run(operation?: "rename" | "delete", restoreScroll?: number) {
     const entityId = this.query.trim();
     if (!/^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/.test(entityId)) {
       this.error = "Enter an entity ID such as light.office.";
@@ -118,11 +209,25 @@ export class BlastRadiusPanel extends LitElement {
       if (operation === "rename")
         message.new_entity_id = this.replacement.trim();
       const report = await this.hass.callWS<Report>(message);
-      if (id === this.requestId) this.report = report;
+      if (id === this.requestId) {
+        this.report = report;
+        this.recentSearches = rememberSearch(this.recentSearches, {
+          entityId: report.entity_id,
+          depth: report.graph.max_depth,
+        });
+        this.rememberView(restoreScroll ?? this.scrollTop);
+      }
     } catch (error) {
       if (id === this.requestId) this.error = this.message(error);
     } finally {
       if (id === this.requestId) this.loading = false;
+    }
+    if (restoreScroll !== undefined && id === this.requestId && this.report) {
+      await this.updateComplete;
+      requestAnimationFrame(() => {
+        if (id === this.requestId && this.isConnected)
+          this.scrollTop = restoreScroll;
+      });
     }
   }
 
@@ -199,6 +304,7 @@ export class BlastRadiusPanel extends LitElement {
   }
 
   private navigate(event: MouseEvent, path: string) {
+    this.rememberView();
     if (
       event.button !== 0 ||
       event.ctrlKey ||
@@ -588,6 +694,39 @@ export class BlastRadiusPanel extends LitElement {
             ${this.loading ? "Inspecting…" : "Analyze"}
           </button>
         </form>
+        ${
+          this.recentSearches.length
+            ? html`<section
+                class="recent-searches"
+                aria-label="Recent searches"
+              >
+                <span class="recent-label">Recent</span>
+                <div class="recent-list">
+                  ${repeat(
+                    this.recentSearches,
+                    (search) => search.entityId,
+                    (search) =>
+                      html`<button
+                        class="recent-search"
+                        title=${`${search.entityId} · depth ${search.depth}`}
+                        aria-label=${`Analyze again: ${search.entityId}`}
+                        aria-pressed=${this.report?.entity_id === search.entityId}
+                        @click=${() => this.reopenSearch(search)}
+                      >
+                        ${this.sourceName(search.entityId)}
+                      </button>`,
+                  )}
+                </div>
+                <button
+                  class="clear-recent"
+                  aria-label="Clear recent searches"
+                  @click=${this.clearRecentSearches}
+                >
+                  Clear
+                </button>
+              </section>`
+            : nothing
+        }
         ${this.loading ? html`<progress aria-label="Inspecting configuration"></progress>` : nothing}
         ${
           this.error

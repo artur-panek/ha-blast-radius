@@ -114,6 +114,43 @@ export const styles = css`
   .search label {
     flex: 1;
   }
+  .recent-searches {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: -6px 0 22px;
+    min-width: 0;
+  }
+  .recent-label {
+    color: var(--br-muted);
+    font-size: 13px;
+  }
+  .recent-list {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    padding: 4px;
+  }
+  .recent-search {
+    font-size: 13px;
+    padding: 8px 12px;
+    white-space: nowrap;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+  }
+  .recent-search[aria-pressed="true"] {
+    border-color: var(--br-accent);
+  }
+  .clear-recent {
+    font-size: 13px;
+    border-color: transparent;
+    padding: 8px;
+    background: transparent;
+  }
   label {
     display: block;
     font-size: 14px;

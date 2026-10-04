@@ -11,7 +11,7 @@ Read-only dependency and impact analysis for Home Assistant. Find where an entit
 is referenced, follow structural dependencies, and preview a rename or removal
 before changing your configuration. Every result includes source paths and confidence.
 
-**v0.1.7 · Experimental alpha · Admin only · MIT**
+**v0.1.8 · Experimental alpha · Admin only · MIT**
 
 Requires Home Assistant **2026.9.4+**; tested against **2026.9.4**. Later releases
 need compatibility testing. This is a static configuration inspector, not a runtime
@@ -42,6 +42,8 @@ The screenshot uses synthetic fixtures, not a real household's configuration.
 - Bounded dependency view with cycle detection and adjustable depth.
 - Clickable sources: inspect loaded automations/scripts in HA's read-only view,
   open scenes in their editor, dashboards in their view, and entities in details.
+- Return to your last search, depth and tab after opening a source. Reopen any of
+  six recent searches from a compact bar in the same browser tab.
 - Rename/removal previews. **Neither operation is ever executed.**
 - Markdown copy, JSON download, dark mode and mobile layout. No cloud or telemetry.
 
@@ -90,6 +92,13 @@ and select the latest numbered release. Updates do not install or restart HA aut
 
 Every request takes a fresh snapshot. Registry-only entities, including disabled
 entities, count as known even when they have no current state.
+
+Returning to the panel or reloading it restores the last successful search and
+fetches a fresh report. The **Recent** bar reopens a search at its previous depth;
+**Clear** forgets the recent list and saved view. Browser session storage keeps
+only entity IDs, depth, tab and scroll position, scoped to your HA user and tab.
+Reports and configuration contents are not stored. Closing the tab normally ends
+this history; browser session recovery may restore it.
 
 ## How analysis works
 

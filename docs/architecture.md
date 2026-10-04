@@ -150,6 +150,16 @@ complete coverage.
 
 - No service calls, registry writes, config saves or template rendering.
 - Setup stores only the normal HA config entry and registers the panel.
+- Since v0.1.8 the panel stores browser session metadata under
+  `blast-radius:session:v1:<HA user ID>`: six recent entity IDs/depths and the last
+  successful entity/depth/tab/scroll position. No report, source names, template
+  bodies or configuration contents are retained. Origin and tab scope come from
+  `sessionStorage`; changing HA accounts loads a separate key and clears the view.
+  A page-memory fallback handles blocked/full storage. Clear removes the
+  saved metadata. Missing user identity disables persistence.
+- Returning/remounting fetches entities and a new analysis before restoring scroll;
+  it never exports a cached report or repeats a rename/removal preview. Stale async
+  responses are ignored after another request, account change or panel disconnect.
 - Exports reveal entity IDs and configuration structure; review before sharing.
 - Diagnostics expose version, timestamp, read-only flag and aggregate counts only.
 - No third-party CDN, analytics, tokens or remote execution in the panel.
