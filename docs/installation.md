@@ -54,8 +54,15 @@ needed on the Home Assistant machine; the built panel is included.
 ## First check
 
 Analyze an entity you know appears in an automation or dashboard. Confirm the
-source IDs and paths against that configuration. Open Graph and try a removal
-preview. Preview buttons only generate reports; they never perform the change.
+source IDs and paths against that configuration. Click a source name or **Open**
+to inspect its automation, script or scene in HA's editor. Dashboard links open the
+dashboard; other entities open HA's details dialog. Configurations without an
+editor ID fall back to details when available; missing entities have no open button.
+Navigation does not run automations, scripts or scenes.
+
+Open **Graph** for separate **Used by** and **Possible targets** columns. Expand
+**Preview a change** to try a removal preview. Preview buttons only generate
+reports; they never perform the change.
 
 An unresolved count is not a count of broken entities. Expand **Unresolved
 expressions** to review groups by source and reason. **In linked configurations**
@@ -66,7 +73,8 @@ unknown. The total across the snapshot is under **Coverage and limitations**;
 a zero local count does not establish complete coverage.
 
 Friendly names and readable locations make the result easier to scan. Locations
-use one-based numbers (for example, Card 3). Expand **Configuration paths** for
+use one-based numbers (for example, Card 3). Expand **Reference details** or
+**Connection details** for
 the exact zero-based path (`cards[2]`), or use **Raw references** and the exports.
 
 ## Troubleshooting

@@ -1,9 +1,24 @@
 import { LitElement, html, nothing } from "lit";
 import { styles } from "./styles";
 import { brandMark } from "./brand";
-import { readablePath, explainReason } from "./presentation";
+import {
+  readablePath,
+  explainReason,
+  referencePurpose,
+  sourceLabels,
+  safeNavigationPath,
+} from "./presentation";
+import { sourceIcon } from "./icons";
 import { version } from "../package.json";
-import type { Confidence, Entity, Hass, Reference, Report } from "./types";
+import type {
+  Confidence,
+  Entity,
+  GraphNode,
+  Hass,
+  NavigationTarget,
+  Reference,
+  Report,
+} from "./types";
 
 const labels: Record<Confidence, string> = {
   explicit: "Explicit",
@@ -164,6 +179,75 @@ export class BlastRadiusPanel extends LitElement {
     );
   }
 
+  private navigationTarget(id: string): NavigationTarget | undefined {
+    if (this.report?.navigation) return this.report.navigation[id];
+    return this.entities.some(
+      (entity) => entity.entity_id === id && entity.exists,
+    )
+      ? { kind: "entity", entity_id: id }
+      : undefined;
+  }
+
+  private openEntity(id: string) {
+    this.dispatchEvent(
+      new CustomEvent("hass-more-info", {
+        detail: { entityId: id },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  private navigate(event: MouseEvent, path: string) {
+    if (
+      event.button !== 0 ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      event.altKey
+    )
+      return;
+    event.preventDefault();
+    history.pushState(
+      { from: location.pathname + location.search + location.hash },
+      "",
+      path,
+    );
+    window.dispatchEvent(
+      new CustomEvent("location-changed", {
+        detail: { replace: false },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  private sourceControl(id: string, compact = false) {
+    const target = this.navigationTarget(id);
+    const text = compact ? "Open →" : this.sourceName(id);
+    const className = compact ? "open-source" : "source-name";
+    if (!target)
+      return compact ? nothing : html`<span class=${className}>${text}</span>`;
+    if (target.kind === "entity")
+      return html`<button
+        class=${className}
+        aria-label=${`Open entity details: ${this.sourceName(id)}`}
+        @click=${() => this.openEntity(id)}
+      >
+        ${text}
+      </button>`;
+    const path = safeNavigationPath(target);
+    if (!path)
+      return compact ? nothing : html`<span class=${className}>${text}</span>`;
+    return html`<a
+      class=${className}
+      href=${path}
+      aria-label=${`Open ${target.kind}: ${this.sourceName(id)}`}
+      @click=${(event: MouseEvent) => this.navigate(event, path)}
+      >${text}</a
+    >`;
+  }
+
   private references(refs: Reference[], unresolved = false) {
     const groups = new Map<string, Reference[]>();
     refs.forEach((ref) =>
@@ -171,28 +255,42 @@ export class BlastRadiusPanel extends LitElement {
     );
     return [...groups].map(
       ([source, references]) =>
-        html`<div class="reference">
+        html`<article class="reference source-row" data-source=${source}>
           <div class="reference-title">
-            <div>
-              <h3>${this.sourceName(source)}</h3>
-              <code>${source}</code>
+            <div class="source-heading">
+              ${sourceIcon(references[0].source_type)}
+              <div>
+                <h3>${this.sourceControl(source)}</h3>
+                <span class="source-meta"
+                  >${sourceLabels[references[0].source_type] || references[0].source_type}
+                  · ${references.length}
+                  ${references.length === 1 ? "reference" : "references"}</span
+                >
+              </div>
             </div>
-            <span class="badge"
-              >${references[0].source_type} · ${references.length}</span
-            >
+            ${this.sourceControl(source, true)}
           </div>
           ${
             unresolved
               ? this.unresolvedGroups(references)
-              : html` ${references.map((ref) => html`<div class="path"><span>${readablePath(ref.path)}</span>${this.badge(ref.confidence)}</div>`)}
+              : html`<p class="purpose">${referencePurpose(references)}</p>
+                  ${references.some((ref) => ref.confidence !== "explicit") ? html`<span class="review-hint">Includes references to review</span>` : nothing}
                   <details class="technical">
-                    <summary>
-                      Configuration paths (${references.length})
-                    </summary>
-                    ${references.map((ref) => html`<div class="technical-row"><code>${ref.path}</code>${this.badge(ref.confidence)}</div>`)}
+                    <summary>Reference details (${references.length})</summary>
+                    <code class="source-id">${source}</code>
+                    ${references.map(
+                      (ref) =>
+                        html`<div class="technical-row">
+                          <div class="path">
+                            <span>${readablePath(ref.path)}</span
+                            >${this.badge(ref.confidence)}
+                          </div>
+                          <code>${ref.path}</code>
+                        </div>`,
+                    )}
                   </details>`
           }
-        </div>`,
+        </article>`,
     );
   }
 
@@ -271,7 +369,9 @@ export class BlastRadiusPanel extends LitElement {
       </h2>
       ${
         report.references.length
-          ? this.references(report.references)
+          ? html`<div class="source-grid">
+              ${this.references(report.references)}
+            </div>`
           : html`<div class="empty">
               <div class="symbol">${brandMark()}</div>
               <h3>No direct references found</h3>
@@ -306,38 +406,89 @@ export class BlastRadiusPanel extends LitElement {
   }
 
   private graph(report: Report) {
-    return html`<h2>Structural impact</h2>
+    const selected = report.graph.nodes.find(
+      (node) => node.relationship === "selected",
+    )!;
+    const dependents = report.graph.nodes.filter(
+      (node) => node.relationship === "dependent",
+    );
+    const downstream = report.graph.nodes.filter(
+      (node) => node.relationship === "downstream",
+    );
+    return html`<h2>Dependency map</h2>
       <p class="muted">
-        Affected configurations, followed by their action targets. This shows
-        possible dependencies, not an execution trace.
+        Read from the selected entity to its linked configurations and their
+        targets. Conditions are not evaluated; these links do not prove an
+        action will run.
       </p>
-      <ol class="tree">
-        ${report.graph.nodes.map(
-          (node) =>
-            html`<li
-              class=${node.relationship}
-              style=${`margin-left:${Math.min(node.depth, 4) * 14}px`}
-            >
-              <div class="node-title">
-                <strong>${this.sourceName(node.id)}</strong
-                ><span class="badge"
-                  >${node.relationship === "selected" ? "Selected" : node.relationship === "dependent" ? "Uses entity" : "Target"}
-                  · Depth ${node.depth}</span
-                >
-              </div>
-              <code>${node.id}</code
-              ><small
-                >${node.relationship === "selected" ? "Starting point" : node.relationship === "dependent" ? `References ${this.sourceName(node.via!)}` : `Action or membership target of ${this.sourceName(node.via!)}`}</small
-              >
-              ${node.path ? html`<div class="node-path">${readablePath(node.path)}</div>` : nothing}${node.confidence ? this.badge(node.confidence) : nothing}
-            </li>`,
-        )}
-      </ol>
+      <div class="tree dependency-map">
+        <div class="map-selected">
+          <span class="map-label">Selected entity</span
+          >${this.graphNode(selected)}
+        </div>
+        <div class="map-columns">
+          <section class="map-group">
+            <h3>Used by <span class="count">${dependents.length}</span></h3>
+            <p class="muted">
+              Configurations that reference the selected entity, directly or
+              through another configuration.
+            </p>
+            ${dependents.length ? dependents.map((node) => this.graphNode(node)) : html`<p>No linked configurations found.</p>`}
+          </section>
+          <section class="map-group">
+            <h3>
+              Possible targets <span class="count">${downstream.length}</span>
+            </h3>
+            <p class="muted">
+              Action and membership targets reached through those
+              configurations.
+            </p>
+            ${downstream.length ? downstream.map((node) => this.graphNode(node)) : html`<p>No downstream targets found.</p>`}
+          </section>
+        </div>
+      </div>
       ${report.graph.cycles.length ? html`<div class="notice">Cycles detected. Nodes are shown once.${report.graph.cycles.map((cycle) => html`<p><code>${cycle.join(" → ")}</code></p>`)}</div>` : nothing}
       <details>
         <summary>All ${report.graph.edges.length} graph edges</summary>
         ${report.graph.edges.map((edge) => html`<div class="edge"><strong>${this.sourceName(edge.source_id)} → ${this.sourceName(edge.target!)}</strong><code>${edge.source_id} → ${edge.target}</code><code>${edge.path}</code><span class="badge">${edge.role}</span> ${this.badge(edge.confidence)}</div>`)}
       </details>`;
+  }
+
+  private graphNode(node: GraphNode) {
+    const kind = node.id.split(".")[0];
+    return html`<article
+      class="graph-node ${node.relationship}"
+      data-source=${node.id}
+    >
+      <div class="reference-title">
+        <div class="source-heading">
+          ${sourceIcon(kind)}
+          <div>
+            <h3>${this.sourceControl(node.id)}</h3>
+            <span class="source-meta"
+              >${sourceLabels[kind] || kind.replaceAll("_", " ")}${node.depth ? ` · ${node.depth} ${node.depth === 1 ? "step" : "steps"} away` : ""}</span
+            >
+          </div>
+        </div>
+        ${this.sourceControl(node.id, true)}
+      </div>
+      ${node.via ? html`<p class="via">${node.relationship === "dependent" ? "References" : "Target of"} ${this.sourceControl(node.via)}</p>` : nothing}
+      <details class="technical">
+        <summary>${node.path ? "Connection details" : "Entity ID"}</summary>
+        <code class="source-id">${node.id}</code>
+        ${
+          node.path
+            ? html`<div class="technical-row">
+                <div class="path">
+                  <span>${readablePath(node.path)}</span
+                  >${node.confidence ? this.badge(node.confidence) : nothing}
+                </div>
+                <code>${node.path}</code>
+              </div>`
+            : nothing
+        }
+      </details>
+    </article>`;
   }
 
   private raw(report: Report) {
@@ -356,7 +507,9 @@ export class BlastRadiusPanel extends LitElement {
               (ref) =>
                 html`<tr>
                   <td>
-                    <code>${ref.source_id}<br />${ref.path}</code>
+                    ${this.sourceControl(ref.source_id)}<code
+                      >${ref.source_id}<br />${ref.path}</code
+                    >
                   </td>
                   <td>${ref.role}</td>
                   <td>${this.badge(ref.confidence)}</td>
@@ -502,51 +655,57 @@ export class BlastRadiusPanel extends LitElement {
                     <p class="status" role="status">${this.status}</p>
                     ${this.copyFallback ? html`<textarea aria-label="Markdown report" readonly .value=${report.markdown}></textarea>` : nothing}
                   </section>
-                  <aside class="card">
-                    <h2>Change preview</h2>
-                    <p class="muted">
-                      See which references need attention before making a
-                      change.
-                    </p>
-                    <label
-                      >New entity ID<input
-                        aria-label="New entity ID"
-                        .value=${this.replacement}
-                        placeholder=${report.entity_id}
-                        @input=${(e: Event) => (this.replacement = (e.target as HTMLInputElement).value)}
-                        spellcheck="false"
-                    /></label>
-                    <button
-                      ?disabled=${this.loading || !this.replacement.trim()}
-                      @click=${() => this.run("rename")}
-                    >
-                      Preview rename</button
-                    ><button
-                      ?disabled=${this.loading}
-                      @click=${() => this.run("delete")}
-                    >
-                      Preview removal
-                    </button>
-                    ${
-                      report.preview
-                        ? html`<div class="preview" role="status">
-                            <h3>
-                              ${report.preview.operation === "rename" ? "Rename preview" : "Removal preview"}
-                            </h3>
-                            <code>${report.entity_id}</code
-                            >${report.preview.new_entity_id ? html`<code>→ ${report.preview.new_entity_id}</code>` : nothing}
-                            <ul>
-                              ${Object.entries(report.preview.affected_sources).map(([kind, count]) => html`<li>${count} ${kind} source${count === 1 ? "" : "s"}</li>`)}
-                            </ul>
-                            <p>${report.preview.note}</p>
-                            <strong>No changes have been made.</strong>
-                          </div>`
-                        : nothing
-                    }
-                    <p class="muted">
-                      Analysis only. No configuration is written.
-                    </p>
-                  </aside>
+                  <details
+                    class="card change-preview"
+                    .open=${!!report.preview}
+                  >
+                    <summary>Preview a change</summary>
+                    <div class="preview-form">
+                      <h2>Change preview</h2>
+                      <p class="muted">
+                        See which references need attention before making a
+                        change.
+                      </p>
+                      <label
+                        >New entity ID<input
+                          aria-label="New entity ID"
+                          .value=${this.replacement}
+                          placeholder=${report.entity_id}
+                          @input=${(e: Event) => (this.replacement = (e.target as HTMLInputElement).value)}
+                          spellcheck="false"
+                      /></label>
+                      <button
+                        ?disabled=${this.loading || !this.replacement.trim()}
+                        @click=${() => this.run("rename")}
+                      >
+                        Preview rename</button
+                      ><button
+                        ?disabled=${this.loading}
+                        @click=${() => this.run("delete")}
+                      >
+                        Preview removal
+                      </button>
+                      ${
+                        report.preview
+                          ? html`<div class="preview" role="status">
+                              <h3>
+                                ${report.preview.operation === "rename" ? "Rename preview" : "Removal preview"}
+                              </h3>
+                              <code>${report.entity_id}</code
+                              >${report.preview.new_entity_id ? html`<code>→ ${report.preview.new_entity_id}</code>` : nothing}
+                              <ul>
+                                ${Object.entries(report.preview.affected_sources).map(([kind, count]) => html`<li>${count} ${kind} source${count === 1 ? "" : "s"}</li>`)}
+                              </ul>
+                              <p>${report.preview.note}</p>
+                              <strong>No changes have been made.</strong>
+                            </div>`
+                          : nothing
+                      }
+                      <p class="muted">
+                        Analysis only. No configuration is written.
+                      </p>
+                    </div>
+                  </details>
                 </div>
                 <details class="card">
                   <summary>

@@ -1,7 +1,7 @@
 import "./panel";
 import { BlastRadiusPanel } from "./panel";
 import data from "./demo-data.json";
-import type { Report } from "./types";
+import type { NavigationTarget, Report } from "./types";
 
 const reports = data.reports as Record<string, unknown>;
 const panel = document.querySelector<BlastRadiusPanel>("blast-radius-panel")!;
@@ -17,6 +17,36 @@ panel.hass = {
         "This demo includes only the synthetic entities in the list.",
       );
     const report = structuredClone(source) as Report;
+    const editorPaths: Record<string, string> = {
+      "automation.wall_button": "/config/automation/edit/wall_button_config",
+      "automation.indicator": "/config/automation/edit/indicator_config",
+      "script.music_toggle": "/config/script/edit/music_toggle_config",
+      "scene.evening": "/config/scene/edit/evening_01",
+      "dashboard.home": "/lovelace",
+    };
+    report.navigation = Object.fromEntries(
+      report.graph.nodes
+        .filter(
+          (node) =>
+            editorPaths[node.id] ||
+            data.entities.some(
+              (entity) => entity.entity_id === node.id && entity.exists,
+            ),
+        )
+        .map((node): [string, NavigationTarget] => {
+          const path = editorPaths[node.id];
+          return [
+            node.id,
+            path
+              ? {
+                  kind: node.id.split(".")[0] as
+                    "automation" | "script" | "scene" | "dashboard",
+                  path,
+                }
+              : { kind: "entity", entity_id: node.id },
+          ];
+        }),
+    );
     if (message.type === "blast_radius/preview") {
       if (message.operation === "rename") {
         const target = String(message.new_entity_id || "");

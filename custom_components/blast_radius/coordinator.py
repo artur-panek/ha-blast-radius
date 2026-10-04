@@ -6,7 +6,7 @@ from typing import Any
 
 from homeassistant.core import HomeAssistant
 
-from .adapter import collect_snapshot
+from .adapter import collect_snapshot, navigation_targets
 from .analysis.analyzer import Analyzer, markdown_report
 
 
@@ -46,6 +46,10 @@ class BlastRadiusCoordinator:
                 return report
 
             result = await self.hass.async_add_executor_job(analyze)
+            if operation != "entities":
+                navigation_ids = {node["id"] for node in result["graph"]["nodes"]}
+                navigation_ids.update(ref["source_id"] for ref in result["references"])
+                result["navigation"] = navigation_targets(self.hass, sources, navigation_ids)
             self.last_summary = {
                 "snapshot_at": timestamp,
                 "source_count": len(sources),

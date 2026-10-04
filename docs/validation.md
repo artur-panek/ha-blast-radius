@@ -1,5 +1,26 @@
 # Validation
 
+## v0.1.6
+
+Local validation on 2026-10-04: **113 Python tests passed**, with **97.07%** engine
+coverage; **17 Chromium tests passed**. Ruff lint/format, engine mypy, frontend
+formatting, TypeScript, the production build and package checks passed. Tested
+against Home Assistant Core 2026.9.4 / Python 3.14.7.
+
+Real HA tests verify automation/script editor IDs after registry renames, scene
+ID encoding, default/custom dashboard routes, no-ID fallbacks and missing entities.
+Browser tests verify native navigation events and history, editor URLs, entity
+details events, rejected unsafe routes and current HA font inheritance. Navigation
+does not issue WebSocket commands or run services. Preview, export, keyboard,
+contrast, uncertainty grouping and mobile-overflow regressions remain covered.
+
+The light, dark and mobile screenshots were visually reviewed and use synthetic
+data only. Browser routing is tested in the demo harness; opening editors in a
+running household HA frontend has not been remotely verified.
+
+The 24-file local installation ZIP has SHA-256:
+`be3cfadc5923b80511a78f50ad4f7b8944aa31e77a758beb8ff40da09f9603b2`.
+
 ## v0.1.5
 
 Local validation on 2026-10-04: **111 Python tests passed**, with **97.07%** engine

@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.6 — 2026-10-04
+
+- Open automations, scripts and scenes directly in their native HA editors using
+  configuration IDs, including renamed entities. Open dashboards at their URL and
+  ordinary entities in HA's details dialog. Navigation never runs an action.
+- Replace technical reference walls with compact source cards, recognizable type
+  icons, clear use descriptions and expandable paths/confidence details.
+- Split the dependency map into used-by configurations and possible targets, with
+  clickable predecessor names. Move change previews into a collapsible section.
+- Use HA's current body-font token with system-font fallbacks. Refine desktop and
+  mobile layouts, and refresh the synthetic screenshots.
+- Add HA identifier/rename tests and browser checks for routing, entity dialogs,
+  missing destinations, unsafe links and font inheritance.
+
 ## 0.1.5 — 2026-10-04
 
 - Separate unresolved expressions in linked dashboard cards from those elsewhere

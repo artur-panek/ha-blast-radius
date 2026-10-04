@@ -11,7 +11,7 @@ Read-only dependency and impact analysis for Home Assistant. Find where an entit
 is referenced, follow structural dependencies, and preview a rename or removal
 before changing your configuration. Every result includes source paths and confidence.
 
-**v0.1.5 · Experimental alpha · Admin only · MIT**
+**v0.1.6 · Experimental alpha · Admin only · MIT**
 
 Requires Home Assistant **2026.9.4+**; tested against **2026.9.4**. Later releases
 need compatibility testing. This is a static configuration inspector, not a runtime
@@ -40,6 +40,8 @@ The screenshot uses synthetic fixtures, not a real household's configuration.
 - Configured Lovelace dashboards, including YAML, through HA's own loader.
 - Jinja literals found without executing templates; unresolved expressions kept separate.
 - Bounded dependency view with cycle detection and adjustable depth.
+- Clickable sources: open automations, scripts and scenes in HA's editor,
+  dashboards in their view, and ordinary entities in the native details dialog.
 - Rename/removal previews. **Neither operation is ever executed.**
 - Markdown copy, JSON download, dark mode and mobile layout. No cloud or telemetry.
 
@@ -80,8 +82,10 @@ and select the latest numbered release. Updates do not install or restart HA aut
 
 1. Select or type an entity ID. Missing old IDs are accepted.
 2. Choose a traversal depth and press **Analyze**.
-3. Read **Impact**, **Graph**, or **Raw references**. Expand coverage before drawing conclusions.
-4. Enter a same-domain replacement for **Preview rename**, or choose **Preview removal**.
+3. Read **Impact**, **Graph**, or **Raw references**. Click a source name or **Open**
+   to inspect it in Home Assistant; expand reference details for exact paths.
+4. Expand **Preview a change**. Enter a same-domain replacement for **Preview rename**,
+   or choose **Preview removal**. Expand coverage before drawing conclusions.
 5. Copy/export the report. Make actual changes yourself in Home Assistant.
 
 Every request takes a fresh snapshot. Registry-only entities, including disabled

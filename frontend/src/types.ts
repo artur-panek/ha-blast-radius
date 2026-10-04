@@ -26,6 +26,7 @@ export interface Report {
   uncertain_references: Reference[];
   other_dashboard_references?: Reference[];
   source_names?: Record<string, string>;
+  navigation?: Record<string, NavigationTarget>;
   unresolved_total: number;
   graph: {
     nodes: GraphNode[];
@@ -57,6 +58,9 @@ export interface Report {
     affected_sources: Record<string, number>;
   };
 }
+export type NavigationTarget =
+  | { kind: "automation" | "script" | "scene" | "dashboard"; path: string }
+  | { kind: "entity"; entity_id: string };
 export interface Entity {
   entity_id: string;
   name: string;

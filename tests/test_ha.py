@@ -13,7 +13,10 @@ from homeassistant.setup import async_setup_component  # noqa: E402
 from pytest_homeassistant_custom_component.common import MockConfigEntry  # noqa: E402
 
 from custom_components.blast_radius import async_setup_entry, async_unload_entry  # noqa: E402
-from custom_components.blast_radius.adapter import collect_snapshot  # noqa: E402
+from custom_components.blast_radius.adapter import (  # noqa: E402
+    collect_snapshot,
+    navigation_targets,
+)
 from custom_components.blast_radius.const import DOMAIN, VERSION  # noqa: E402
 from custom_components.blast_radius.coordinator import BlastRadiusCoordinator  # noqa: E402
 from custom_components.blast_radius.diagnostics import (
@@ -88,6 +91,57 @@ async def test_real_automation_script_adapter_and_non_mutation(hass):
     assert "media_player.speaker" in {n["id"] for n in report["graph"]["nodes"]}
     assert (await collect_snapshot(hass))[0] == sources
     assert warnings
+    assert (
+        report["navigation"]["automation.wall_button"]["path"]
+        == "/config/automation/edit/wall_button"
+    )
+    assert report["navigation"]["script.music_toggle"]["path"] == "/config/script/edit/music_toggle"
+    assert report["navigation"]["media_player.speaker"] == {
+        "kind": "entity",
+        "entity_id": "media_player.speaker",
+    }
+
+
+async def test_navigation_uses_config_ids_after_entity_renames(hass):
+    from homeassistant.helpers import entity_registry as er
+
+    await load_sources(hass)
+    registry = er.async_get(hass)
+    registry.async_update_entity("automation.wall_button", new_entity_id="automation.renamed")
+    registry.async_update_entity("script.music_toggle", new_entity_id="script.renamed")
+    await hass.async_block_till_done()
+    sources, _, _ = await collect_snapshot(hass)
+    targets = navigation_targets(hass, sources, {"automation.renamed", "script.renamed"})
+    assert targets["automation.renamed"]["path"] == "/config/automation/edit/wall_button"
+    assert targets["script.renamed"]["path"] == "/config/script/edit/music_toggle"
+
+
+async def test_scene_dashboard_and_missing_navigation(hass):
+    from custom_components.blast_radius.analysis.models import Source
+
+    hass.states.async_set("scene.evening", "unknown", {"id": "evening scene/#1"})
+    hass.states.async_set("scene.external", "unknown")
+    hass.states.async_set("automation.yaml_no_id", "on")
+    sources = (
+        Source("dashboard.lovelace", "dashboard", "Overview", {}),
+        Source("dashboard.wall-panel", "dashboard", "Wall", {}),
+    )
+    ids = {"scene.evening", "scene.external", "automation.yaml_no_id", "light.removed"} | {
+        s.source_id for s in sources
+    }
+    with patch.object(
+        type(hass.services), "async_call", side_effect=AssertionError("must not call services")
+    ):
+        targets = navigation_targets(hass, sources, ids)
+    assert targets["scene.evening"]["path"] == "/config/scene/edit/evening%20scene%2F%231"
+    assert targets["scene.external"] == {"kind": "entity", "entity_id": "scene.external"}
+    assert targets["automation.yaml_no_id"] == {
+        "kind": "entity",
+        "entity_id": "automation.yaml_no_id",
+    }
+    assert targets["dashboard.lovelace"]["path"] == "/lovelace"
+    assert targets["dashboard.wall-panel"]["path"] == "/wall-panel"
+    assert "light.removed" not in targets
 
 
 async def test_dashboard_failure_is_partial_coverage(hass):

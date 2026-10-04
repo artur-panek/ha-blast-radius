@@ -50,9 +50,24 @@ Referenced IDs absent from state/registry have `exists: false`.
 ```
 
 Returns `entity_id`, `exists`, `read_only`, `references`, `graph`,
-`uncertain_references`, `other_dashboard_references`, `source_names`,
+`uncertain_references`, `other_dashboard_references`, `source_names`, `navigation`,
 `unresolved_total`, `summary`, `coverage`, `warnings`,
 `snapshot_at`, `markdown`.
+
+Since v0.1.6, the HA adapter adds `navigation`, keyed by source/entity ID, after
+analysis returns to the event loop. Values are `{kind, path}` for local editor or
+dashboard routes, or `{kind: "entity", entity_id}` for HA's native more-info dialog.
+Automation/scene IDs come from state attributes; script configuration IDs come from
+the entity registry, so an entity rename does not change the editor destination.
+Sources without an editor ID use the details dialog when a current state exists.
+Missing entities have no destination. Dashboard links open the dashboard, not an
+individual nested card. The pure engine does not depend on HA routing metadata.
+
+The panel validates local route shapes, preserves modified link clicks, and uses
+HA's `location-changed` / `hass-more-info` events. It does not call services or
+save configuration when navigating. Routes/events were checked against frontend
+20260826.7's [navigation helper](https://github.com/home-assistant/frontend/blob/20260826.7/src/common/navigate.ts)
+and [more-info dialog](https://github.com/home-assistant/frontend/blob/20260826.7/src/dialogs/more-info/ha-more-info-dialog.ts).
 
 Graph nodes include `id`, `depth`, `relationship`, and a traversal predecessor
 `via`, reference `path` and `confidence` where applicable. Edges retain the original

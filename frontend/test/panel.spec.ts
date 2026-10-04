@@ -37,7 +37,7 @@ test("inspect, traverse, preview rename and removal, export JSON", async ({
     .fill("binary_sensor.wall_button");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
   await expect(
-    page.getByText("Trigger 1 › Entity ID", { exact: true }),
+    page.getByText("Used by a trigger", { exact: true }).first(),
   ).toBeVisible();
   await expect(
     page.getByText("Unresolved expressions", {
@@ -46,8 +46,9 @@ test("inspect, traverse, preview rename and removal, export JSON", async ({
   ).toBeVisible();
   await page.getByRole("tab", { name: "Graph", exact: true }).click();
   await expect(
-    page.locator(".tree").getByText("media_player.tablet", { exact: true }),
+    page.locator('.tree .graph-node[data-source="media_player.tablet"]'),
   ).toBeVisible();
+  await page.getByText("Preview a change", { exact: true }).click();
   await page
     .getByRole("textbox", { name: "New entity ID" })
     .fill("binary_sensor.music_button");
@@ -90,7 +91,7 @@ test("dark mobile layout has no horizontal overflow", async ({ page }) => {
   await search.fill("binary_sensor.wall_button");
   await search.press("Enter");
   await expect(
-    page.getByText("Trigger 1 › Entity ID", { exact: true }),
+    page.getByText("Used by a trigger", { exact: true }).first(),
   ).toBeVisible();
   expect(
     await page
@@ -112,7 +113,7 @@ test("desktop screenshots and depth change", async ({ page }) => {
   await search.fill("binary_sensor.wall_button");
   await search.press("Enter");
   await expect(
-    page.getByText("Trigger 1 › Entity ID", { exact: true }),
+    page.getByText("Used by a trigger", { exact: true }).first(),
   ).toBeVisible();
   await screenshotPanel(page, "../docs/panel-light.png");
   await page.getByRole("button", { name: "Toggle theme" }).click();
@@ -120,8 +121,8 @@ test("desktop screenshots and depth change", async ({ page }) => {
   await screenshotPanel(page, "../docs/panel-dark.png");
   await page.getByLabel("Traversal depth").selectOption("1");
   await expect(
-    page.locator(".tree").getByText("media_player.tablet", { exact: true }),
-  ).not.toBeVisible();
+    page.locator('.tree .graph-node[data-source="media_player.tablet"]'),
+  ).toHaveCount(0);
 });
 
 test("configuration labels are rendered as text", async ({ page }) => {
@@ -247,12 +248,16 @@ for (const theme of ["light", "dark", "custom-dark"]) {
     });
     await page.locator(".uncertainty-scope > summary").first().click();
     await page.locator(".reason-group > summary").first().click();
+    for (const summary of await page
+      .locator(".source-grid .technical > summary")
+      .all())
+      await summary.click();
     for (const selector of [
       ".badge.explicit",
       ".badge.template_literal",
       ".badge.dynamic",
       ".badge.unknown",
-      ".reference-title code",
+      ".source-meta",
       ".stat span",
       "button.primary",
     ]) {
@@ -392,6 +397,7 @@ test("analysis tabs support keyboard navigation and readable configuration locat
   ).toBeVisible();
   await page.keyboard.press("Home");
   await expect(impact).toBeFocused();
+  await page.locator(".source-grid .technical > summary").first().click();
   await expect(
     page.getByText("Trigger 1 › Entity ID", { exact: true }),
   ).toBeVisible();
@@ -401,4 +407,160 @@ test("analysis tabs support keyboard navigation and readable configuration locat
       .first()
       .evaluate((el) => parseFloat(getComputedStyle(el).fontSize)),
   ).toBeGreaterThanOrEqual(14);
+});
+
+test("source links use configuration IDs and notify the Home Assistant router", async ({
+  page,
+}) => {
+  const search = page.getByRole("combobox", { name: "Entity", exact: true });
+  await search.fill("binary_sensor.wall_button");
+  await search.press("Enter");
+  const automation = page.locator(
+    '.source-grid [data-source="automation.wall_button"]',
+  );
+  await expect(automation.locator("a.source-name")).toHaveAttribute(
+    "href",
+    "/config/automation/edit/wall_button_config",
+  );
+  await expect(automation.locator(".open-source")).toHaveAttribute(
+    "href",
+    "/config/automation/edit/wall_button_config",
+  );
+  await page.getByRole("tab", { name: "Graph", exact: true }).click();
+  await expect(
+    page.locator('.graph-node[data-source="script.music_toggle"] .open-source'),
+  ).toHaveAttribute("href", "/config/script/edit/music_toggle_config");
+  await expect(
+    page.locator('.graph-node[data-source="dashboard.home"] .open-source'),
+  ).toHaveAttribute("href", "/lovelace");
+  await page.evaluate(() => {
+    (window as any).navigationEvents = [];
+    window.addEventListener("location-changed", (event) =>
+      (window as any).navigationEvents.push((event as CustomEvent).detail),
+    );
+  });
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    panel.hass.callWS = () => {
+      throw new Error("Navigation must not issue commands");
+    };
+  });
+  await page
+    .locator('.graph-node[data-source="automation.wall_button"] .open-source')
+    .click();
+  await expect(page).toHaveURL(
+    /\/config\/automation\/edit\/wall_button_config$/,
+  );
+  expect(
+    await page.evaluate(() => ({
+      events: (window as any).navigationEvents,
+      from: history.state.from,
+    })),
+  ).toEqual({ events: [{ replace: false }], from: "/" });
+  await page.goBack();
+  await expect(page).toHaveURL(/\/$/);
+});
+
+test("scenes open their editor and ordinary entities open the native more-info dialog", async ({
+  page,
+}) => {
+  const search = page.getByRole("combobox", { name: "Entity", exact: true });
+  await search.fill("media_player.speaker");
+  await search.press("Enter");
+  await expect(
+    page.locator('.source-grid [data-source="scene.evening"] .open-source'),
+  ).toHaveAttribute("href", "/config/scene/edit/evening_01");
+  await page.getByRole("tab", { name: "Graph", exact: true }).click();
+  await page.evaluate(() => {
+    (window as any).moreInfo = [];
+    window.addEventListener("hass-more-info", (event) =>
+      (window as any).moreInfo.push({
+        detail: (event as CustomEvent).detail,
+        bubbles: event.bubbles,
+        composed: event.composed,
+      }),
+    );
+  });
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    panel.hass.callWS = () => {
+      throw new Error("Opening details must not issue commands");
+    };
+  });
+  await page
+    .locator(
+      '.graph-node[data-source="media_player.speaker"] > .reference-title .open-source',
+    )
+    .click();
+  expect(await page.evaluate(() => (window as any).moreInfo)).toEqual([
+    {
+      detail: { entityId: "media_player.speaker" },
+      bubbles: true,
+      composed: true,
+    },
+  ]);
+  await expect(page).toHaveURL(/\/$/);
+});
+
+test("missing entities and unsafe navigation destinations do not get open controls", async ({
+  page,
+}) => {
+  const search = page.getByRole("combobox", { name: "Entity", exact: true });
+  await search.fill("light.removed");
+  await search.press("Enter");
+  await page.getByRole("tab", { name: "Graph", exact: true }).click();
+  await expect(
+    page.locator('.graph-node[data-source="light.removed"] .open-source'),
+  ).toHaveCount(0);
+  await search.fill("binary_sensor.wall_button");
+  await search.press("Enter");
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  for (const path of [
+    "https://example.com",
+    "//example.com",
+    "javascript:alert(1)",
+    "/config/automation/edit/../new",
+    "/config/automation/edit/new",
+  ]) {
+    await page
+      .locator("blast-radius-panel")
+      .evaluate((panel: any, destination) => {
+        panel.report = {
+          ...panel.report,
+          navigation: {
+            ...panel.report.navigation,
+            "automation.wall_button": { kind: "automation", path: destination },
+          },
+        };
+      }, path);
+    await expect(
+      page.locator('[data-source="automation.wall_button"] .open-source'),
+    ).toHaveCount(0);
+    await expect(
+      page.locator('[data-source="automation.wall_button"] a.source-name'),
+    ).toHaveCount(0);
+  }
+});
+
+test("panel uses the current HA body font and hides technical details initially", async ({
+  page,
+}) => {
+  await page.locator("blast-radius-panel").evaluate((panel: HTMLElement) => {
+    panel.style.setProperty("--ha-font-family-body", "Arial");
+    panel.style.setProperty(
+      "--paper-font-body1_-_font-family",
+      "Times New Roman",
+    );
+  });
+  await page
+    .getByRole("combobox", { name: "Entity", exact: true })
+    .fill("binary_sensor.wall_button");
+  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  const purpose = page.getByText("Used by a trigger", { exact: true }).first();
+  await expect(purpose).toBeVisible();
+  expect(
+    await purpose.evaluate((element) => getComputedStyle(element).fontFamily),
+  ).toMatch(/^Arial,/);
+  await expect(page.locator(".source-grid .badge").first()).not.toBeVisible();
+  await expect(
+    page.getByRole("textbox", { name: "New entity ID" }),
+  ).not.toBeVisible();
 });

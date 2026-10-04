@@ -1,3 +1,49 @@
+import type { Reference, NavigationTarget } from "./types";
+
+export const sourceLabels: Record<string, string> = {
+  automation: "Automation",
+  script: "Script",
+  scene: "Scene",
+  dashboard: "Dashboard",
+  group: "Group",
+};
+
+export function referencePurpose(refs: Reference[]): string {
+  const descriptions = new Set(
+    refs.map((ref) => {
+      if (ref.source_type === "dashboard") return "Used on this dashboard";
+      if (ref.source_type === "scene") return "Included in this scene";
+      if (ref.role === "member") return "Member of this group";
+      if (ref.role === "call") return "Called by this configuration";
+      if (ref.role === "write") return "Listed as an action target";
+      if (/^(triggers?|wait_for_trigger)(\[|\.)/.test(ref.path))
+        return "Used by a trigger";
+      if (ref.confidence === "template_literal")
+        return "Referenced in a template";
+      if (ref.confidence === "unknown") return "Reference needs review";
+      return "Read by this configuration";
+    }),
+  );
+  return [...descriptions].join(" · ");
+}
+
+export function safeNavigationPath(
+  target: NavigationTarget,
+): string | undefined {
+  if (target.kind === "entity") return undefined;
+  const { path } = target;
+  if (target.kind === "dashboard") {
+    return /^\/[a-z0-9_-]+$/.test(path) ? path : undefined;
+  }
+  const prefix = `/config/${target.kind}/edit/`;
+  return ["automation", "script", "scene"].includes(target.kind) &&
+    path.startsWith(prefix) &&
+    /^[a-zA-Z0-9_%.-]+$/.test(path.slice(prefix.length)) &&
+    ![".", "..", "new"].includes(path.slice(prefix.length))
+    ? path
+    : undefined;
+}
+
 const pathLabels: Record<string, string> = {
   views: "View",
   sections: "Section",

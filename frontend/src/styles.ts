@@ -7,13 +7,15 @@ export const styles = css`
     overflow: auto;
     color: var(--primary-text-color, #212121);
     background: var(--primary-background-color, #fafafa);
-    font-family: var(
-      --paper-font-body1_-_font-family,
-      Roboto,
+    font-family:
+      var(--ha-font-family-body, Roboto),
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
       Arial,
-      sans-serif
-    );
-    font-size: 15px;
+      sans-serif;
+    font-size: 16px;
     line-height: 1.55;
     --br-card: var(--card-background-color, #fff);
     --br-border: color-mix(
@@ -74,7 +76,7 @@ export const styles = css`
     background: transparent;
   }
   main {
-    max-width: 1240px;
+    max-width: 1380px;
     margin: auto;
     padding: 30px 32px 50px;
   }
@@ -218,18 +220,24 @@ export const styles = css`
   .stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
+    gap: 0;
     margin: 22px 0;
-  }
-  .stat {
     border: 1px solid var(--br-border);
     border-radius: 10px;
-    padding: 16px;
     background: var(--br-card);
+    overflow: hidden;
+  }
+  .stat {
+    border-right: 1px solid var(--br-border);
+    padding: 14px 20px;
+    background: var(--br-card);
+  }
+  .stat:last-child {
+    border-right: 0;
   }
   .stat strong {
     display: block;
-    font-size: 28px;
+    font-size: 25px;
     font-weight: 500;
     margin-bottom: 5px;
   }
@@ -239,8 +247,8 @@ export const styles = css`
   }
   .columns {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 310px;
-    gap: 20px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
     align-items: start;
   }
   .card {
@@ -269,24 +277,30 @@ export const styles = css`
     border-bottom-color: var(--br-accent);
   }
   .reference {
-    padding: 20px 0;
-    border-top: 1px solid var(--br-border);
+    padding: 16px;
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    min-width: 0;
   }
-  .reference:first-of-type {
-    border-top: 0;
+  .source-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    align-items: start;
   }
   .reference-title {
     display: flex;
     gap: 10px;
     justify-content: space-between;
-    align-items: start;
+    align-items: center;
   }
   .reference-title code {
     font-size: 13px;
     color: var(--br-muted);
   }
   .reference-title h3 {
-    margin-bottom: 2px;
+    margin: 0;
+    font-size: 17px;
   }
   .path {
     display: flex;
@@ -323,33 +337,6 @@ export const styles = css`
     height: 48px;
     margin: 0 auto 12px;
   }
-  .tree {
-    list-style: none;
-    padding: 0;
-  }
-  .tree li {
-    border-left: 2px solid var(--br-border);
-    padding: 16px;
-    margin: 12px 0;
-  }
-  .tree .selected {
-    border-color: var(--br-accent);
-    background: var(--secondary-background-color, #f5f5f5);
-  }
-  .tree small {
-    display: block;
-    margin-top: 5px;
-    line-height: 1.5;
-    color: var(--br-muted);
-    overflow-wrap: anywhere;
-    font-size: 14px;
-  }
-  .tree code {
-    font-size: 13px;
-  }
-  .tree .badge {
-    margin-top: 5px;
-  }
   .controls {
     display: flex;
     gap: 8px;
@@ -359,14 +346,13 @@ export const styles = css`
   .controls button {
     font-size: 13px;
   }
-  aside label {
+  .preview-form label {
     margin: 18px 0;
   }
-  aside button {
-    width: 100%;
-    margin-top: 10px;
+  .preview-form > button {
+    margin: 0 8px 8px 0;
   }
-  aside p {
+  .preview-form p {
     font-size: 14px;
   }
   .preview {
@@ -452,19 +438,28 @@ export const styles = css`
     color: var(--br-muted);
   }
   .technical {
-    margin-top: 12px;
+    margin-top: 8px;
     color: var(--br-muted);
   }
+  .technical > summary {
+    font-size: 14px;
+  }
   .technical-row {
-    display: flex;
-    gap: 12px;
-    align-items: start;
-    justify-content: space-between;
+    display: grid;
+    gap: 8px;
     padding: 10px 0;
     border-top: 1px solid var(--br-border);
   }
   .technical-row code {
     min-width: 0;
+  }
+  .technical-row .path {
+    padding-top: 0;
+    color: var(--primary-text-color, #212121);
+  }
+  .source-id {
+    display: block;
+    margin: 8px 0 12px;
   }
   .uncertainty {
     border-top: 1px solid var(--br-border);
@@ -515,38 +510,165 @@ export const styles = css`
   .unresolved-row code {
     color: var(--br-muted);
   }
-  .node-title {
-    display: flex;
-    align-items: start;
-    justify-content: space-between;
-    gap: 12px;
-    overflow-wrap: anywhere;
-  }
-  .node-title strong {
-    min-width: 0;
-  }
-  .node-title .badge {
-    margin: 0;
-  }
-  .node-path {
-    font-size: 14px;
-    margin-top: 8px;
-    overflow-wrap: anywhere;
-  }
   .edge {
     padding: 16px 0;
     border-top: 1px solid var(--br-border);
     overflow-wrap: anywhere;
   }
+  .source-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+  .source-heading > div {
+    min-width: 0;
+  }
+  .source-icon {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    color: var(--br-muted);
+  }
+  .source-meta {
+    font-size: 13px;
+    color: var(--br-muted);
+  }
+  .source-name {
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+    text-decoration: none;
+  }
+  button.source-name {
+    border: 0;
+    border-radius: 3px;
+    padding: 0;
+    min-height: 0;
+    background: none;
+    text-align: left;
+  }
+  a.source-name:hover,
+  button.source-name:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  a.open-source,
+  button.open-source {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    border: 1px solid var(--br-border);
+    border-radius: 7px;
+    padding: 7px 12px;
+    background: var(--br-card);
+    color: var(--primary-text-color, #212121);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  a.open-source:hover,
+  button.open-source:hover {
+    border-color: var(--br-accent);
+  }
+  .purpose {
+    margin: 12px 0 0;
+    font-size: 15px;
+  }
+  .review-hint {
+    display: block;
+    color: var(--br-muted);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  .dependency-map {
+    margin: 20px 0;
+  }
+  .map-selected {
+    max-width: 600px;
+    margin: 0 auto 24px;
+    padding: 12px 16px 0;
+    border: 1px solid var(--br-accent);
+    border-radius: 10px;
+  }
+  .map-selected .graph-node {
+    border: 0;
+    margin-bottom: 0;
+    padding: 10px 0 0;
+  }
+  .map-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--br-muted);
+  }
+  .map-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .map-group {
+    min-width: 0;
+    border-top: 2px solid var(--br-border);
+    padding-top: 18px;
+  }
+  .map-group > h3 {
+    font-size: 18px;
+  }
+  .map-group > p {
+    font-size: 14px;
+    margin: 8px 0 18px;
+  }
+  .graph-node {
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    padding: 14px 16px 4px;
+    margin-bottom: 12px;
+  }
+  .via {
+    font-size: 14px;
+    margin: 10px 0 0;
+    color: var(--br-muted);
+  }
+  .via .source-name {
+    font-weight: 500;
+  }
+  .change-preview {
+    margin-top: 0;
+    padding: 6px 22px;
+  }
+  .change-preview > summary {
+    font-weight: 600;
+    padding: 14px 0;
+  }
+  .preview-form {
+    max-width: 680px;
+    padding: 12px 0;
+  }
+  .preview-form h2 {
+    display: none;
+  }
+  td code {
+    display: block;
+    margin-top: 6px;
+  }
+  .uncertainty .reference {
+    margin: 12px 0;
+  }
   @media (max-width: 850px) {
     .columns {
       grid-template-columns: 1fr;
     }
-    aside {
-      order: 1;
-    }
     main {
       padding: 22px 18px;
+    }
+  }
+  @media (max-width: 1000px) {
+    .source-grid,
+    .map-columns {
+      grid-template-columns: 1fr;
     }
   }
   @media (max-width: 500px) {
@@ -570,6 +692,12 @@ export const styles = css`
     .stats {
       grid-template-columns: repeat(2, 1fr);
     }
+    .stat:nth-child(2) {
+      border-right: 0;
+    }
+    .stat:nth-child(-n + 2) {
+      border-bottom: 1px solid var(--br-border);
+    }
     .search {
       flex-wrap: wrap;
     }
@@ -590,12 +718,30 @@ export const styles = css`
       flex-direction: column;
     }
     .reference-title {
-      flex-wrap: wrap;
+      gap: 8px;
     }
-    .technical-row,
-    .node-title {
-      flex-direction: column;
+    .technical-row {
       gap: 6px;
+    }
+    .source-heading {
+      gap: 8px;
+    }
+    .source-icon {
+      width: 22px;
+      height: 22px;
+      flex-basis: 22px;
+    }
+    .reference-title h3 {
+      font-size: 16px;
+    }
+    .reference,
+    .graph-node {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+    a.open-source,
+    button.open-source {
+      padding: 6px 8px;
     }
     .foot {
       flex-direction: column;
