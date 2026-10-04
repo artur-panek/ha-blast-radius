@@ -24,6 +24,14 @@ frontend. No household screenshots or configuration are published.
 The 24-file local installation ZIP has SHA-256:
 `98175a7c981c4612f4a0a0459bce7ea36b608506aa073e61a78cdc860eb94a4d`.
 
+All six jobs passed in the [v0.1.7 CI run](https://github.com/artur-panek/ha-blast-radius/actions/runs/37170706705)
+at `4b800fee29d6707feffe621122cb0e1a39cb76eb`: Python 3.12 (100 tests, HA module
+skipped), Python 3.14 (116 tests, 97.07% engine coverage), frontend (17 browser tests),
+hassfest, HACS and automatic publication. The published
+[v0.1.7](https://github.com/artur-panek/ha-blast-radius/releases/tag/v0.1.7) tag points
+to that commit and its ZIP matches the local checksum. Discovery, installation and
+opening the loaded-config view on the user's server remain unverified remotely.
+
 ## v0.1.6
 
 Local validation on 2026-10-04: **113 Python tests passed**, with **97.07%** engine
