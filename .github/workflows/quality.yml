@@ -72,8 +72,6 @@ jobs:
         with:
           category: integration
           comment: false
-          # Custom repository alpha: upstream brands/default-list submission is deferred.
-          ignore: brands
 
   release:
     name: Publish version for HACS
