@@ -409,7 +409,7 @@ test("analysis tabs support keyboard navigation and readable configuration locat
   ).toBeGreaterThanOrEqual(14);
 });
 
-test("source links use configuration IDs and notify the Home Assistant router", async ({
+test("source links open loaded configurations and notify the Home Assistant router", async ({
   page,
 }) => {
   const search = page.getByRole("combobox", { name: "Entity", exact: true });
@@ -420,16 +420,16 @@ test("source links use configuration IDs and notify the Home Assistant router", 
   );
   await expect(automation.locator("a.source-name")).toHaveAttribute(
     "href",
-    "/config/automation/edit/wall_button_config",
+    "/config/automation/show/automation.wall_button",
   );
   await expect(automation.locator(".open-source")).toHaveAttribute(
     "href",
-    "/config/automation/edit/wall_button_config",
+    "/config/automation/show/automation.wall_button",
   );
   await page.getByRole("tab", { name: "Graph", exact: true }).click();
   await expect(
     page.locator('.graph-node[data-source="script.music_toggle"] .open-source'),
-  ).toHaveAttribute("href", "/config/script/edit/music_toggle_config");
+  ).toHaveAttribute("href", "/config/script/show/script.music_toggle");
   await expect(
     page.locator('.graph-node[data-source="dashboard.home"] .open-source'),
   ).toHaveAttribute("href", "/lovelace");
@@ -440,6 +440,9 @@ test("source links use configuration IDs and notify the Home Assistant router", 
     );
   });
   await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    panel.hass.callApi = () => {
+      throw new Error("Opening the inspector must not read editor files");
+    };
     panel.hass.callWS = () => {
       throw new Error("Navigation must not issue commands");
     };
@@ -448,7 +451,7 @@ test("source links use configuration IDs and notify the Home Assistant router", 
     .locator('.graph-node[data-source="automation.wall_button"] .open-source')
     .click();
   await expect(page).toHaveURL(
-    /\/config\/automation\/edit\/wall_button_config$/,
+    /\/config\/automation\/show\/automation\.wall_button$/,
   );
   expect(
     await page.evaluate(() => ({
@@ -519,6 +522,9 @@ test("missing entities and unsafe navigation destinations do not get open contro
     "javascript:alert(1)",
     "/config/automation/edit/../new",
     "/config/automation/edit/new",
+    "/config/automation/show/script.music_toggle",
+    "/config/automation/show/automation.wall_button/extra",
+    "/config/automation/show/automation.%2e%2e",
   ]) {
     await page
       .locator("blast-radius-panel")

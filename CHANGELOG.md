@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.7 — 2026-10-04
+
+- Open automations/scripts through HA's native read-only `/show` route using
+  current entity IDs. This inspects the configuration already loaded in HA and
+  avoids the file-based editor request that can return HTTP 500.
+- Support loaded YAML automations without an editor ID and renamed entities.
+  Scene editors, dashboard links and ordinary entity details keep their behavior.
+- Reproduce native editor HTTP 500 responses in HA tests and verify that its
+  loaded-config WebSocket API remains available. Tighten allowed view routes and
+  update navigation regression checks and documentation.
+- This corrects Blast Radius navigation; it does not repair malformed or
+  inaccessible configuration files behind errors in HA's own editor.
+
 ## 0.1.6 — 2026-10-04
 
 - Open automations, scripts and scenes directly in their native HA editors using

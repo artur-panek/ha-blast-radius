@@ -55,11 +55,17 @@ Returns `entity_id`, `exists`, `read_only`, `references`, `graph`,
 `snapshot_at`, `markdown`.
 
 Since v0.1.6, the HA adapter adds `navigation`, keyed by source/entity ID, after
-analysis returns to the event loop. Values are `{kind, path}` for local editor or
+analysis returns to the event loop. Values are `{kind, path}` for local views or
 dashboard routes, or `{kind: "entity", entity_id}` for HA's native more-info dialog.
-Automation/scene IDs come from state attributes; script configuration IDs come from
-the entity registry, so an entity rename does not change the editor destination.
-Sources without an editor ID use the details dialog when a current state exists.
+Since v0.1.7, loaded automations/scripts use `/config/{domain}/show/{entity_id}`.
+HA loads this read-only view through its native `automation/config` or `script/config`
+WebSocket command, matching the loaded objects inspected by the analyzer. This
+works after entity renames and without an automation editor ID. It avoids `/edit`,
+whose separate file request may return HTTP 500 even with a valid loaded config.
+No file repair or configuration write is attempted.
+
+Scene editor IDs still come from state attributes. Other sources use the details
+dialog when a current state exists.
 Missing entities have no destination. Dashboard links open the dashboard, not an
 individual nested card. The pure engine does not depend on HA routing metadata.
 
@@ -68,6 +74,10 @@ HA's `location-changed` / `hass-more-info` events. It does not call services or
 save configuration when navigating. Routes/events were checked against frontend
 20260826.7's [navigation helper](https://github.com/home-assistant/frontend/blob/20260826.7/src/common/navigate.ts)
 and [more-info dialog](https://github.com/home-assistant/frontend/blob/20260826.7/src/dialogs/more-info/ha-more-info-dialog.ts).
+The loaded-config routes were checked against its
+[automation editor](https://github.com/home-assistant/frontend/blob/20260826.7/src/panels/config/automation/ha-automation-editor.ts),
+[script editor](https://github.com/home-assistant/frontend/blob/20260826.7/src/panels/config/script/ha-script-editor.ts)
+and [file-load handling](https://github.com/home-assistant/frontend/blob/20260826.7/src/panels/config/automation/ha-automation-script-editor-mixin.ts).
 
 Graph nodes include `id`, `depth`, `relationship`, and a traversal predecessor
 `via`, reference `path` and `confidence` where applicable. Edges retain the original

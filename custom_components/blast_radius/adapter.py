@@ -20,7 +20,7 @@ from .analysis.models import Source
 def navigation_targets(
     hass: HomeAssistant, sources: tuple[Source, ...], entity_ids: set[str]
 ) -> dict[str, dict[str, str]]:
-    """Build local editor links using HA IDs, never entity-name guesses or service calls."""
+    """Link loaded configurations to HA's native inspector without reading editor files."""
     registry = er.async_get(hass)
     source_by_id = {source.source_id: source for source in sources}
     result: dict[str, dict[str, str]] = {}
@@ -31,27 +31,31 @@ def navigation_targets(
             # Dashboard URL paths are encoded as one segment, not arbitrary URLs.
             result[entity_id] = {"kind": "dashboard", "path": f"/{quote(path, safe='')}"}
             continue
+        if source and source.source_type in {"automation", "script"}:
+            # /show uses the same loaded configuration as this analyzer. /edit
+            # reads automations.yaml/scripts.yaml, which may be absent, stale or
+            # invalid even while HA is running a valid in-memory configuration.
+            domain = source.source_type
+            result[entity_id] = {
+                "kind": domain,
+                "path": f"/config/{domain}/show/{quote(entity_id, safe='')}",
+            }
+            continue
         state = hass.states.get(entity_id)
         entry = registry.async_get(entity_id)
         if state is None and entry is None:
             continue
         domain = entity_id.partition(".")[0]
         editor_id = None
-        if domain in {"automation", "scene"} and state is not None:
+        if domain == "scene" and state is not None:
             editor_id = state.attributes.get("id")
-        elif domain == "script" and source and entry is not None:
-            editor_id = entry.unique_id
-        if (
-            domain in {"automation", "script", "scene"}
-            and isinstance(editor_id, (str, int))
-            and str(editor_id)
-        ):
+        if domain == "scene" and isinstance(editor_id, (str, int)) and str(editor_id):
             result[entity_id] = {
                 "kind": domain,
                 "path": f"/config/{domain}/edit/{quote(str(editor_id), safe='')}",
             }
             continue
-        # YAML automations/scenes without IDs and ordinary entities open HA's
+        # Unloaded automations, scenes without IDs and ordinary entities open HA's
         # more-info dialog. Disabled/removed entities without states have no dialog.
         if state is not None:
             result[entity_id] = {"kind": "entity", "entity_id": entity_id}

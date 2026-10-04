@@ -55,9 +55,10 @@ needed on the Home Assistant machine; the built panel is included.
 
 Analyze an entity you know appears in an automation or dashboard. Confirm the
 source IDs and paths against that configuration. Click a source name or **Open**
-to inspect its automation, script or scene in HA's editor. Dashboard links open the
-dashboard; other entities open HA's details dialog. Configurations without an
-editor ID fall back to details when available; missing entities have no open button.
+to inspect the loaded automation or script in HA's native read-only view. This also
+works for loaded YAML automations without an editor ID. Scene links open HA's editor;
+dashboards open their view and other entities open HA's details dialog. Scenes
+without an editor ID fall back to details; missing entities have no open button.
 Navigation does not run automations, scripts or scenes.
 
 Open **Graph** for separate **Used by** and **Possible targets** columns. Expand
@@ -84,6 +85,7 @@ the exact zero-based path (`cards[2]`), or use **Raw references** and the export
 | Integration not found | Verify the folder path and HA version, then restart HA |
 | Sidebar entry absent | Confirm the integration was added and you are an administrator |
 | Old UI or missing sidebar icon | Restart HA after updating, then reload the browser or reopen the app |
+| Error loading automation (500) after Open | Update to v0.1.7+, restart HA and reload. Open now uses HA's loaded-config view. A 500 in HA's separate edit screen still needs investigation in HA logs; Blast Radius does not repair configuration files |
 | Analysis fails | Reload the integration and retry; record versions and a synthetic reproduction |
 | Expected reference absent | Expand coverage warnings; unloaded YAML, blueprint bodies and several source types are outside coverage |
 | Many unresolved entries | Expand the reason groups; runtime variables, patterns and selectors need more context. Other dashboard cards are listed separately, not attributed to this entity |

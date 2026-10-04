@@ -1,5 +1,29 @@
 # Validation
 
+## v0.1.7
+
+Local validation on 2026-10-04: **116 Python tests passed**, with **97.07%** engine
+coverage; **17 Chromium tests passed**. Ruff lint/format, engine mypy, frontend
+formatting, TypeScript, the production build and package checks passed. Tested
+against Home Assistant Core 2026.9.4 / Python 3.14.7.
+
+Two real-HA transport regressions reproduce HTTP 500 from the native automation
+and script file editor by supplying an invalid file structure. Both verify that
+the native loaded-config WebSocket commands still return the running configuration
+and that navigation uses `/show/{entity_id}`. A further test covers an automation
+without an editor ID. Existing rename, scene, dashboard and entity-dialog cases pass.
+Browser checks verify the new view routes, routing events, rejected path shapes and
+no file-editor API call from the panel. Existing UI checks remain green.
+
+This is a reproduction of the failure class, not a diagnosis of the user's actual
+configuration file. The screenshot confirms an editor HTTP 500; its server-side
+cause remains unknown without HA logs. The fix changes the inspection route and
+does not repair HA files. Browser tests use a synthetic harness, not the user's HA
+frontend. No household screenshots or configuration are published.
+
+The 24-file local installation ZIP has SHA-256:
+`98175a7c981c4612f4a0a0459bce7ea36b608506aa073e61a78cdc860eb94a4d`.
+
 ## v0.1.6
 
 Local validation on 2026-10-04: **113 Python tests passed**, with **97.07%** engine

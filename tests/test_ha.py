@@ -93,16 +93,19 @@ async def test_real_automation_script_adapter_and_non_mutation(hass):
     assert warnings
     assert (
         report["navigation"]["automation.wall_button"]["path"]
-        == "/config/automation/edit/wall_button"
+        == "/config/automation/show/automation.wall_button"
     )
-    assert report["navigation"]["script.music_toggle"]["path"] == "/config/script/edit/music_toggle"
+    assert (
+        report["navigation"]["script.music_toggle"]["path"]
+        == "/config/script/show/script.music_toggle"
+    )
     assert report["navigation"]["media_player.speaker"] == {
         "kind": "entity",
         "entity_id": "media_player.speaker",
     }
 
 
-async def test_navigation_uses_config_ids_after_entity_renames(hass):
+async def test_navigation_uses_current_entity_ids_after_renames(hass):
     from homeassistant.helpers import entity_registry as er
 
     await load_sources(hass)
@@ -112,8 +115,8 @@ async def test_navigation_uses_config_ids_after_entity_renames(hass):
     await hass.async_block_till_done()
     sources, _, _ = await collect_snapshot(hass)
     targets = navigation_targets(hass, sources, {"automation.renamed", "script.renamed"})
-    assert targets["automation.renamed"]["path"] == "/config/automation/edit/wall_button"
-    assert targets["script.renamed"]["path"] == "/config/script/edit/music_toggle"
+    assert targets["automation.renamed"]["path"] == "/config/automation/show/automation.renamed"
+    assert targets["script.renamed"]["path"] == "/config/script/show/script.renamed"
 
 
 async def test_scene_dashboard_and_missing_navigation(hass):
@@ -156,6 +159,69 @@ async def test_dashboard_failure_is_partial_coverage(hass):
     assert not any("private-secret" in warning for warning in warnings)
     good.async_save.assert_not_called()
     bad.async_save.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    ("domain", "entity_id", "config_key", "invalid_file"),
+    [
+        ("automation", "automation.wall_button", "wall_button", {"wrong_root": []}),
+        ("script", "script.music_toggle", "music_toggle", ["wrong_root"]),
+    ],
+)
+async def test_loaded_config_remains_available_when_editor_returns_500(
+    hass, hass_client, hass_ws_client, domain, entity_id, config_key, invalid_file
+):
+    from homeassistant.components.config import automation, script
+
+    await load_sources(hass)
+    assert await async_setup_component(hass, "http", {})
+    assert await async_setup_component(hass, "websocket_api", {})
+    assert (automation if domain == "automation" else script).async_setup(hass)
+    http = await hass_client()
+    websocket = await hass_ws_client(hass)
+    sources, _, _ = await collect_snapshot(hass)
+    # Reproduce a failed native file-based editor independently from the valid
+    # configuration still loaded in HA. Do not modify any user configuration.
+    with (
+        patch("homeassistant.components.config.view._read", return_value=invalid_file),
+        patch.object(
+            type(hass.services), "async_call", side_effect=AssertionError("must not call services")
+        ),
+    ):
+        response = await http.get(f"/api/config/{domain}/config/{config_key}")
+        assert response.status == 500
+        targets = navigation_targets(hass, sources, {entity_id})
+        assert targets[entity_id]["path"] == f"/config/{domain}/show/{entity_id}"
+        # This is the native command used by HA's /show route, not a stub.
+        await websocket.send_json({"id": 1, "type": f"{domain}/config", "entity_id": entity_id})
+        result = await websocket.receive_json()
+        assert result["success"]
+        assert result["result"]["config"]["alias"] == (
+            "Wall button" if domain == "automation" else "Music toggle"
+        )
+
+
+async def test_loaded_yaml_automation_without_id_opens_native_inspector(hass):
+    assert await async_setup_component(
+        hass,
+        "automation",
+        {
+            "automation": [
+                {
+                    "alias": "YAML only",
+                    "triggers": [{"trigger": "event", "event_type": "synthetic_event"}],
+                    "actions": [],
+                }
+            ]
+        },
+    )
+    await hass.async_block_till_done()
+    sources, _, _ = await collect_snapshot(hass)
+    assert "id" not in hass.states.get("automation.yaml_only").attributes
+    assert (
+        navigation_targets(hass, sources, {"automation.yaml_only"})["automation.yaml_only"]["path"]
+        == "/config/automation/show/automation.yaml_only"
+    )
 
 
 async def test_websocket_real_transport(hass, hass_ws_client):

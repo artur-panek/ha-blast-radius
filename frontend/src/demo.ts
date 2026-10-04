@@ -17,10 +17,11 @@ panel.hass = {
         "This demo includes only the synthetic entities in the list.",
       );
     const report = structuredClone(source) as Report;
-    const editorPaths: Record<string, string> = {
-      "automation.wall_button": "/config/automation/edit/wall_button_config",
-      "automation.indicator": "/config/automation/edit/indicator_config",
-      "script.music_toggle": "/config/script/edit/music_toggle_config",
+    const sourcePaths: Record<string, string> = {
+      "automation.wall_button":
+        "/config/automation/show/automation.wall_button",
+      "automation.indicator": "/config/automation/show/automation.indicator",
+      "script.music_toggle": "/config/script/show/script.music_toggle",
       "scene.evening": "/config/scene/edit/evening_01",
       "dashboard.home": "/lovelace",
     };
@@ -28,13 +29,13 @@ panel.hass = {
       report.graph.nodes
         .filter(
           (node) =>
-            editorPaths[node.id] ||
+            sourcePaths[node.id] ||
             data.entities.some(
               (entity) => entity.entity_id === node.id && entity.exists,
             ),
         )
         .map((node): [string, NavigationTarget] => {
-          const path = editorPaths[node.id];
+          const path = sourcePaths[node.id];
           return [
             node.id,
             path

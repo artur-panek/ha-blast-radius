@@ -11,7 +11,7 @@ Read-only dependency and impact analysis for Home Assistant. Find where an entit
 is referenced, follow structural dependencies, and preview a rename or removal
 before changing your configuration. Every result includes source paths and confidence.
 
-**v0.1.6 · Experimental alpha · Admin only · MIT**
+**v0.1.7 · Experimental alpha · Admin only · MIT**
 
 Requires Home Assistant **2026.9.4+**; tested against **2026.9.4**. Later releases
 need compatibility testing. This is a static configuration inspector, not a runtime
@@ -40,8 +40,8 @@ The screenshot uses synthetic fixtures, not a real household's configuration.
 - Configured Lovelace dashboards, including YAML, through HA's own loader.
 - Jinja literals found without executing templates; unresolved expressions kept separate.
 - Bounded dependency view with cycle detection and adjustable depth.
-- Clickable sources: open automations, scripts and scenes in HA's editor,
-  dashboards in their view, and ordinary entities in the native details dialog.
+- Clickable sources: inspect loaded automations/scripts in HA's read-only view,
+  open scenes in their editor, dashboards in their view, and entities in details.
 - Rename/removal previews. **Neither operation is ever executed.**
 - Markdown copy, JSON download, dark mode and mobile layout. No cloud or telemetry.
 

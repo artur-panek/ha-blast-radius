@@ -35,8 +35,15 @@ export function safeNavigationPath(
   if (target.kind === "dashboard") {
     return /^\/[a-z0-9_-]+$/.test(path) ? path : undefined;
   }
+  if (target.kind === "automation" || target.kind === "script") {
+    const prefix = `/config/${target.kind}/show/${target.kind}.`;
+    return path.startsWith(prefix) &&
+      /^[a-z0-9_]+$/.test(path.slice(prefix.length))
+      ? path
+      : undefined;
+  }
   const prefix = `/config/${target.kind}/edit/`;
-  return ["automation", "script", "scene"].includes(target.kind) &&
+  return target.kind === "scene" &&
     path.startsWith(prefix) &&
     /^[a-zA-Z0-9_%.-]+$/.test(path.slice(prefix.length)) &&
     ![".", "..", "new"].includes(path.slice(prefix.length))

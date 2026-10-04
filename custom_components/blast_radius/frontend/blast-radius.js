@@ -1280,12 +1280,12 @@ function xe(e) {
 	if (e.kind === "entity") return;
 	let { path: t } = e;
 	if (e.kind === "dashboard") return /^\/[a-z0-9_-]+$/.test(t) ? t : void 0;
+	if (e.kind === "automation" || e.kind === "script") {
+		let n = `/config/${e.kind}/show/${e.kind}.`;
+		return t.startsWith(n) && /^[a-z0-9_]+$/.test(t.slice(n.length)) ? t : void 0;
+	}
 	let n = `/config/${e.kind}/edit/`;
-	return [
-		"automation",
-		"script",
-		"scene"
-	].includes(e.kind) && t.startsWith(n) && /^[a-zA-Z0-9_%.-]+$/.test(t.slice(n.length)) && ![
+	return e.kind === "scene" && t.startsWith(n) && /^[a-zA-Z0-9_%.-]+$/.test(t.slice(n.length)) && ![
 		".",
 		"..",
 		"new"
@@ -1355,7 +1355,7 @@ function Te(e) {
 }
 //#endregion
 //#region package.json
-var Ee = "0.1.6", De = {
+var Ee = "0.1.7", De = {
 	explicit: "Explicit",
 	template_literal: "Template literal",
 	dynamic: "Dynamic",
