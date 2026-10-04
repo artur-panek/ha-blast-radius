@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.3 — 2026-10-05
+
+- Keep state, numeric-state and compound conditions used as standalone script
+  steps as read dependencies. They must not appear as downstream action targets.
+- Preserve the v0.2.2 grouped review and device-registry improvements; add explicit
+  regressions for sequence conditions and retain source paths for incoming review.
+
 ## 0.2.2 — 2026-10-05
 
 - Separate literal device references from unexpanded entity-set selectors and

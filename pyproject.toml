@@ -1,6 +1,6 @@
 [project]
 name = "ha-blast-radius"
-version = "0.2.2"
+version = "0.2.3"
 description = "Read-only dependency and impact analysis for Home Assistant"
 authors = [{ name = "Artur Panek" }]
 requires-python = ">=3.12"

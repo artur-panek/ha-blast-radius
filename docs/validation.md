@@ -1,5 +1,24 @@
 # Validation
 
+## v0.2.3
+
+The final review of v0.2.2 found the same read/write issue in ordinary state and
+numeric-state conditions used as standalone sequence steps. A focused regression
+shows that the previous graph included the guard entity as a downstream action
+target. All native condition nodes now retain a read role; direct incoming
+references still show their exact paths. State, numeric-state and compound
+sequence-condition cases supplement the device-condition coverage.
+
+Local HA Core 2026.9.4 / Python 3.14.7 validation: 179 tests passed with 98.46%
+engine coverage. Ruff, formatting, mypy, TypeScript/build and package checks pass.
+The same 50-test browser suite verifies that the report presentation, export and
+navigation behavior remains intact; the panel cache version is updated to 0.2.3.
+
+The preceding v0.2.2 changes passed all five required Quality checks and the
+advisory HA-next lane in [PR #13](https://github.com/artur-panek/ha-blast-radius/pull/13).
+The published v0.2.2 installation ZIP matches the locally tested SHA-256
+`c866643161e221cbaa2638c0af539934a23f2e2945fca64e36dc3bb46f6e4625`.
+
 ## v0.2.2
 
 Local validation on 2026-10-05:
