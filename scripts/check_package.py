@@ -24,7 +24,12 @@ assert any(
     for node in constants.body
 ), "The integration version and frontend cache key must agree"
 assert manifest["config_flow"] is True
-assert json.loads((ROOT / "hacs.json").read_text())["homeassistant"] == "2026.9.4"
+assert manifest["single_config_entry"] is True
+assert manifest["iot_class"] == "calculated"
+hacs = json.loads((ROOT / "hacs.json").read_text())
+assert hacs["homeassistant"] == "2026.9.4"
+assert hacs["render_readme"] is True
+assert hacs["hide_default_branch"] is True
 assert (COMPONENT / "frontend/blast-radius.js").stat().st_size > 1000
 assert (COMPONENT / "frontend/blast-radius-icons.js").is_file()
 for prefix in ("", "dark_"):

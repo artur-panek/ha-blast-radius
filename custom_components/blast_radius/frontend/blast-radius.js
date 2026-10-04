@@ -1584,7 +1584,7 @@ function Ke(e, t) {
 }
 //#endregion
 //#region package.json
-var qe = "0.1.9", Je = {
+var qe = "0.2.0", Je = {
 	explicit: "Explicit",
 	template_literal: "Template literal",
 	dynamic: "Dynamic",

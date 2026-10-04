@@ -1,14 +1,28 @@
 {
   "domain": "blast_radius",
   "name": "HA Blast Radius",
-  "after_dependencies": ["automation", "group", "lovelace", "scene", "script"],
-  "codeowners": ["@artur-panek"],
+  "after_dependencies": [
+    "automation",
+    "group",
+    "lovelace",
+    "scene",
+    "script"
+  ],
+  "codeowners": [
+    "@artur-panek"
+  ],
   "config_flow": true,
-  "dependencies": ["frontend", "http", "panel_custom", "websocket_api"],
+  "dependencies": [
+    "frontend",
+    "http",
+    "panel_custom",
+    "websocket_api"
+  ],
   "documentation": "https://github.com/artur-panek/ha-blast-radius",
   "integration_type": "service",
-  "iot_class": "local_push",
+  "iot_class": "calculated",
   "issue_tracker": "https://github.com/artur-panek/ha-blast-radius/issues",
   "requirements": [],
-  "version": "0.1.9"
+  "single_config_entry": true,
+  "version": "0.2.0"
 }

@@ -1,6 +1,6 @@
 # Release checklist
 
-The 0.1 series is an experimental alpha. A green workflow validates the declared
+The 0.2 series is a public alpha. A green workflow validates the declared
 test environment; it is not certification across all Home Assistant installations.
 Publishing to GitHub and listing in HACS's default directory are separate steps.
 
@@ -14,7 +14,7 @@ Publishing to GitHub and listing in HACS's default directory are separate steps.
    changing their source. Rebuild and commit the frontend and runtime assets.
 4. Run the commands in CONTRIBUTING.md. Inspect desktop/mobile screenshots and
    check setup, analysis, preview and unload on the supported HA version.
-5. Review the diff for credentials, household configuration and unintentional files.
+5. Review the diff for credentials, household configuration and unintentional files.\n6. Confirm both hassfest and the HACS Action pass without ignored validations.
 
 ## Package
 
