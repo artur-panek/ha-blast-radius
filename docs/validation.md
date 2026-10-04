@@ -17,6 +17,18 @@ whole panel or arbitrary themes. Other tests distinguish 0 or 1 unresolved refer
 in affected sources from a synthetic global total of 170. The global total remains
 visible in expanded coverage details.
 
+All six jobs passed in the [v0.1.4 CI run](https://github.com/artur-panek/ha-blast-radius/actions/runs/37166171988)
+at `a497deeb94ea8812446b7516f86b7f7a7a0a77b7`: Python 3.12 (79 tests, HA module
+skipped), Python 3.14 (90 tests, 96.31% engine coverage), frontend (11 browser tests),
+hassfest, HACS and automatic publication.
+
+The workflow published [v0.1.4](https://github.com/artur-panek/ha-blast-radius/releases/tag/v0.1.4)
+in the standard HACS release channel. The tag points to the tested commit. The
+24-file ZIP and checksum file are attached; the ZIP's SHA-256 matches the local
+package and both CI builds:
+`91a0fa77cc06e6cc41cc6cfd0d6b58305c2c2cd17bedaa3b883e4d332c9dbe34`.
+HACS discovery and installation on the user's server are not remotely verified.
+
 ## v0.1.3
 
 Release-preparation validation on 2026-10-04 against Home Assistant 2026.9.4 /
