@@ -7,6 +7,7 @@ from typing import Any
 from .graph import MAX_EDGES, MAX_NODES, DependencyGraph
 from .models import BASE_COVERAGE_NOTE, Confidence, InvalidInput, Source
 from .references import scan_sources
+from .review import review_markdown, review_summary
 from .templates import ENTITY_RE
 
 
@@ -85,6 +86,11 @@ class Analyzer:
                 key: source.name for key, source in self.sources.items() if key in affected
             },
             "unresolved_total": len(unresolved),
+            "review_summary": {
+                "linked": review_summary(uncertain),
+                "other_dashboard": review_summary(other_dashboard),
+                "snapshot": review_summary([ref.as_dict() for ref in unresolved]),
+            },
             "summary": {
                 "references": len(direct),
                 "sources": len({ref.source_id for ref in direct}),
@@ -166,23 +172,25 @@ def markdown_report(report: dict[str, Any]) -> str:
     lines += ["", "## Structural impact", ""]
     for node in report["graph"]["nodes"]:
         lines.append(f"- `{node['id']}` — {node['relationship']}, depth {node['depth']}")
+    linked_review = review_summary(report["uncertain_references"])
     lines += [
         "",
-        "## Unresolved references",
+        "## References to review",
         "",
-        f"{report['unresolved_total']} unresolved references across the whole snapshot; "
-        "these cannot be attributed to the selected entity.",
+        f"{report['unresolved_total']} locations without an entity target "
+        "across the whole snapshot. "
+        "This includes device identities, unexpanded selectors and dynamic/unknown expressions; "
+        "it is not a count of dependencies on the selected entity.",
+        "",
+        "### In linked configurations",
+        "",
+        f"{linked_review['groups']} review group(s) across {linked_review['locations']} locations.",
+        "",
+        "Grouped by source, role, reason and selector identity. A group can contain several "
+        "different dynamic expressions. All original locations are listed.",
+        "",
     ]
-    for ref in report["uncertain_references"]:
-        lines.append(f"- `{ref['source_id']}` — `{ref['path']}` ({ref['reason']})")
-        if selector := ref.get("selector"):
-            presence = {True: "present", False: "not found", None: "not checked"}[
-                selector["exists"]
-            ]
-            lines.append(
-                f"  Selector `{selector['kind']}`; registry identity {presence}. "
-                "Entity membership is not expanded."
-            )
+    lines.extend(review_markdown(report["uncertain_references"]))
     other_dashboard = report.get("other_dashboard_references", [])
     if other_dashboard:
         lines += [
@@ -191,9 +199,9 @@ def markdown_report(report: dict[str, Any]) -> str:
             "",
             f"{len(other_dashboard)} additional expressions outside cards with known links. "
             "These are retained for context, not attributed to the selected entity.",
+            "",
         ]
-        for ref in other_dashboard:
-            lines.append(f"- `{ref['source_id']}` — `{ref['path']}` ({ref['reason']})")
+        lines.extend(review_markdown(other_dashboard))
     coverage = report["coverage"]
     lines += [
         "",

@@ -423,6 +423,7 @@ test("selector presentation separates known identity from unexpanded entity memb
       ...p.report.uncertain_references[0],
       path: "actions[0].target.area_id",
       reason: "Unexpanded area_id target",
+      resolution: "selector",
       selector: { kind: "area_id", value: "office", exists: true },
     };
     p.report = { ...p.report, uncertain_references: [ref] };

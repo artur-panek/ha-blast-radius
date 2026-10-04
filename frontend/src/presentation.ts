@@ -105,6 +105,14 @@ const reasons: Record<string, string> = {
   "Entity pattern":
     "A wildcard or pattern can match multiple entities; matches are not expanded.",
   "Non-literal entity target": "This field does not contain a fixed entity ID.",
+  "Entity registry ID not found":
+    "A device automation names an internal entity ID that is absent from the current registry. Its entity target remains unknown.",
+  "Entity registry lookup unavailable":
+    "A device automation uses an internal entity ID, but this snapshot has no entity registry to resolve it.",
+  "Device identity reference":
+    "This is a device ID used by a trigger, event filter, condition or device action. It does not select every entity on the device or establish a dependency on the entity being analyzed.",
+  "Entity registry ID resolved":
+    "Home Assistant's entity registry maps this internal ID to the displayed entity. Conditional execution is not evaluated.",
 };
 
 export function explainReason(reason: string): string {

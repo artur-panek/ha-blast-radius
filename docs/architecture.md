@@ -75,6 +75,43 @@ actions. Tests populate a real device/area/floor/label membership and prove it d
 not leak into graph edges; a mixed explicit entity + selector keeps only the explicit
 entity edge. Missing registry identity is reported without claiming breakage.
 
+### Review classification and device entity IDs (v0.2.2)
+
+References add `resolution`: `entity`, `device`, `selector`, or `unresolved`.
+This describes what was identified, independently of the existing entity-reference
+`confidence`. Literal device IDs in native triggers/conditions/actions and event
+trigger filters are device identities, not unexpanded selections of every entity
+on a device. Literal service selectors still have an unknown entity set. Templates
+remain unresolved. A selector's `exists` continues to mean registry identity only.
+
+For API compatibility, `uncertain_references`, `other_dashboard_references` and
+`unresolved_total` retain every location whose **entity target** is null, including
+known devices and selectors. Consumers should use `resolution` and `review_summary`
+instead of interpreting that legacy total as dynamic expressions or broken entities.
+`review_summary` contains `linked`, `other_dashboard` and `snapshot` summaries, each
+with `locations`, `groups`, `device_locations`, `selector_locations`, and
+`unresolved_locations`. The three location-category counts sum to `locations`.
+
+Review grouping uses source ID/type, role, confidence, reason, resolution and
+selector kind/value/registry status. Different devices, sources and roles remain
+separate. All paths survive JSON, raw-reference inspection and grouped Markdown.
+Grouping a shared reason does not establish identical expressions or targets.
+Panel counts are recalculated after display filters; exports retain the full report.
+
+The adapter detaches the entity registry's internal ID → current entity ID mapping
+on the event loop. The pure scanner uses it only in typed native device automation
+nodes in known trigger, condition and action paths (including choose/repeat/parallel).
+This follows Core 2026.9.4's `entity_id_or_uuid` and device-automation validation
+contract, checked against
+[HA's validator](https://github.com/home-assistant/core/blob/2026.9.4/homeassistant/components/device_automation/helpers.py)
+and [entity registry resolver](https://github.com/home-assistant/core/blob/2026.9.4/homeassistant/helpers/entity_registry.py).
+The original configuration is untouched. Resolved IDs retain the exact source path
+and role with `reason: "Entity registry ID resolved"`. Device conditions embedded
+as sequence steps remain reads. Renames follow the current registry identity;
+missing IDs remain unresolved. Arbitrary source values and raw templates are not
+added to exports. Service payloads, variable dictionaries, templates and custom cards
+are not treated as native device nodes merely because their field names look similar.
+
 Input helpers, counters, timers and schedules work through normal explicit entity
 references in loaded configurations. No bespoke helper-definition parsers were added.
 Internal helper/template integration definitions remain outside guaranteed coverage.

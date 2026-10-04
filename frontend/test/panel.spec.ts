@@ -40,9 +40,7 @@ test("inspect, traverse, preview rename and removal, export JSON", async ({
     page.getByText("Used by a trigger", { exact: true }).first(),
   ).toBeVisible();
   await expect(
-    page.getByText("Unresolved expressions", {
-      exact: true,
-    }),
+    page.getByRole("heading", { name: "References to review", exact: true }),
   ).toBeVisible();
   await page.getByRole("tab", { name: "Graph", exact: true }).click();
   await expect(
@@ -191,7 +189,7 @@ for (const related of [0, 1]) {
       .filter({ hasText: "In linked configurations" });
     if (related) {
       await expect(scope.locator("summary .count").first()).toHaveText(
-        String(related),
+        `${related} group · ${related} location`,
       );
       await expect(scope).not.toHaveAttribute("open", "");
     } else await expect(scope).toHaveCount(0);
@@ -199,9 +197,12 @@ for (const related of [0, 1]) {
     await expect(page.locator(".stats")).not.toContainText("170");
     await page.getByText("Coverage and limitations", { exact: false }).click();
     await expect(
-      page.getByText("170 unresolved references across the full snapshot", {
-        exact: false,
-      }),
+      page.getByText(
+        "170 locations without an entity target across the full snapshot",
+        {
+          exact: false,
+        },
+      ),
     ).toBeVisible();
     await expect(
       page.getByText("they cannot be attributed to this entity", {
@@ -326,7 +327,9 @@ test("a large dashboard stays compact, explains unknowns and retains exact paths
     };
   });
   const elsewhere = page.locator(".dashboard-context");
-  await expect(elsewhere.locator("summary .count").first()).toHaveText("51");
+  await expect(elsewhere.locator("summary .count").first()).toHaveText(
+    "1 group · 51 locations",
+  );
   await expect(elsewhere).not.toHaveAttribute("open", "");
   await expect(page.locator(".stats")).not.toContainText("51");
   await expect(

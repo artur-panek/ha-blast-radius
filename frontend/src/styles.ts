@@ -553,6 +553,16 @@ export const styles = css`
   .reason-group {
     margin: 8px 0;
   }
+  .reason-group > summary {
+    overflow-wrap: anywhere;
+    line-height: 1.7;
+  }
+  .registry-status {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 12px;
+    color: var(--br-muted);
+  }
   .unresolved-row {
     display: grid;
     gap: 8px;

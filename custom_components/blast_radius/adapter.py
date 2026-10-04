@@ -5,6 +5,7 @@ script/config WebSocket commands. Dashboard loading delegates to Lovelace.
 No filesystem parsing, service calls, template rendering or config writes.
 """
 
+from types import MappingProxyType
 from typing import Any
 from urllib.parse import quote
 
@@ -105,9 +106,14 @@ def _normalize(value: Any, depth: int = 0) -> Any:
 async def collect_snapshot(
     hass: HomeAssistant,
 ) -> tuple[tuple[Source, ...], dict[str, str], tuple[str, ...]]:
+    registry = er.async_get(hass)
+    # Copy identities on the event loop. The executor never reads live registries.
+    entity_registry = MappingProxyType(
+        {entry.id: entry.entity_id for entry in registry.entities.values()}
+    )
     names = {
         entity.entity_id: entity.name or entity.original_name or entity.entity_id
-        for entity in er.async_get(hass).entities.values()
+        for entity in registry.entities.values()
     }
     names.update({state.entity_id: state.name for state in hass.states.async_all()})
     sources: list[Source] = []
@@ -178,6 +184,7 @@ async def collect_snapshot(
                     native_selectors=native_selectors,
                     selector_registry=selector_registry,
                     blueprint=blueprint,
+                    entity_registry=entity_registry,
                 )
             )
 

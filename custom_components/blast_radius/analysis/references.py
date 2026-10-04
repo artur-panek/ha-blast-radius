@@ -3,7 +3,7 @@
 import re
 from typing import Any
 
-from .models import Confidence, Reference, Role, Scan, Selector, Source
+from .models import Confidence, Reference, Resolution, Role, Scan, Selector, Source
 from .templates import ENTITY_RE, inspect_template, is_template
 
 MAX_NESTING = 80
@@ -12,6 +12,28 @@ _SKIP = {"alias", "description", "name", "icon", "unique_id", "id"}
 _ENTITY_KEYS = {"entity_id", "entity", "entities", "entity_ids"}
 _SCRIPT_SERVICES = {"turn_on", "turn_off", "toggle", "reload"}
 _SELECTOR_KEYS = {"area_id", "device_id", "floor_id", "label_id"}
+_DEVICE_POSITIONS = {
+    "trigger",
+    "triggers",
+    "wait_for_trigger",
+    "condition",
+    "conditions",
+    "if",
+    "while",
+    "until",
+    "action",
+    "actions",
+    "sequence",
+    "then",
+    "else",
+    "default",
+    "parallel",
+}
+_NATIVE_NODE_PATH = re.compile(
+    r"^(?:triggers?|conditions?|actions?|sequence)(?:\[\d+\])?"
+    r"(?:\.(?:choose|conditions?|sequence|then|else|default|parallel|repeat|while|until|if|"
+    r"wait_for_trigger)(?:\[\d+\])?)*$"
+)
 
 
 def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
@@ -28,6 +50,7 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
         role: Role,
         reason: str = "",
         selector: Selector | None = None,
+        resolution: Resolution | None = None,
     ) -> None:
         if len(found) >= MAX_REFERENCES:
             warnings.add("Reference limit reached; analysis is incomplete.")
@@ -42,12 +65,20 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                 role,
                 reason,
                 selector,
+                resolution,
             )
         ] = None
         if target is not None:
             located_by_source.setdefault(source.source_id, set()).add(target)
 
-    def emit_selector(source: Source, kind: str, value: str, path: str, role: Role) -> None:
+    def emit_selector(
+        source: Source,
+        kind: str,
+        value: str,
+        path: str,
+        role: Role,
+        device_reference: bool = False,
+    ) -> None:
         selectors_by_source.setdefault(source.source_id, set()).add((kind, value))
         # Registry presence confirms only the selector identity, not membership
         # or service-specific runtime eligibility. Never create entity edges here.
@@ -64,9 +95,30 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
             if re.fullmatch(r"[a-zA-Z0-9_-]{1,512}", value)
             else None
         )
-        emit(source, None, path, Confidence.DYNAMIC, role, f"Unexpanded {kind} target", selector)
+        resolution = Resolution.DEVICE if device_reference else Resolution.SELECTOR
+        reason = "Device identity reference" if device_reference else f"Unexpanded {kind} target"
+        emit(
+            source,
+            None,
+            path,
+            Confidence.DYNAMIC,
+            role,
+            reason,
+            selector,
+            resolution if selector else Resolution.UNRESOLVED,
+        )
 
-    def walk(source: Source, value: Any, path: str, key: str, role: Role, depth: int) -> None:
+    def walk(
+        source: Source,
+        value: Any,
+        path: str,
+        key: str,
+        role: Role,
+        depth: int,
+        device_reference: bool = False,
+        registry_entity: bool = False,
+        event_filter: bool = False,
+    ) -> None:
         if depth > MAX_NESTING:
             warnings.add(f"Nesting limit reached in {source.source_id}; analysis is incomplete.")
             return
@@ -74,6 +126,31 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
             warnings.add("Reference limit reached; analysis is incomplete.")
             return
         if isinstance(value, dict):
+            # Only HA device automation nodes accept entity registry IDs here.
+            # An ID-looking value in service data, variables or a custom card
+            # does not establish those semantics.
+            native_source = (
+                source.source_type in {"automation", "script"}
+                and _NATIVE_NODE_PATH.fullmatch(path) is not None
+            )
+            device_node = (
+                native_source
+                and key in _DEVICE_POSITIONS
+                and isinstance(value.get("device_id"), str)
+                and isinstance(value.get("domain"), str)
+                and isinstance(value.get("type"), str)
+            )
+            event_trigger = (
+                native_source
+                and key in {"trigger", "triggers", "wait_for_trigger"}
+                and value.get("trigger", value.get("platform")) == "event"
+            )
+            if device_node and (
+                value.get("condition") == "device"
+                or value.get("trigger", value.get("platform")) == "device"
+            ):
+                # A condition used as a sequence step still reads its entity.
+                role = Role.READ
             for field, child in value.items():
                 if not isinstance(field, str) or field in _SKIP:
                     continue
@@ -98,10 +175,31 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     emit(source, field, child_path, Confidence.EXPLICIT, role)
                     # Scene state attributes are not configuration references.
                     continue
-                walk(source, child, child_path, field, next_role, depth + 1)
+                walk(
+                    source,
+                    child,
+                    child_path,
+                    field,
+                    next_role,
+                    depth + 1,
+                    device_reference=field == "device_id"
+                    and (device_node or (key == "event_data" and event_filter)),
+                    registry_entity=field == "entity_id" and device_node,
+                    event_filter=field == "event_data" and event_trigger,
+                )
         elif isinstance(value, (list, tuple)):
             for index, child in enumerate(value):
-                walk(source, child, f"{path}[{index}]", key, role, depth + 1)
+                walk(
+                    source,
+                    child,
+                    f"{path}[{index}]",
+                    key,
+                    role,
+                    depth + 1,
+                    device_reference,
+                    registry_entity,
+                    event_filter,
+                )
         elif isinstance(value, str):
             if is_template(value):
                 result = inspect_template(value)
@@ -137,6 +235,20 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     target = target.strip()
                     if ENTITY_RE.fullmatch(target):
                         emit(source, target, path, Confidence.EXPLICIT, role)
+                    elif (
+                        registry_entity
+                        and source.entity_registry is not None
+                        and (resolved := source.entity_registry.get(target))
+                        and ENTITY_RE.fullmatch(resolved)
+                    ):
+                        emit(
+                            source,
+                            resolved,
+                            path,
+                            Confidence.EXPLICIT,
+                            role,
+                            "Entity registry ID resolved",
+                        )
                     elif target:
                         emit(
                             source,
@@ -144,7 +256,13 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                             path,
                             Confidence.DYNAMIC,
                             role,
-                            "Entity pattern"
+                            (
+                                "Entity registry ID not found"
+                                if source.entity_registry is not None
+                                else "Entity registry lookup unavailable"
+                            )
+                            if registry_entity and re.fullmatch(r"[0-9a-f]{32}", target)
+                            else "Entity pattern"
                             if any(char in target for char in "*?[")
                             else "Non-literal entity target",
                         )
@@ -156,7 +274,7 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                 ):
                     emit(source, value, path, Confidence.EXPLICIT, Role.CALL)
             elif key in _SELECTOR_KEYS:
-                emit_selector(source, key, value, path, role)
+                emit_selector(source, key, value, path, role, device_reference)
             elif value in known_entities:
                 emit(
                     source,

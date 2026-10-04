@@ -259,11 +259,11 @@ var y = globalThis, ae = (e) => e, b = y.trustedTypes, x = b ? b.createPolicy("l
 	strings: t,
 	values: n
 }), M = pe(1), me = pe(2), N = Symbol.for("lit-noChange"), P = Symbol.for("lit-nothing"), he = /* @__PURE__ */ new WeakMap(), F = T.createTreeWalker(T, 129);
-function I(e, t) {
+function ge(e, t) {
 	if (!O(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
 	return x === void 0 ? t : x.createHTML(t);
 }
-var L = (e, t) => {
+var _e = (e, t) => {
 	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = A;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
@@ -271,12 +271,12 @@ var L = (e, t) => {
 		let d = o === j && e[t + 1].startsWith("/>") ? " " : "";
 		a += o === A ? n + oe : l >= 0 ? (r.push(s), n.slice(0, l) + S + n.slice(l) + C + d) : n + C + (l === -2 ? t : d);
 	}
-	return [I(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, R = class e {
+	return [ge(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
+}, I = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
-		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = L(t, n);
+		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = _e(t, n);
 		if (this.el = e.createElement(l, r), F.currentNode = this.el.content, n === 2 || n === 3) {
 			let e = this.el.content.firstChild;
 			e.replaceWith(...e.childNodes);
@@ -290,7 +290,7 @@ var L = (e, t) => {
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? ge : r[1] === "?" ? _e : r[1] === "@" ? ve : H
+						ctor: r[1] === "." ? ve : r[1] === "?" ? ye : r[1] === "@" ? be : B
 					}), i.removeAttribute(e);
 				} else e.startsWith(C) && (c.push({
 					type: 6,
@@ -328,12 +328,12 @@ var L = (e, t) => {
 		return n.innerHTML = e, n;
 	}
 };
-function z(e, t, n = e, r) {
+function L(e, t, n = e, r) {
 	if (t === N) return t;
 	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = D(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = z(e, i._$AS(e, t.values), i, r)), t;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = L(e, i._$AS(e, t.values), i, r)), t;
 }
-var B = class {
+var R = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -350,7 +350,7 @@ var B = class {
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new V(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new ye(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new z(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new xe(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
 			a !== s?.index && (i = F.nextNode(), a++);
 		}
@@ -360,7 +360,7 @@ var B = class {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, V = class e {
+}, z = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
@@ -378,7 +378,7 @@ var B = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = z(this, e, t), D(e) ? e === P || e == null || e === "" ? (this._$AH !== P && this._$AR(), this._$AH = P) : e !== this._$AH && e !== N && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? se(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = L(this, e, t), D(e) ? e === P || e == null || e === "" ? (this._$AH !== P && this._$AR(), this._$AH = P) : e !== this._$AH && e !== N && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? se(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -390,16 +390,16 @@ var B = class {
 		this._$AH !== P && D(this._$AH) ? this._$AA.nextSibling.data = e : this.T(T.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = R.createElement(I(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = I.createElement(ge(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new B(r, this), n = e.u(this.options);
+			let e = new R(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
 		let t = he.get(e.strings);
-		return t === void 0 && he.set(e.strings, t = new R(e)), t;
+		return t === void 0 && he.set(e.strings, t = new I(e)), t;
 	}
 	k(t) {
 		O(this._$AH) || (this._$AH = [], this._$AR());
@@ -416,7 +416,7 @@ var B = class {
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, H = class {
+}, B = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -428,43 +428,43 @@ var B = class {
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = z(this, e, t, 0), a = !D(e) || e !== this._$AH && e !== N, a && (this._$AH = e);
+		if (i === void 0) e = L(this, e, t, 0), a = !D(e) || e !== this._$AH && e !== N, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = z(this, r[n + o], t, o), s === N && (s = this._$AH[o]), a ||= !D(s) || s !== this._$AH[o], s === P ? e = P : e !== P && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = L(this, r[n + o], t, o), s === N && (s = this._$AH[o]), a ||= !D(s) || s !== this._$AH[o], s === P ? e = P : e !== P && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
 		e === P ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, ge = class extends H {
+}, ve = class extends B {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
 		this.element[this.name] = e === P ? void 0 : e;
 	}
-}, _e = class extends H {
+}, ye = class extends B {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
 		this.element.toggleAttribute(this.name, !!e && e !== P);
 	}
-}, ve = class extends H {
+}, be = class extends B {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = z(this, e, t, 0) ?? P) === N) return;
+		if ((e = L(this, e, t, 0) ?? P) === N) return;
 		let n = this._$AH, r = e === P && n !== P || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== P && (n === P || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, ye = class {
+}, xe = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -472,33 +472,33 @@ var B = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		z(this, e);
+		L(this, e);
 	}
-}, be = {
+}, Se = {
 	M: S,
 	P: C,
 	A: w,
 	C: 1,
-	L,
-	R: B,
+	L: _e,
+	R,
 	D: se,
-	V: z,
-	I: V,
-	H,
-	N: _e,
-	U: ve,
-	B: ge,
-	F: ye
-}, xe = y.litHtmlPolyfillSupport;
-xe?.(R, V), (y.litHtmlVersions ??= []).push("3.3.3");
-var Se = (e, t, n) => {
+	V: L,
+	I: z,
+	H: B,
+	N: ye,
+	U: be,
+	B: ve,
+	F: xe
+}, Ce = y.litHtmlPolyfillSupport;
+Ce?.(I, z), (y.litHtmlVersions ??= []).push("3.3.3");
+var we = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new V(t.insertBefore(E(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new z(t.insertBefore(E(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, U = globalThis, W = class extends v {
+}, V = globalThis, H = class extends v {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -508,7 +508,7 @@ var Se = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Se(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = we(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -520,22 +520,22 @@ var Se = (e, t, n) => {
 		return N;
 	}
 };
-W._$litElement$ = !0, W.finalized = !0, U.litElementHydrateSupport?.({ LitElement: W });
-var Ce = U.litElementPolyfillSupport;
-Ce?.({ LitElement: W }), (U.litElementVersions ??= []).push("4.2.2");
+H._$litElement$ = !0, H.finalized = !0, V.litElementHydrateSupport?.({ LitElement: H });
+var Te = V.litElementPolyfillSupport;
+Te?.({ LitElement: H }), (V.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region node_modules/lit-html/directive.js
-var we = {
+var Ee = {
 	ATTRIBUTE: 1,
 	CHILD: 2,
 	PROPERTY: 3,
 	BOOLEAN_ATTRIBUTE: 4,
 	EVENT: 5,
 	ELEMENT: 6
-}, Te = (e) => (...t) => ({
+}, De = (e) => (...t) => ({
 	_$litDirective$: e,
 	values: t
-}), Ee = class {
+}), Oe = class {
 	constructor(e) {}
 	get _$AU() {
 		return this._$AM._$AU;
@@ -549,9 +549,9 @@ var we = {
 	update(e, t) {
 		return this.render(...t);
 	}
-}, { I: De } = be, Oe = (e) => e, ke = () => document.createComment(""), G = (e, t, n) => {
+}, { I: ke } = Se, Ae = (e) => e, je = () => document.createComment(""), U = (e, t, n) => {
 	let r = e._$AA.parentNode, i = t === void 0 ? e._$AB : t._$AA;
-	if (n === void 0) n = new De(r.insertBefore(ke(), i), r.insertBefore(ke(), i), e, e.options);
+	if (n === void 0) n = new ke(r.insertBefore(je(), i), r.insertBefore(je(), i), e, e.options);
 	else {
 		let t = n._$AB.nextSibling, a = n._$AM, o = a !== e;
 		if (o) {
@@ -561,21 +561,21 @@ var we = {
 		if (t !== i || o) {
 			let e = n._$AA;
 			for (; e !== t;) {
-				let t = Oe(e).nextSibling;
-				Oe(r).insertBefore(e, i), e = t;
+				let t = Ae(e).nextSibling;
+				Ae(r).insertBefore(e, i), e = t;
 			}
 		}
 	}
 	return n;
-}, K = (e, t, n = e) => (e._$AI(t, n), e), Ae = {}, je = (e, t = Ae) => e._$AH = t, Me = (e) => e._$AH, q = (e) => {
+}, W = (e, t, n = e) => (e._$AI(t, n), e), Me = {}, Ne = (e, t = Me) => e._$AH = t, Pe = (e) => e._$AH, G = (e) => {
 	e._$AR(), e._$AA.remove();
-}, Ne = (e, t, n) => {
+}, Fe = (e, t, n) => {
 	let r = /* @__PURE__ */ new Map();
 	for (let i = t; i <= n; i++) r.set(e[i], i);
 	return r;
-}, Pe = Te(class extends Ee {
+}, Ie = De(class extends Oe {
 	constructor(e) {
-		if (super(e), e.type !== we.CHILD) throw Error("repeat() can only be used in text expressions");
+		if (super(e), e.type !== Ee.CHILD) throw Error("repeat() can only be used in text expressions");
 	}
 	dt(e, t, n) {
 		let r;
@@ -591,36 +591,36 @@ var we = {
 		return this.dt(e, t, n).values;
 	}
 	update(e, [t, n, r]) {
-		let i = Me(e), { values: a, keys: o } = this.dt(t, n, r);
+		let i = Pe(e), { values: a, keys: o } = this.dt(t, n, r);
 		if (!Array.isArray(i)) return this.ut = o, a;
 		let s = this.ut ??= [], c = [], l, u, d = 0, f = i.length - 1, p = 0, m = a.length - 1;
 		for (; d <= f && p <= m;) if (i[d] === null) d++;
 		else if (i[f] === null) f--;
-		else if (s[d] === o[p]) c[p] = K(i[d], a[p]), d++, p++;
-		else if (s[f] === o[m]) c[m] = K(i[f], a[m]), f--, m--;
-		else if (s[d] === o[m]) c[m] = K(i[d], a[m]), G(e, c[m + 1], i[d]), d++, m--;
-		else if (s[f] === o[p]) c[p] = K(i[f], a[p]), G(e, i[d], i[f]), f--, p++;
-		else if (l === void 0 && (l = Ne(o, p, m), u = Ne(s, d, f)), l.has(s[d])) {
+		else if (s[d] === o[p]) c[p] = W(i[d], a[p]), d++, p++;
+		else if (s[f] === o[m]) c[m] = W(i[f], a[m]), f--, m--;
+		else if (s[d] === o[m]) c[m] = W(i[d], a[m]), U(e, c[m + 1], i[d]), d++, m--;
+		else if (s[f] === o[p]) c[p] = W(i[f], a[p]), U(e, i[d], i[f]), f--, p++;
+		else if (l === void 0 && (l = Fe(o, p, m), u = Fe(s, d, f)), l.has(s[d])) {
 			if (l.has(s[f])) {
 				let t = u.get(o[p]), n = t === void 0 ? null : i[t];
 				if (n === null) {
-					let t = G(e, i[d]);
-					K(t, a[p]), c[p] = t;
-				} else c[p] = K(n, a[p]), G(e, i[d], n), i[t] = null;
+					let t = U(e, i[d]);
+					W(t, a[p]), c[p] = t;
+				} else c[p] = W(n, a[p]), U(e, i[d], n), i[t] = null;
 				p++;
-			} else q(i[f]), f--;
-		} else q(i[d]), d++;
+			} else G(i[f]), f--;
+		} else G(i[d]), d++;
 		for (; p <= m;) {
-			let t = G(e, c[m + 1]);
-			K(t, a[p]), c[p++] = t;
+			let t = U(e, c[m + 1]);
+			W(t, a[p]), c[p++] = t;
 		}
 		for (; d <= f;) {
 			let e = i[d++];
-			e !== null && q(e);
+			e !== null && G(e);
 		}
-		return this.ut = o, je(e, c), N;
+		return this.ut = o, Ne(e, c), N;
 	}
-}), Fe = o`
+}), Le = o`
   :host {
     display: block;
     height: 100%;
@@ -1173,6 +1173,16 @@ var we = {
   .reason-group {
     margin: 8px 0;
   }
+  .reason-group > summary {
+    overflow-wrap: anywhere;
+    line-height: 1.7;
+  }
+  .registry-status {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 12px;
+    color: var(--br-muted);
+  }
   .unresolved-row {
     display: grid;
     gap: 8px;
@@ -1474,26 +1484,26 @@ var we = {
       flex-direction: column;
     }
   }
-`, J = {
+`, K = {
 	viewBox: "0 0 32 32",
 	rings: "M 28.943 12.532 A 13.399999999999999 13.399999999999999 0 1 1 19.468 3.057 A 1.2 1.2 0 0 1 18.847 5.375 A 11.0 11.0 0 1 0 26.625 13.153 A 1.2 1.2 0 0 1 28.943 12.532 Z M 23.921 13.878 A 8.2 8.2 0 1 1 18.122 8.079 A 1.2 1.2 0 0 1 17.501 10.398 A 5.8 5.8 0 1 0 21.602 14.499 A 1.2 1.2 0 0 1 23.921 13.878 Z",
 	radius: "M 15.222 15.222 L 23.849 6.595 L 25.405 8.151 L 16.778 16.778 Z M 13.600 16.000 a 2.4 2.4 0 1 1 4.8 0 a 2.4 2.4 0 1 1 -4.8 0 Z M 22.227 7.373 a 2.4 2.4 0 1 1 4.8 0 a 2.4 2.4 0 1 1 -4.8 0 Z"
-}, Y = () => me`
-  <svg class="brand-mark" viewBox=${J.viewBox} aria-hidden="true" focusable="false">
-    <path fill="currentColor" d=${J.rings}></path>
-    <path class="radius" d=${J.radius}></path>
+}, q = () => me`
+  <svg class="brand-mark" viewBox=${K.viewBox} aria-hidden="true" focusable="false">
+    <path fill="currentColor" d=${K.rings}></path>
+    <path class="radius" d=${K.radius}></path>
   </svg>
-`, X = {
+`, J = {
 	automation: "Automation",
 	script: "Script",
 	scene: "Scene",
 	dashboard: "Dashboard",
 	group: "Group"
 };
-function Ie(e) {
+function Re(e) {
 	return [...new Set(e.map((e) => e.source_type === "dashboard" ? "Used on this dashboard" : e.source_type === "scene" ? "Included in this scene" : e.role === "member" ? "Member of this group" : e.role === "call" ? "Called by this configuration" : e.role === "write" ? "Listed as an action target" : /^(triggers?|wait_for_trigger)(\[|\.)/.test(e.path) ? "Used by a trigger" : e.confidence === "template_literal" ? "Referenced in a template" : e.confidence === "unknown" ? "Reference needs review" : "Read by this configuration"))].join(" · ");
 }
-function Le(e) {
+function ze(e) {
 	if (e.kind === "entity") return;
 	let { path: t } = e;
 	if (e.kind === "dashboard") return /^\/[a-z0-9_-]+$/.test(t) ? t : void 0;
@@ -1508,7 +1518,7 @@ function Le(e) {
 		"new"
 	].includes(t.slice(n.length)) ? t : void 0;
 }
-var Re = {
+var Be = {
 	views: "View",
 	sections: "Section",
 	cards: "Card",
@@ -1528,13 +1538,13 @@ var Re = {
 	entity: "Entity",
 	value_template: "Template"
 };
-function Z(e) {
+function Y(e) {
 	return e.split(".").map((e) => {
 		let t = /^(.*?)(?:\[(\d+)\])?$/.exec(e), n = t[1];
-		return `${Re[n] || n.replaceAll("_", " ").replace(/^./, (e) => e.toUpperCase())}${t[2] === void 0 ? "" : ` ${Number(t[2]) + 1}`}`;
+		return `${Be[n] || n.replaceAll("_", " ").replace(/^./, (e) => e.toUpperCase())}${t[2] === void 0 ? "" : ` ${Number(t[2]) + 1}`}`;
 	}).join(" › ");
 }
-var ze = {
+var Ve = {
 	"Computed entity lookup": "The entity ID is calculated at runtime.",
 	"External template variable": "A variable comes from runtime context or the card. Its value is not available here.",
 	"Template helper or macro": "A helper or macro may read additional entities that are not visible in this expression.",
@@ -1545,14 +1555,18 @@ var ze = {
 	"Unsupported template syntax": "The expression could not be parsed. Visible entity IDs are still retained.",
 	"Templated target": "The final action or entity target is produced by a template that is not executed here.",
 	"Entity pattern": "A wildcard or pattern can match multiple entities; matches are not expanded.",
-	"Non-literal entity target": "This field does not contain a fixed entity ID."
+	"Non-literal entity target": "This field does not contain a fixed entity ID.",
+	"Entity registry ID not found": "A device automation names an internal entity ID that is absent from the current registry. Its entity target remains unknown.",
+	"Entity registry lookup unavailable": "A device automation uses an internal entity ID, but this snapshot has no entity registry to resolve it.",
+	"Device identity reference": "This is a device ID used by a trigger, event filter, condition or device action. It does not select every entity on the device or establish a dependency on the entity being analyzed.",
+	"Entity registry ID resolved": "Home Assistant's entity registry maps this internal ID to the displayed entity. Conditional execution is not evaluated."
 };
-function Be(e) {
-	return e.startsWith("Unexpanded ") ? "This configuration names a device, area, floor or label. Its entity membership and runtime eligibility are not expanded." : e.split("; ").map((e) => ze[e] || e || "The target cannot be determined from the loaded configuration.").join(" ");
+function X(e) {
+	return e.startsWith("Unexpanded ") ? "This configuration names a device, area, floor or label. Its entity membership and runtime eligibility are not expanded." : e.split("; ").map((e) => Ve[e] || e || "The target cannot be determined from the loaded configuration.").join(" ");
 }
 //#endregion
 //#region src/icons.ts
-function Ve(e) {
+function He(e) {
 	return M`<svg class="source-icon" viewBox="0 0 24 24" aria-hidden="true">
     <path
       d=${{
@@ -1572,7 +1586,7 @@ function Ve(e) {
 }
 //#endregion
 //#region src/session.ts
-var Q = /* @__PURE__ */ new Map(), He = [
+var Z = /* @__PURE__ */ new Map(), Ue = [
 	1,
 	2,
 	3,
@@ -1580,31 +1594,31 @@ var Q = /* @__PURE__ */ new Map(), He = [
 	6,
 	8,
 	12
-], Ue = (e) => {
+], We = (e) => {
 	if (!e || typeof e != "object") return !1;
 	let t = e;
-	return typeof t.entityId == "string" && t.entityId.length <= 512 && /^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/.test(t.entityId) && He.includes(t.depth);
+	return typeof t.entityId == "string" && t.entityId.length <= 512 && /^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/.test(t.entityId) && Ue.includes(t.depth);
 };
-function We(e) {
+function Ge(e) {
 	return e ? `blast-radius:session:v1:${e}` : void 0;
 }
-function Ge(e, t) {
+function Ke(e, t) {
 	return [t, ...e.filter((e) => e.entityId !== t.entityId)].slice(0, 6);
 }
-function Ke(e) {
+function qe(e) {
 	if (!e) return { recent: [] };
-	if (Q.has(e)) return Q.get(e);
+	if (Z.has(e)) return Z.get(e);
 	let t;
 	try {
 		t = sessionStorage.getItem(e);
 	} catch {
-		return Q.get(e) || { recent: [] };
+		return Z.get(e) || { recent: [] };
 	}
 	try {
 		if (!t || t.length > 16384) return { recent: [] };
 		let e = JSON.parse(t), n = [];
 		if (Array.isArray(e?.recent)) {
-			for (let t of e.recent) if (Ue(t) && !n.some((e) => e.entityId === t.entityId) && (n.push({
+			for (let t of e.recent) if (We(t) && !n.some((e) => e.entityId === t.entityId) && (n.push({
 				entityId: t.entityId,
 				depth: t.depth
 			}), n.length === 6)) break;
@@ -1612,7 +1626,7 @@ function Ke(e) {
 		let r = e?.last;
 		return {
 			recent: n,
-			...Ue(r) && [
+			...We(r) && [
 				"impact",
 				"graph",
 				"raw"
@@ -1627,9 +1641,9 @@ function Ke(e) {
 		return { recent: [] };
 	}
 }
-function qe(e, t) {
+function Je(e, t) {
 	if (e) {
-		Q.set(e, t);
+		Z.set(e, t);
 		try {
 			!t.last && !t.recent.length ? sessionStorage.removeItem(e) : sessionStorage.setItem(e, JSON.stringify(t));
 		} catch {}
@@ -1637,18 +1651,18 @@ function qe(e, t) {
 }
 //#endregion
 //#region src/filters.ts
-var Je = [
+var Ye = [
 	"automation",
 	"script",
 	"dashboard",
 	"scene",
 	"group"
 ];
-function Ye(e, t, n) {
+function Xe(e, t, n) {
 	let r = e.confidence === "dynamic" || e.confidence === "unknown" ? "review" : e.confidence;
 	return (!t.length || t.includes(e.source_type)) && (!n.length || n.includes(r));
 }
-function Xe(e, t) {
+function Ze(e, t) {
 	let n = e.graph.edges.filter(t), r = new Map(e.graph.nodes.map((e) => [e.id, e]));
 	return e.graph.nodes.flatMap((e) => {
 		if (e.relationship === "selected") return [e];
@@ -1672,15 +1686,60 @@ function Xe(e, t) {
 }
 //#endregion
 //#region package.json
-var Ze = "0.2.1", Qe = {
+var Qe = "0.2.2";
+//#endregion
+//#region src/review.ts
+function Q(e) {
+	return e.resolution || (e.target === null ? e.selector ? "selector" : "unresolved" : "entity");
+}
+function $e(e) {
+	let t = /* @__PURE__ */ new Map();
+	for (let n of e) {
+		let e = JSON.stringify([
+			n.source_id,
+			n.source_type,
+			n.role,
+			n.confidence,
+			n.reason,
+			Q(n),
+			n.selector?.kind,
+			n.selector?.value,
+			n.selector?.exists
+		]), r = t.get(e);
+		r ? r.paths.push(n.path) : t.set(e, {
+			reference: n,
+			paths: [n.path]
+		});
+	}
+	return [...t.values()];
+}
+function et(e) {
+	return Q(e) === "device" ? "Device reference" : Q(e) === "selector" ? "Entity set not expanded" : e.reason || "Dynamic or unrecognized target";
+}
+function tt(e) {
+	return {
+		read: "Read or trigger",
+		write: "Action",
+		display: "Display",
+		call: "Call",
+		member: "Membership"
+	}[e.role] || e.role;
+}
+function $(e) {
+	let t = $e(e).length;
+	return `${t} ${t === 1 ? "group" : "groups"} · ${e.length} ${e.length === 1 ? "location" : "locations"}`;
+}
+//#endregion
+//#region src/panel.ts
+var nt = {
 	explicit: "Explicit",
 	template_literal: "Template literal",
 	dynamic: "Dynamic",
 	unknown: "Unclassified"
-}, $ = class extends W {
+}, rt = class extends H {
 	constructor(...e) {
 		super(...e), this.narrow = !1, this.entities = [], this.query = "", this.loading = !1, this.error = "", this.tab = "impact", this.recentSearches = [], this.replacement = "", this.depth = 6, this.status = "", this.copyFallback = !1, this.sourceFilters = [], this.reviewFilters = [], this.analyzedRoot = "", this.initialized = !1, this.requestId = 0, this.saveSession = () => {
-			qe(this.storageKey, {
+			Je(this.storageKey, {
 				recent: this.recentSearches,
 				last: this.lastView
 			});
@@ -1689,10 +1748,10 @@ var Ze = "0.2.1", Qe = {
 				...this.lastView,
 				scrollTop: this.scrollTop
 			}, clearTimeout(this.scrollTimer), this.scrollTimer = setTimeout(this.saveSession, 150));
-		}, this.matchesFilter = (e) => Ye(e, this.sourceFilters, this.reviewFilters);
+		}, this.matchesFilter = (e) => Xe(e, this.sourceFilters, this.reviewFilters);
 	}
 	static {
-		this.styles = Fe;
+		this.styles = Le;
 	}
 	static {
 		this.properties = {
@@ -1737,10 +1796,10 @@ var Ze = "0.2.1", Qe = {
 		this.recentSearches = [], this.lastView = void 0, clearTimeout(this.scrollTimer), this.saveSession();
 	}
 	updated(e) {
-		let t = We(this.hass?.user?.id);
+		let t = Ge(this.hass?.user?.id);
 		if (this.hass && (!this.initialized || t !== this.storageKey)) {
 			this.initialized = !0, this.storageKey = t;
-			let e = Ke(t);
+			let e = qe(t);
 			this.recentSearches = e.recent, this.lastView = e.last, this.query = e.last?.entityId || "", this.depth = e.last?.depth || 6, this.tab = e.last?.tab || "impact", this.report = void 0, this.sourceFilters = [], this.reviewFilters = [], this.analyzedRoot = "", this.entities = [], this.replacement = "", this.status = "", this.copyFallback = !1, this.loadEntities();
 		} else e.has("tab") && this.lastView && this.rememberView();
 	}
@@ -1781,7 +1840,7 @@ var Ze = "0.2.1", Qe = {
 			};
 			e && (i.operation = e), e === "rename" && (i.new_entity_id = this.replacement.trim());
 			let a = await this.hass.callWS(i);
-			r === this.requestId && (this.report = a, this.recentSearches = Ge(this.recentSearches, {
+			r === this.requestId && (this.report = a, this.recentSearches = Ke(this.recentSearches, {
 				entityId: a.entity_id,
 				depth: a.graph.max_depth
 			}), this.rememberView(t ?? this.scrollTop));
@@ -1807,7 +1866,7 @@ var Ze = "0.2.1", Qe = {
 		r.href = n, r.download = `blast-radius-${t.entity_id}.json`, r.click(), setTimeout(() => URL.revokeObjectURL(n), 1e3), this.status = "JSON report downloaded.";
 	}
 	badge(e) {
-		return M`<span class="badge ${e}">${Qe[e]}</span>`;
+		return M`<span class="badge ${e}">${nt[e]}</span>`;
 	}
 	tabKeydown(e) {
 		let t = [
@@ -1855,7 +1914,7 @@ var Ze = "0.2.1", Qe = {
       >
         ${r}
       </button>`;
-		let a = Le(n);
+		let a = ze(n);
 		return a ? M`<a
       class=${i}
       href=${a}
@@ -1869,76 +1928,85 @@ var Ze = "0.2.1", Qe = {
 		return e.filter(this.matchesFilter).forEach((e) => n.set(e.source_id, [...n.get(e.source_id) || [], e])), [...n].map(([e, n]) => M`<article class="reference source-row" data-source=${e}>
           <div class="reference-title">
             <div class="source-heading">
-              ${Ve(n[0].source_type)}
+              ${He(n[0].source_type)}
               <div>
                 <h3>${this.sourceControl(e)}</h3>
                 <span class="source-meta"
-                  >${X[n[0].source_type] || n[0].source_type}
-                  · ${n.length}
-                  ${n.length === 1 ? "reference" : "references"}</span
+                  >${J[n[0].source_type] || n[0].source_type}
+                  ·
+                  ${t ? $(n) : `${n.length} ${n.length === 1 ? "reference" : "references"}`}</span
                 >
               </div>
             </div>
             ${this.sourceControl(e, !0)}
           </div>
-          ${t ? this.unresolvedGroups(n) : M`<p class="purpose">${Ie(n)}</p>
+          ${t ? this.unresolvedGroups(n) : M`<p class="purpose">${Re(n)}</p>
                   ${n.some((e) => e.confidence !== "explicit") ? M`<span class="review-hint">Includes references to review</span>` : P}
                   <details class="technical">
                     <summary>Reference details (${n.length})</summary>
                     <code class="source-id">${e}</code>
                     ${n.map((e) => M`<div class="technical-row">
                           <div class="path">
-                            <span>${Z(e.path)}</span
+                            <span>${Y(e.path)}</span
                             >${this.badge(e.confidence)}
                           </div>
                           <code>${e.path}</code>
+                          ${e.reason ? M`<p>${X(e.reason)}</p>` : P}
                         </div>`)}
                   </details>`}
         </article>`);
 	}
 	unresolvedGroups(e) {
-		let t = /* @__PURE__ */ new Map();
-		for (let n of e) {
-			let e = n.reason || "Runtime expression";
-			t.set(e, [...t.get(e) || [], n]);
-		}
-		return [...t].map(([e, t]) => M` <details class="reason-group">
+		return $e(e).map(({ reference: e, paths: t }) => M` <details
+          class="reason-group"
+          data-resolution=${Q(e)}
+        >
           <summary>
-            ${e} <span class="count">${t.length}</span>
+            ${et(e)} · ${tt(e)}
+            <span class="count"
+              >${t.length}
+              ${t.length === 1 ? "location" : "locations"}</span
+            >
+            ${e.selector ? M`<span class="registry-status">${e.selector.exists === !0 ? "Identity found" : e.selector.exists === !1 ? "Identity not found" : "Identity not checked"}</span>` : P}
           </summary>
-          <p>${Be(e)}</p>
-          ${t.map((e) => M`<div class="unresolved-row"><span>${Z(e.path)}</span><code>${e.path}</code>${this.badge(e.confidence)}${this.selectorDetail(e)}</div>`)}
+          <p>${X(e.reason)}</p>
+          ${this.selectorDetail(e)}
+          ${e.selector ? P : M`<p>
+                    Locations share a reason, not necessarily the same
+                    expression or target.
+                  </p>
+                  ${this.badge(e.confidence)}`}
+          ${t.map((e) => M`<div class="unresolved-row"><span>${Y(e)}</span><code>${e}</code></div>`)}
         </details>`);
 	}
 	uncertainty(e) {
 		let t = e.uncertain_references.filter(this.matchesFilter), n = (e.other_dashboard_references || []).filter(this.matchesFilter);
-		return !t.length && !n.length ? P : M`<section
-      class="uncertainty"
-      aria-label="Unresolved expressions"
-    >
-      <h2>Unresolved expressions</h2>
+		return !t.length && !n.length ? P : M`<section class="uncertainty" aria-label="References to review">
+      <h2>References to review</h2>
       <p>
         These are limits of static analysis, not a count of broken entities.
-        Dynamic targets may still be relevant to this entity.
+        Device IDs and selectors are listed separately from dynamic or
+        unrecognized targets. Repeated locations are grouped; a shared
+        configuration does not prove a dependency.
       </p>
       ${t.length ? M`<details class="uncertainty-scope">
               <summary>
                 In linked configurations
-                <span class="count">${t.length}</span>
+                <span class="count">${$(t)}</span>
               </summary>
               <p>
-                Expressions in linked automation/script configurations or
-                dashboard cards. Their targets are unknown; a shared
-                configuration does not prove a dependency.
+                References in linked automation/script configurations or
+                dashboard cards, including other conditional branches.
               </p>
               ${this.references(t, !0)}
             </details>` : M`<p class="muted">
-              No unresolved expressions in the linked configurations or cards.
+              No references requiring review in the linked configurations or
+              cards.
             </p>`}
       ${n.length ? M`<details class="uncertainty-scope dashboard-context">
               <summary>
                 Elsewhere in linked dashboards
-                <span class="count">${n.length}</span>
+                <span class="count">${$(n)}</span>
               </summary>
               <p>
                 Outside cards with known links, or at dashboard level. Kept for
@@ -1967,7 +2035,7 @@ var Ze = "0.2.1", Qe = {
         >
           All sources
         </button>
-        ${Je.map((e) => M`<button aria-pressed=${this.sourceFilters.includes(e)} @click=${() => this.sourceFilters = this.sourceFilters.includes(e) ? this.sourceFilters.filter((t) => t !== e) : [...this.sourceFilters, e]}>${X[e]}</button>`)}
+        ${Ye.map((e) => M`<button aria-pressed=${this.sourceFilters.includes(e)} @click=${() => this.sourceFilters = this.sourceFilters.includes(e) ? this.sourceFilters.filter((t) => t !== e) : [...this.sourceFilters, e]}>${J[e]}</button>`)}
       </div>
       <div role="group" aria-label="Reference confidence" class="filter-row">
         <span class="filter-label">Confidence</span>
@@ -1981,8 +2049,9 @@ var Ze = "0.2.1", Qe = {
       </div>
       <p class="filter-note" role="status">
         ${n} of ${e.references.length} direct references visible. Needs
-        review includes unclassified references and unresolved expressions.
-        Exports and coverage always include the full analysis.
+        review includes unclassified references, device IDs, unexpanded
+        selectors and unresolved expressions. Exports and coverage always
+        include the full analysis.
       </p>
     </section>`;
 	}
@@ -1990,10 +2059,13 @@ var Ze = "0.2.1", Qe = {
 		if (!e.selector) return P;
 		let t = e.selector;
 		return M`<p class="selector-detail">
-      <strong>${t.kind.replace("_id", "")} selector</strong>
+      <strong
+        >${t.kind.replace("_id", "")}
+        ${Q(e) === "device" ? "reference" : "selector"}</strong
+      >
       <code>${t.value}</code>
       ${t.exists === !0 ? "Identity found in HA registry." : t.exists === !1 ? "Identity not found in HA registry; this does not establish a broken target." : "Registry identity not checked."}
-      Entity membership and runtime eligibility are not expanded.
+      ${Q(e) === "device" ? "Device identity does not establish an entity dependency or prove an action will run." : "Entity membership and runtime eligibility are not expanded."}
     </p>`;
 	}
 	impact(e) {
@@ -2006,7 +2078,7 @@ var Ze = "0.2.1", Qe = {
         >
       </h2>
       ${t.length ? M`<div class="source-grid">${this.references(t)}</div>` : M`<div class="empty">
-              <div class="symbol">${Y()}</div>
+              <div class="symbol">${q()}</div>
               <h3>
                 ${this.filtersActive ? "No matching direct references" : "No direct references found"}
               </h3>
@@ -2082,7 +2154,7 @@ var Ze = "0.2.1", Qe = {
     </section>`;
 	}
 	graph(e) {
-		let t = this.filtersActive ? Xe(e, this.matchesFilter) : e.graph.nodes, n = e.graph.edges.filter(this.matchesFilter), r = t.find((e) => e.relationship === "selected"), i = t.filter((e) => e.relationship === "dependent"), a = t.filter((e) => e.relationship === "downstream");
+		let t = this.filtersActive ? Ze(e, this.matchesFilter) : e.graph.nodes, n = e.graph.edges.filter(this.matchesFilter), r = t.find((e) => e.relationship === "selected"), i = t.filter((e) => e.relationship === "dependent"), a = t.filter((e) => e.relationship === "downstream");
 		return M`<h2>Dependency map</h2>
       <p class="muted">
         Read from the selected entity to its linked configurations and their
@@ -2133,11 +2205,11 @@ var Ze = "0.2.1", Qe = {
     >
       <div class="reference-title">
         <div class="source-heading">
-          ${Ve(t)}
+          ${He(t)}
           <div>
             <h3>${this.sourceControl(e.id)}</h3>
             <span class="source-meta"
-              >${X[t] || t.replaceAll("_", " ")}${e.depth ? ` · ${e.depth} ${e.depth === 1 ? "step" : "steps"} away` : ""}</span
+              >${J[t] || t.replaceAll("_", " ")}${e.depth ? ` · ${e.depth} ${e.depth === 1 ? "step" : "steps"} away` : ""}</span
             >
           </div>
         </div>
@@ -2152,7 +2224,7 @@ var Ze = "0.2.1", Qe = {
         <code class="source-id">${e.id}</code>
         ${e.path ? M`<div class="technical-row">
                 <div class="path">
-                  <span>${Z(e.path)}</span
+                  <span>${Y(e.path)}</span
                   >${e.confidence ? this.badge(e.confidence) : P}
                 </div>
                 <code>${e.path}</code>
@@ -2186,7 +2258,7 @@ var Ze = "0.2.1", Qe = {
                   </td>
                   <td>${e.role}</td>
                   <td>
-                    ${this.badge(e.confidence)}${e.reason ? M`<p>${Be(e.reason)}</p>` : P}${this.selectorDetail(e)}
+                    ${e.selector ? M`<span class="badge">${et(e)}</span>` : this.badge(e.confidence)}${e.reason ? M`<p>${X(e.reason)}</p>` : P}${this.selectorDetail(e)}
                   </td>
                 </tr>`)}
           </tbody>
@@ -2207,10 +2279,10 @@ var Ze = "0.2.1", Qe = {
           ☰
         </button>
         <div class="brand-lockup">
-          ${Y()}<strong>HA Blast Radius</strong>
+          ${q()}<strong>HA Blast Radius</strong>
         </div>
         <span class="badge"
-          >READ ONLY<span class="release-label"> · α ${Ze}</span></span
+          >READ ONLY<span class="release-label"> · α ${Qe}</span></span
         >
       </header>
       <main>
@@ -2269,7 +2341,7 @@ var Ze = "0.2.1", Qe = {
               >
                 <span class="recent-label">Recent</span>
                 <div class="recent-list">
-                  ${Pe(this.recentSearches, (e) => e.entityId, (e) => M`<button
+                  ${Ie(this.recentSearches, (e) => e.entityId, (e) => M`<button
                         class="recent-search"
                         title=${`${e.entityId} · depth ${e.depth}`}
                         aria-label=${`Analyze again: ${e.entityId}`}
@@ -2325,7 +2397,7 @@ var Ze = "0.2.1", Qe = {
                   <div class="stat">
                     <strong
                       >${e.summary.template_literal + e.summary.unknown}</strong
-                    ><span>References to review</span>
+                    ><span>Direct refs to review</span>
                   </div>
                 </div>
                 <div class="columns">
@@ -2424,17 +2496,20 @@ var Ze = "0.2.1", Qe = {
                   <ul>
                     ${e.warnings.map((e) => M`<li>${e}</li>`)}
                     <li>
-                      ${e.unresolved_total} unresolved references across
-                      the full snapshot. Their targets are unknown; they cannot
-                      be attributed to this entity.
+                      ${e.unresolved_total} locations without an entity
+                      target across the full snapshot. These include device IDs,
+                      selectors and expressions; they cannot be attributed to
+                      this entity.
                     </li>
                     <li>
-                      ${e.uncertain_references.length} unresolved
-                      expressions in linked configurations or cards;
-                      ${e.other_dashboard_references?.length || 0}
-                      elsewhere in linked dashboards. Counts refer to expression
-                      locations, not missing or broken entities.
+                      ${$(e.uncertain_references)} in linked
+                      configurations or cards;
+                      ${$(e.other_dashboard_references || [])}
+                      elsewhere in linked dashboards. Groups summarize repeated
+                      reasons and selector identities, not a count of affected
+                      entities.
                     </li>
+                    ${e.review_summary?.snapshot.locations === e.unresolved_total ? M`<li>Full snapshot: ${e.review_summary.snapshot.device_locations} device-reference locations · ${e.review_summary.snapshot.selector_locations} unexpanded-selector locations · ${e.review_summary.snapshot.unresolved_locations} dynamic or unrecognized locations.</li>` : P}
                     <li>
                       Conditional branches are not evaluated. A reference does
                       not prove an action will run.
@@ -2450,7 +2525,7 @@ var Ze = "0.2.1", Qe = {
                   >
                 </div>
               ` : !this.loading && !this.error ? M`<section class="card empty">
-                  <div class="symbol">${Y()}</div>
+                  <div class="symbol">${q()}</div>
                   <h2>Start with one entity</h2>
                   <p class="muted">
                     A button, a helper, an old light.<br />Find out what points
@@ -2464,6 +2539,6 @@ var Ze = "0.2.1", Qe = {
       </main>`;
 	}
 };
-customElements.get("blast-radius-panel") || customElements.define("blast-radius-panel", $);
+customElements.get("blast-radius-panel") || customElements.define("blast-radius-panel", rt);
 //#endregion
-export { $ as BlastRadiusPanel };
+export { rt as BlastRadiusPanel };

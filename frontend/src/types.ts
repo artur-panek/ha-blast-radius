@@ -9,6 +9,14 @@ export interface Reference {
   role: string;
   reason: string;
   selector?: { kind: string; value: string; exists: boolean | null };
+  resolution?: "entity" | "device" | "selector" | "unresolved";
+}
+export interface ReviewSummary {
+  locations: number;
+  groups: number;
+  device_locations: number;
+  selector_locations: number;
+  unresolved_locations: number;
 }
 export interface GraphNode {
   id: string;
@@ -29,6 +37,11 @@ export interface Report {
   source_names?: Record<string, string>;
   navigation?: Record<string, NavigationTarget>;
   unresolved_total: number;
+  review_summary?: {
+    linked: ReviewSummary;
+    other_dashboard: ReviewSummary;
+    snapshot: ReviewSummary;
+  };
   graph: {
     nodes: GraphNode[];
     edges: Reference[];

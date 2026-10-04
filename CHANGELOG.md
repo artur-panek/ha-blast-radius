@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.2 — 2026-10-05
+
+- Separate literal device references from unexpanded entity-set selectors and
+  dynamic/unrecognized targets in the panel, JSON and Markdown reports.
+- Group repeated review locations by source, role, reason, selector identity and
+  registry status. Retain every original path; show group and location counts
+  without presenting snapshot-wide uncertainty as impact on one selected entity.
+- Resolve internal entity registry IDs in native device actions, triggers and
+  conditions, including nested branches and current IDs after entity renames.
+  Keep missing IDs unresolved and exclude templates, service payloads, variables
+  and custom cards from this lookup. Never expand device membership into targets.
+- Add regression coverage for a 16-trigger keypad, repeated actions, all selector
+  types, missing/unchecked registries, conditional reads, unrelated dashboards,
+  filters, complete exports and mobile layouts. Rebuild the distributed panel.
+
 ## 0.2.1 — 2026-10-04
 
 - Verify loaded automation/script blueprint expansion against real HA interfaces;
