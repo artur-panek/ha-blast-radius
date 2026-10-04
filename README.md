@@ -11,7 +11,7 @@ Read-only dependency and impact analysis for Home Assistant. Find where an entit
 is referenced, follow structural dependencies, and preview a rename or removal
 before changing your configuration. Every result includes source paths and confidence.
 
-**v0.1.9 · Experimental alpha · Admin only · MIT**
+**v0.2.0 · Public alpha · Admin only · MIT**
 
 Requires Home Assistant **2026.9.4+**; tested against **2026.9.4**. Later releases
 need compatibility testing. This is a static configuration inspector, not a runtime
@@ -59,6 +59,10 @@ conditional branch will run tonight. That would be a different project.
 ## Installation
 
 ### HACS custom repository
+
+[![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=artur-panek&repository=ha-blast-radius&category=integration)
+
+Use the button above for one-click HACS setup, or add the repository manually:
 
 1. In HACS, open **Custom repositories** from its menu.
 2. Add `https://github.com/artur-panek/ha-blast-radius`, type **Integration**.
