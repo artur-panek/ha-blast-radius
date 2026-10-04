@@ -7,6 +7,10 @@ Make a Home Assistant backup before installing or updating any custom integratio
 
 ## HACS custom repository
 
+[![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=artur-panek&repository=ha-blast-radius&category=integration)
+
+Use the button above for one-click HACS setup, or add the repository manually:
+
 1. Open HACS and its **Custom repositories** dialog.
 2. Add `https://github.com/artur-panek/ha-blast-radius` as **Integration**.
 3. Download **HA Blast Radius** and restart Home Assistant.
@@ -37,9 +41,9 @@ needed on the Home Assistant machine; the built panel is included.
   Assistant. Discovery is periodic, not immediate. Install the offered update,
   then restart HA; this integration never installs itself or restarts your server.
 - **One-time switch from `main`:** open HACS → HA Blast Radius → menu →
-  **Redownload**, select the newest numbered release (for example `v0.1.3`), and
-  download it. Restart HA and reload the browser. Even if the panel already says
-  `0.1.3`, this switches HACS from branch tracking to numbered release tracking.
+  **Redownload**, select the newest numbered release, and download it. Restart HA
+  and reload the browser. Even if the panel already shows that version, this switches
+  HACS from branch tracking to numbered release tracking.
 - If a new release is missing, use the repository menu's **Update information**
   option and reopen Redownload. Do not delete the integration or edit HACS storage.
 - Staying on `main` is an opt-in development choice; branch updates may include
