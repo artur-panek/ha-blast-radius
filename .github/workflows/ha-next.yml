@@ -1,0 +1,42 @@
+name: HA next compatibility
+on:
+  pull_request:
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE', '.github/ISSUE_TEMPLATE/**']
+  push:
+    branches: [main]
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE', '.github/ISSUE_TEMPLATE/**']
+  schedule:
+    - cron: '23 6 * * 2'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: ha-next-${{ github.ref }}
+  cancel-in-progress: true
+
+# Advisory: separate from the required stable Quality/release dependency chain.
+# Do not use continue-on-error: upstream failures must remain visibly red.
+jobs:
+  ha-next:
+    name: HA next compatibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements/ha-next.txt
+      - run: python -m pip install -e '.[dev]' -r requirements/ha-next.txt
+      - run: python -m pip check
+      - name: Record exact Home Assistant version
+        run: |
+          python -c 'from homeassistant.const import __version__; print("Home Assistant", __version__)' | tee -a "$GITHUB_STEP_SUMMARY"
+      - run: pytest -q --cov --timeout=60
+      - name: Explain advisory result
+        if: always()
+        run: echo 'HA-next is advisory. Stable HA 2026.9.4 Quality tests remain authoritative and release-blocking. See docs/validation.md.' >> "$GITHUB_STEP_SUMMARY"

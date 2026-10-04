@@ -109,7 +109,7 @@ const reasons: Record<string, string> = {
 
 export function explainReason(reason: string): string {
   if (reason.startsWith("Unexpanded "))
-    return "This selector targets a device, area, floor or label. Its entity membership is not expanded.";
+    return "This configuration names a device, area, floor or label. Its entity membership and runtime eligibility are not expanded.";
   return reason
     .split("; ")
     .map(

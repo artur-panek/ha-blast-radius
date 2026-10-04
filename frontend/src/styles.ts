@@ -711,6 +711,59 @@ export const styles = css`
   .uncertainty .reference {
     margin: 12px 0;
   }
+  .result-filters {
+    margin: 14px 0 20px;
+  }
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .filter-label {
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .filter-row button {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 16px;
+  }
+  .filter-row button[aria-pressed="true"] {
+    background: var(--primary-text-color, #212121);
+    color: var(--br-card);
+    border-color: var(--primary-text-color, #212121);
+  }
+  .filter-note,
+  .totals-label {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .node-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+  .analyze-node {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  .graph-node .reference-title {
+    flex-wrap: wrap;
+  }
+  .selector-detail {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .issue-link {
+    color: var(--br-muted);
+    display: inline-block;
+    margin-top: 12px;
+    font-size: 12px;
+  }
   @media (max-width: 850px) {
     .columns {
       grid-template-columns: 1fr;

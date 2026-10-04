@@ -14,7 +14,8 @@ Publishing to GitHub and listing in HACS's default directory are separate steps.
    changing their source. Rebuild and commit the frontend and runtime assets.
 4. Run the commands in CONTRIBUTING.md. Inspect desktop/mobile screenshots and
    check setup, analysis, preview and unload on the supported HA version.
-5. Review the diff for credentials, household configuration and unintentional files.\n6. Confirm both hassfest and the HACS Action pass without ignored validations.
+5. Review the diff for credentials, household configuration and unintentional files.
+6. Confirm both hassfest and the HACS Action pass without ignored validations.
 
 ## Package
 
@@ -66,3 +67,30 @@ Existing branch-based installations should Redownload once and select the number
 version; see [installation](installation.md). HACS detects releases periodically;
 the integration never auto-installs itself or restarts HA. No HACS default-directory
 submission is performed by this workflow.
+
+## Maintaining HA compatibility
+
+`pyproject.toml` pins stable HA, its matching pytest fixture package and frontend.
+Quality's Python 3.14 job remains required by publication; Python 3.12 tests the
+standalone engine. `.github/workflows/ha-next.yml` runs the same full Python suite
+on PRs, main and weekly, using `requirements/ha-next.txt` in a separate environment.
+The next lane is advisory and is not a dependency of publication. Failures remain
+red with their logs and exact HA version; no `continue-on-error` hides them.
+
+Before each release, inspect official HA GitHub releases and update the next pairing
+to the latest appropriate official prerelease, including the matching fixture package
+and HA frontend requirement. Version pins keep runs reproducible. A newly released
+beta does not silently replace an already recorded test result.
+
+Once the next HA version becomes stable, run the full suite, assess interface changes
+and deliberately update the stable pins, HACS minimum/support statement, package
+checks and release notes. Then move the advisory pairing to the next official release.
+Do not relax stable checks to accommodate beta failures. Keep stable and next in
+separate environments; do not install the stable `ha` extra in the next environment.
+
+```bash
+python3.14 -m venv .venv-next
+.venv-next/bin/python -m pip install -e '.[dev]' -r requirements/ha-next.txt
+.venv-next/bin/python -m pip check
+.venv-next/bin/pytest -q --cov --timeout=60
+```

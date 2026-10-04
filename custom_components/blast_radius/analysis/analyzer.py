@@ -53,7 +53,7 @@ class Analyzer:
             else:
                 uncertain.append(ref.as_dict())
         warnings = list(self.warnings)
-        exists = entity_id in self.entities
+        exists = entity_id in self.entities or entity_id in self.sources
         if not exists:
             warnings.append(
                 "Entity has no current state or registry entry; stale references are still shown."
@@ -97,6 +97,7 @@ class Analyzer:
                 "sources": len(self.sources),
                 "entities": len(self.entities),
                 "source_types": dict(Counter(s.source_type for s in self.sources.values())),
+                "loaded_blueprints": sum(s.blueprint for s in self.sources.values()),
                 # Keep specific snapshot/scanner gaps distinct from the routine
                 # explanation of sources this analyzer never claims to cover.
                 "warnings": [note for note in self.warnings if note != BASE_COVERAGE_NOTE],
@@ -174,6 +175,14 @@ def markdown_report(report: dict[str, Any]) -> str:
     ]
     for ref in report["uncertain_references"]:
         lines.append(f"- `{ref['source_id']}` — `{ref['path']}` ({ref['reason']})")
+        if selector := ref.get("selector"):
+            presence = {True: "present", False: "not found", None: "not checked"}[
+                selector["exists"]
+            ]
+            lines.append(
+                f"  Selector `{selector['kind']}`; registry identity {presence}. "
+                "Entity membership is not expanded."
+            )
     other_dashboard = report.get("other_dashboard_references", [])
     if other_dashboard:
         lines += [

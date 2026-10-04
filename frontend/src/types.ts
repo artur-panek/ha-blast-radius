@@ -8,6 +8,7 @@ export interface Reference {
   confidence: Confidence;
   role: string;
   reason: string;
+  selector?: { kind: string; value: string; exists: boolean | null };
 }
 export interface GraphNode {
   id: string;

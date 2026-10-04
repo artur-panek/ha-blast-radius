@@ -13,7 +13,7 @@ Read-only dependency and impact analysis for Home Assistant. Find where an entit
 is referenced, follow structural dependencies, and preview a rename or removal
 before changing your configuration. Every result includes source paths and confidence.
 
-**v0.2.0 · Public alpha · Admin only · MIT**
+**v0.2.1 · Public alpha · Admin only · MIT**
 
 Requires Home Assistant **2026.9.4+**; tested against **2026.9.4**. Later releases
 need compatibility testing. This is a static configuration inspector, not a runtime
@@ -96,10 +96,20 @@ and select the latest numbered release. Updates do not install or restart HA aut
 1. Select or type an entity ID. Missing old IDs are accepted.
 2. Choose a traversal depth and press **Analyze**.
 3. Read **Impact**, **Graph**, or **Raw references**. Click a source name or **Open**
-   to inspect it in Home Assistant; expand reference details for exact paths.
+   to inspect it in Home Assistant; **Analyze this** makes a graph node the new root
+   without leaving the panel. Expand reference details for exact paths.
 4. Expand **Preview a change**. Enter a same-domain replacement for **Preview rename**,
    or choose **Preview removal**. Expand coverage before drawing conclusions.
 5. Copy/export the report. Make actual changes yourself in Home Assistant.
+
+Use the source chips (Automation, Script, Dashboard, Scene, Group) and confidence
+chips (Explicit, Template literal, Needs review) to narrow the displayed results.
+Needs review includes unclassified references and unresolved expressions, not a
+count of broken entities. Filters apply to source cards, graph connections and raw
+references; full totals, coverage, previews and exports remain unchanged. **All
+sources** / **All confidence** reset each group. Filters reset on a new root or
+panel remount and are not saved in session storage. The selected tab is preserved.
+Graph paths may pass through hidden configurations; filters do not recalculate reachability.
 
 Every request takes a fresh snapshot. Registry-only entities, including disabled
 entities, count as known even when they have no current state.
@@ -126,7 +136,7 @@ adjustable from 1 to 12. Graphs cap at 500 nodes and 2,000 edges; scans cap at
 50,000 references and 80 nested levels. Depth/size limits and specific snapshot
 coverage gaps produce a **Results are incomplete** notice above the counts.
 The notice offers a deeper search for depth-only limits below 12, and opens the
-coverage details for skipped sources, unexpanded blueprint bodies and scan limits.
+coverage details for skipped sources, failed blueprint expansion and scan limits.
 Warnings also appear in Markdown and JSON exports. The static-analysis limitations
 below apply even when no warning is shown.
 
@@ -137,7 +147,7 @@ below apply even when no warning is shown.
 | Explicit | `entity_id: light.desk` | Recognized field or direct script call |
 | Template literal | `{{ states('light.desk') }}` | Visible ID; execution is unknown |
 | Dynamic | `{{ states('light.' ~ room) }}` | Final target cannot be resolved |
-| Unclassified | Known ID in an untyped field | Candidate requiring manual review |
+| Unclassified | Untyped field or native-only metadata | Candidate requiring manual review |
 
 Dynamic references have **no guessed target**. Plain constant templates and common
 value-only filters do not automatically count as unresolved dependencies. A templated
@@ -166,17 +176,23 @@ zero-based paths; the raw-reference view and exports retain the original identif
 ## Known limitations
 
 - Loaded configurations only; invalid or unloaded YAML is not scanned.
-- Blueprint inputs are inspected; blueprint bodies are not expanded.
+- Successfully loaded automation and script blueprints are inspected after HA substitutes
+  their inputs. Failed/unavailable configurations produce redacted coverage warnings.
 - Scene/group membership is exposed; scene attribute strings are not scanned.
-- Helper definitions and template integration definitions are not universally exposed.
-- Device, area, floor and label selectors remain unresolved.
+- References to common helpers (input helpers, counters, timers and schedules) are
+  inspected like other entity IDs. Their internal definitions and template integration
+  definitions are not universally exposed.
+- Device, area, floor and label selectors show their registry identity status.
+  Their entity membership and service-specific runtime eligibility remain unresolved;
+  no selector is expanded into entity targets. A registry miss is not proof of breakage.
 - Template literals are reference dependencies, not assumed downstream action targets.
 - Generated/unavailable dashboards produce coverage warnings.
 - Custom cards, JavaScript templates and unknown field semantics may be missed.
 - No Node-RED, AppDaemon, ESPHome, runtime causality or event recording.
 - Rename previews do not predict HA's own automatic reference rewrites.
 - The adapter uses version-sensitive HA component interfaces. Tested against
-  2026.9.4; later HA releases need compatibility testing despite the minimum-version declaration.
+  2026.9.4 is the required stable baseline. A separate advisory CI lane tests
+  2026.10.0b0 with the full HA suite; this does not declare general support for future HA.
 
 See [architecture and API](docs/architecture.md) for source access and
 [validation](docs/validation.md) for tested versions and evidence.
@@ -243,8 +259,11 @@ dumps. Security reports: [SECURITY.md](SECURITY.md). Preparing a release:
 
 ## Roadmap
 
-- More helper and blueprint coverage through HA interfaces.
-- Source filtering and richer graph navigation.
-- Compatibility checks against future HA releases.
+- Broader helper and template-integration definition coverage where HA exposes it.
+- Additional HA source types.
+- Richer comparison and change planning.
+
+Loaded-blueprint coverage, source/confidence filters, graph root navigation and
+HA-next CI shipped in v0.2.1. Compatibility testing continues as routine maintenance.
 
 Automatic rewriting and runtime recording are outside this project's scope.

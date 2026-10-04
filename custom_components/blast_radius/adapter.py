@@ -10,11 +10,34 @@ from urllib.parse import quote
 
 from homeassistant.components.lovelace.const import LOVELACE_DATA
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import area_registry as ar
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import floor_registry as fr
+from homeassistant.helpers import label_registry as lr
 from homeassistant.helpers.entity_component import DATA_INSTANCES
 from homeassistant.helpers.template import Template
 
 from .analysis.models import BASE_COVERAGE_NOTE, Source
+
+_NATIVE_SELECTORS = {
+    "device_id": "referenced_devices",
+    "area_id": "referenced_areas",
+    "floor_id": "referenced_floors",
+    "label_id": "referenced_labels",
+}
+
+
+def _native_ids(entity: Any, attribute: str) -> frozenset[str]:
+    """Detach metadata; its values are identifiers, never a config representation."""
+    values = getattr(entity, attribute)
+    if not isinstance(values, (set, frozenset)):
+        raise ValueError("Unsupported native reference metadata")
+    if len(values) > 50_000:
+        raise ValueError("Native reference metadata exceeds analysis limit")
+    if any(not isinstance(value, str) or len(value) > 512 for value in values):
+        raise ValueError("Unsupported native reference identifier")
+    return frozenset(values)
 
 
 def navigation_targets(
@@ -89,6 +112,22 @@ async def collect_snapshot(
     names.update({state.entity_id: state.name for state in hass.states.async_all()})
     sources: list[Source] = []
     warnings: list[str] = []
+    selector_registry = frozenset(
+        (kind, identifier)
+        for kind, identifiers in (
+            (
+                "device_id",
+                (
+                    device if isinstance(device, str) else device.id
+                    for device in dr.async_get(hass).devices
+                ),
+            ),
+            ("area_id", (area.id for area in ar.async_get(hass).async_list_areas())),
+            ("floor_id", (floor.floor_id for floor in fr.async_get(hass).async_list_floors())),
+            ("label_id", (label.label_id for label in lr.async_get(hass).async_list_labels())),
+        )
+        for identifier in identifiers
+    )
     components = hass.data.get(DATA_INSTANCES, {})
     for domain in ("automation", "script"):
         component = components.get(domain)
@@ -100,7 +139,13 @@ async def collect_snapshot(
                 warnings.append(f"Configuration unavailable for {entity.entity_id}.")
                 continue
             if "use_blueprint" in config:
-                warnings.append(f"{entity.entity_id}: blueprint body is not expanded; inputs only.")
+                warnings.append(
+                    f"{entity.entity_id}: blueprint expansion unavailable; supplied inputs only."
+                )
+            elif not entity.available:
+                warnings.append(
+                    f"{entity.entity_id}: loaded configuration is unavailable or failed validation."
+                )
             try:
                 normalized = _normalize(config)
             except ValueError:
@@ -108,12 +153,31 @@ async def collect_snapshot(
                     f"Configuration size limit reached for {entity.entity_id}; skipped."
                 )
                 continue
+            native_entities: frozenset[str] = frozenset()
+            native_selectors: frozenset[tuple[str, str]] = frozenset()
+            blueprint = False
+            try:
+                native_entities = _native_ids(entity, "referenced_entities")
+                native_selectors = frozenset(
+                    (kind, value)
+                    for kind, attribute in _NATIVE_SELECTORS.items()
+                    for value in _native_ids(entity, attribute)
+                )
+                # Retain provenance as a boolean only. Blueprint paths and raw
+                # input bags never enter reports, warnings or diagnostics.
+                blueprint = bool(getattr(entity, "referenced_blueprint", None))
+            except Exception:
+                warnings.append(f"{entity.entity_id}: native reference metadata unavailable.")
             sources.append(
                 Source(
                     entity.entity_id,
                     domain,
                     names.get(entity.entity_id, entity.entity_id),
                     normalized,
+                    native_entities=native_entities,
+                    native_selectors=native_selectors,
+                    selector_registry=selector_registry,
+                    blueprint=blueprint,
                 )
             )
 
@@ -139,7 +203,13 @@ async def collect_snapshot(
             try:
                 config = await dashboard.async_load(False)
                 sources.append(
-                    Source(source_id, "dashboard", path or "Overview", _normalize(config))
+                    Source(
+                        source_id,
+                        "dashboard",
+                        path or "Overview",
+                        _normalize(config),
+                        selector_registry=selector_registry,
+                    )
                 )
             except Exception:  # A broken/auto-generated dashboard must not hide other sources.
                 # Do not include exceptions: YAML errors can contain secrets or local paths.
