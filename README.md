@@ -13,7 +13,7 @@ Read-only dependency and impact analysis for Home Assistant. Find where an entit
 is referenced, follow structural dependencies, and preview a rename or removal
 before changing your configuration. Every result includes source paths and confidence.
 
-**v0.2.1 · Public alpha · Admin only · MIT**
+**v0.2.2 · Public alpha · Admin only · MIT**
 
 Requires Home Assistant **2026.9.4+**; tested against **2026.9.4**. Later releases
 need compatibility testing. This is a static configuration inspector, not a runtime
@@ -104,9 +104,9 @@ and select the latest numbered release. Updates do not install or restart HA aut
 
 Use the source chips (Automation, Script, Dashboard, Scene, Group) and confidence
 chips (Explicit, Template literal, Needs review) to narrow the displayed results.
-Needs review includes unclassified references and unresolved expressions, not a
-count of broken entities. Filters apply to source cards, graph connections and raw
-references; full totals, coverage, previews and exports remain unchanged. **All
+Needs review includes unclassified references, device identities, unexpanded
+selectors and unresolved expressions. Filters apply to source cards, graph
+connections and raw references; full totals, coverage, previews and exports remain unchanged. **All
 sources** / **All confidence** reset each group. Filters reset on a new root or
 panel remount and are not saved in session storage. The selected tab is preserved.
 Graph paths may pass through hidden configurations; filters do not recalculate reachability.
@@ -156,7 +156,12 @@ rendered destination is unknown. Simple template-local assignments and value loo
 do not, by themselves, introduce unknown entity dependencies. Runtime variables,
 unknown helpers/filters/tests, imports and state collections remain unresolved.
 
-**Unresolved expressions** are grouped by source and reason, with two scopes:
+**References to review** distinguishes device identities, entity sets that have
+not been expanded, and dynamic or unrecognized targets. It groups repeated locations
+by source, role, reason and selector identity/status. For example, sixteen event
+triggers naming the same device become one group with sixteen expandable paths.
+Different devices and read/action roles stay separate. Dynamic expressions grouped
+under one reason may still have different targets. Two scopes remain available:
 
 - **In linked configurations:** affected automation/script configurations and
   dashboard cards with known reference links, including their parent/child cards.
@@ -164,9 +169,9 @@ unknown helpers/filters/tests, imports and state collections remain unresolved.
   dashboard level. They remain visible and exported but are not attributed to the
   selected entity. Custom card boundaries cannot always be inferred.
 
-The full-snapshot total remains under **Coverage and limitations**. These counts
-describe expression locations, not broken entities. Even expressions in a linked
-configuration may refer to something else. Zero references is not a guarantee that
+The full-snapshot total and category breakdown remain under **Coverage and limitations**.
+Counts describe configuration locations and review groups, not broken entities.
+Even expressions in a linked configuration may refer to something else. Zero references is not a guarantee that
 removal is safe. The main summary counts known references and linked configurations.
 
 The panel shows friendly names and readable, one-based locations such as
@@ -185,6 +190,11 @@ zero-based paths; the raw-reference view and exports retain the original identif
 - Device, area, floor and label selectors show their registry identity status.
   Their entity membership and service-specific runtime eligibility remain unresolved;
   no selector is expanded into entity targets. A registry miss is not proof of breakage.
+- Device triggers, conditions, actions and event filters identify devices separately.
+  In native device automation fields, an internal entity registry ID is resolved to
+  the current entity ID, including after renames. This is an exact identity lookup;
+  it does not select other entities on the device or evaluate conditional branches.
+  Missing registry IDs and unavailable lookups remain visible for review.
 - Template literals are reference dependencies, not assumed downstream action targets.
 - Generated/unavailable dashboards produce coverage warnings.
 - Custom cards, JavaScript templates and unknown field semantics may be missed.

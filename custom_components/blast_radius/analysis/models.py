@@ -1,5 +1,6 @@
 """Normalized, immutable input and reference records."""
 
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass
 from enum import StrEnum
 from typing import Any
@@ -30,6 +31,15 @@ class Role(StrEnum):
     DISPLAY = "display"
 
 
+class Resolution(StrEnum):
+    """What a reference identifies, independently of entity-edge confidence."""
+
+    ENTITY = "entity"
+    DEVICE = "device"
+    SELECTOR = "selector"
+    UNRESOLVED = "unresolved"
+
+
 @dataclass(frozen=True)
 class Source:
     source_id: str
@@ -40,6 +50,7 @@ class Source:
     native_selectors: frozenset[tuple[str, str]] = frozenset()
     selector_registry: frozenset[tuple[str, str]] | None = None
     blueprint: bool = False
+    entity_registry: Mapping[str, str] | None = None
 
 
 @dataclass(frozen=True)
@@ -61,11 +72,19 @@ class Reference:
     role: Role
     reason: str = ""
     selector: Selector | None = None
+    resolution: Resolution | None = None
 
     def as_dict(self) -> dict[str, Any]:
         result = asdict(self)
         if self.selector is None:
             result.pop("selector")
+        result["resolution"] = self.resolution or (
+            Resolution.ENTITY
+            if self.target is not None
+            else Resolution.SELECTOR
+            if self.selector is not None
+            else Resolution.UNRESOLVED
+        )
         return result
 
 

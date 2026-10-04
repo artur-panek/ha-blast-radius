@@ -27,6 +27,13 @@ import {
   type ReviewFilter,
 } from "./filters";
 import { version } from "../package.json";
+import {
+  groupReviewReferences,
+  reviewCounts,
+  reviewLabel,
+  reviewResolution,
+  reviewRole,
+} from "./review";
 import type {
   Confidence,
   Entity,
@@ -403,8 +410,8 @@ export class BlastRadiusPanel extends LitElement {
                 <h3>${this.sourceControl(source)}</h3>
                 <span class="source-meta"
                   >${sourceLabels[references[0].source_type] || references[0].source_type}
-                  · ${references.length}
-                  ${references.length === 1 ? "reference" : "references"}</span
+                  ·
+                  ${unresolved ? reviewCounts(references) : `${references.length} ${references.length === 1 ? "reference" : "references"}`}</span
                 >
               </div>
             </div>
@@ -426,6 +433,7 @@ export class BlastRadiusPanel extends LitElement {
                             >${this.badge(ref.confidence)}
                           </div>
                           <code>${ref.path}</code>
+                          ${ref.reason ? html`<p>${explainReason(ref.reason)}</p>` : nothing}
                         </div>`,
                     )}
                   </details>`
@@ -435,19 +443,32 @@ export class BlastRadiusPanel extends LitElement {
   }
 
   private unresolvedGroups(refs: Reference[]) {
-    const groups = new Map<string, Reference[]>();
-    for (const ref of refs) {
-      const reason = ref.reason || "Runtime expression";
-      groups.set(reason, [...(groups.get(reason) || []), ref]);
-    }
-    return [...groups].map(
-      ([reason, references]) =>
-        html` <details class="reason-group">
+    return groupReviewReferences(refs).map(
+      ({ reference: ref, paths }) =>
+        html` <details
+          class="reason-group"
+          data-resolution=${reviewResolution(ref)}
+        >
           <summary>
-            ${reason} <span class="count">${references.length}</span>
+            ${reviewLabel(ref)} · ${reviewRole(ref)}
+            <span class="count"
+              >${paths.length}
+              ${paths.length === 1 ? "location" : "locations"}</span
+            >
+            ${ref.selector ? html`<span class="registry-status">${ref.selector.exists === true ? "Identity found" : ref.selector.exists === false ? "Identity not found" : "Identity not checked"}</span>` : nothing}
           </summary>
-          <p>${explainReason(reason)}</p>
-          ${references.map((ref) => html`<div class="unresolved-row"><span>${readablePath(ref.path)}</span><code>${ref.path}</code>${this.badge(ref.confidence)}${this.selectorDetail(ref)}</div>`)}
+          <p>${explainReason(ref.reason)}</p>
+          ${this.selectorDetail(ref)}
+          ${
+            !ref.selector
+              ? html`<p>
+                    Locations share a reason, not necessarily the same
+                    expression or target.
+                  </p>
+                  ${this.badge(ref.confidence)}`
+              : nothing
+          }
+          ${paths.map((path) => html`<div class="unresolved-row"><span>${readablePath(path)}</span><code>${path}</code></div>`)}
         </details>`,
     );
   }
@@ -458,31 +479,30 @@ export class BlastRadiusPanel extends LitElement {
       this.matchesFilter,
     );
     if (!local.length && !elsewhere.length) return nothing;
-    return html`<section
-      class="uncertainty"
-      aria-label="Unresolved expressions"
-    >
-      <h2>Unresolved expressions</h2>
+    return html`<section class="uncertainty" aria-label="References to review">
+      <h2>References to review</h2>
       <p>
         These are limits of static analysis, not a count of broken entities.
-        Dynamic targets may still be relevant to this entity.
+        Device IDs and selectors are listed separately from dynamic or
+        unrecognized targets. Repeated locations are grouped; a shared
+        configuration does not prove a dependency.
       </p>
       ${
         local.length
           ? html`<details class="uncertainty-scope">
               <summary>
                 In linked configurations
-                <span class="count">${local.length}</span>
+                <span class="count">${reviewCounts(local)}</span>
               </summary>
               <p>
-                Expressions in linked automation/script configurations or
-                dashboard cards. Their targets are unknown; a shared
-                configuration does not prove a dependency.
+                References in linked automation/script configurations or
+                dashboard cards, including other conditional branches.
               </p>
               ${this.references(local, true)}
             </details>`
           : html`<p class="muted">
-              No unresolved expressions in the linked configurations or cards.
+              No references requiring review in the linked configurations or
+              cards.
             </p>`
       }
       ${
@@ -490,7 +510,7 @@ export class BlastRadiusPanel extends LitElement {
           ? html`<details class="uncertainty-scope dashboard-context">
               <summary>
                 Elsewhere in linked dashboards
-                <span class="count">${elsewhere.length}</span>
+                <span class="count">${reviewCounts(elsewhere)}</span>
               </summary>
               <p>
                 Outside cards with known links, or at dashboard level. Kept for
@@ -541,8 +561,9 @@ export class BlastRadiusPanel extends LitElement {
       </div>
       <p class="filter-note" role="status">
         ${count} of ${report.references.length} direct references visible. Needs
-        review includes unclassified references and unresolved expressions.
-        Exports and coverage always include the full analysis.
+        review includes unclassified references, device IDs, unexpanded
+        selectors and unresolved expressions. Exports and coverage always
+        include the full analysis.
       </p>
     </section>`;
   }
@@ -551,10 +572,13 @@ export class BlastRadiusPanel extends LitElement {
     if (!ref.selector) return nothing;
     const selector = ref.selector;
     return html`<p class="selector-detail">
-      <strong>${selector.kind.replace("_id", "")} selector</strong>
+      <strong
+        >${selector.kind.replace("_id", "")}
+        ${reviewResolution(ref) === "device" ? "reference" : "selector"}</strong
+      >
       <code>${selector.value}</code>
       ${selector.exists === true ? "Identity found in HA registry." : selector.exists === false ? "Identity not found in HA registry; this does not establish a broken target." : "Registry identity not checked."}
-      Entity membership and runtime eligibility are not expanded.
+      ${reviewResolution(ref) === "device" ? "Device identity does not establish an entity dependency or prove an action will run." : "Entity membership and runtime eligibility are not expanded."}
     </p>`;
   }
 
@@ -778,7 +802,7 @@ export class BlastRadiusPanel extends LitElement {
                   </td>
                   <td>${ref.role}</td>
                   <td>
-                    ${this.badge(ref.confidence)}${ref.reason ? html`<p>${explainReason(ref.reason)}</p>` : nothing}${this.selectorDetail(ref)}
+                    ${ref.selector ? html`<span class="badge">${reviewLabel(ref)}</span>` : this.badge(ref.confidence)}${ref.reason ? html`<p>${explainReason(ref.reason)}</p>` : nothing}${this.selectorDetail(ref)}
                   </td>
                 </tr>`,
             )}
@@ -932,7 +956,7 @@ export class BlastRadiusPanel extends LitElement {
                   <div class="stat">
                     <strong
                       >${report.summary.template_literal + report.summary.unknown}</strong
-                    ><span>References to review</span>
+                    ><span>Direct refs to review</span>
                   </div>
                 </div>
                 <div class="columns">
@@ -1033,17 +1057,20 @@ export class BlastRadiusPanel extends LitElement {
                   <ul>
                     ${report.warnings.map((warning) => html`<li>${warning}</li>`)}
                     <li>
-                      ${report.unresolved_total} unresolved references across
-                      the full snapshot. Their targets are unknown; they cannot
-                      be attributed to this entity.
+                      ${report.unresolved_total} locations without an entity
+                      target across the full snapshot. These include device IDs,
+                      selectors and expressions; they cannot be attributed to
+                      this entity.
                     </li>
                     <li>
-                      ${report.uncertain_references.length} unresolved
-                      expressions in linked configurations or cards;
-                      ${report.other_dashboard_references?.length || 0}
-                      elsewhere in linked dashboards. Counts refer to expression
-                      locations, not missing or broken entities.
+                      ${reviewCounts(report.uncertain_references)} in linked
+                      configurations or cards;
+                      ${reviewCounts(report.other_dashboard_references || [])}
+                      elsewhere in linked dashboards. Groups summarize repeated
+                      reasons and selector identities, not a count of affected
+                      entities.
                     </li>
+                    ${report.review_summary?.snapshot.locations === report.unresolved_total ? html`<li>Full snapshot: ${report.review_summary.snapshot.device_locations} device-reference locations · ${report.review_summary.snapshot.selector_locations} unexpanded-selector locations · ${report.review_summary.snapshot.unresolved_locations} dynamic or unrecognized locations.</li>` : nothing}
                     <li>
                       Conditional branches are not evaluated. A reference does
                       not prove an action will run.

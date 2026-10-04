@@ -1,5 +1,31 @@
 # Validation
 
+## v0.2.2
+
+Local validation on 2026-10-05:
+
+| Check | Result |
+| --- | --- |
+| HA Core 2026.9.4 / Python 3.14.7 | 176 passed; 98.46% engine coverage |
+| Chromium browser suite | 50 passed, including new desktop/mobile review cases |
+| Ruff lint/format, engine mypy, TypeScript/build, frontend formatting | Passed |
+| Dependency and version/package/mutation-call checks | Passed |
+
+A synthetic 16-trigger keypad reproduces 34 review locations and reduces their
+presentation to three groups without dropping paths. Additional cases distinguish
+device identities from service selectors, retain missing/unchecked registry status,
+prevent UUID resolution in templates/custom cards/service payloads, and preserve
+read/write roles through choose/repeat/parallel and device conditions in sequences.
+A real HA-loaded device action retains its raw internal entity ID while analysis
+follows an entity rename; deletion remains unresolved and no other device members
+become targets. JSON/Markdown exports and filtered panel views retain all locations.
+
+Synthetic light/dark/mobile screenshots were inspected. The local browser runner
+uses Chromium 153 with an explicit executable path; standard Playwright Chromium
+and Python 3.12 are also required by repository CI. The advisory next-version pin
+remains HA 2026.10.0b0, verified against the official HA release list on 2026-10-05.
+No installation or restart on the user's HA server has been performed remotely.
+
 ## v0.2.1
 
 Local pre-release validation on 2026-10-04:
