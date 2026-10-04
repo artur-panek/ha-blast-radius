@@ -1,5 +1,26 @@
 # Validation
 
+## v0.2.0
+
+Public-alpha release preparation changed packaging, HACS onboarding and manifest
+metadata only; the analysis engine is unchanged from v0.1.9. The main Quality run
+[37175008251](https://github.com/artur-panek/ha-blast-radius/actions/runs/37175008251)
+passed Python 3.12, Python 3.14, frontend, hassfest, HACS and publication at
+`6d37ab7ed8f2bed1947c7d669d5b3a99763501e8`. The Python 3.14 suite ran **122 tests**
+with **98.17%** engine coverage; the frontend ran **30 Chromium tests**.
+
+HACS validation passed **all 9 checks with no ignores**, including local brand
+validation. Hassfest passed with the manifest declared as a calculated,
+single-config-entry integration. The committed frontend bundle and generated brand
+assets matched their sources, and the reproducible package contained 24 files.
+
+The published [v0.2.0](https://github.com/artur-panek/ha-blast-radius/releases/tag/v0.2.0)
+release points to that tested commit. Its installation ZIP has SHA-256
+`819a825c6920719f8b62aeec977ea53f4cba67e0bd51cece9ee3840351ed234e` and is accompanied
+by `SHA256SUMS`. HACS default-directory submission is separate from this release.
+Installation on unrelated real-world Home Assistant configurations remains the goal
+of the public alpha rather than a claim of broad compatibility.
+
 ## v0.1.9
 
 Local validation on 2026-10-04: **122 Python tests passed**, with **98.69%** engine
