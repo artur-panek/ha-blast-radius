@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0 — 2026-10-04
+
+- Mark the first public-testing release and add one-click HACS installation through
+  the official My Home Assistant repository link.
+- Hide the development branch from HACS downloads so testers stay on numbered,
+  CI-validated releases.
+- Validate local integration branding in HACS without suppressing the brands check.
+- Declare the integration as a calculated, single-config-entry integration in the
+  Home Assistant manifest while retaining the existing read-only setup flow.
+- Tighten release documentation and remove stale version-specific installation text.
+
 ## 0.1.9 — 2026-10-04
 
 - Show incomplete results above the counts when traversal hits a depth/size limit
