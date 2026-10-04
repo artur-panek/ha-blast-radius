@@ -21,6 +21,15 @@ running household HA frontend has not been remotely verified.
 The 24-file local installation ZIP has SHA-256:
 `be3cfadc5923b80511a78f50ad4f7b8944aa31e77a758beb8ff40da09f9603b2`.
 
+All six jobs passed in the [v0.1.6 CI run](https://github.com/artur-panek/ha-blast-radius/actions/runs/37169707943)
+at `1302bd34304828a52629d56bf3f116cb9f0960db`: Python 3.12 (100 tests, HA module
+skipped), Python 3.14 (113 tests, 97.07% engine coverage), frontend (17 browser tests),
+hassfest, HACS and automatic publication. The workflow published
+[v0.1.6](https://github.com/artur-panek/ha-blast-radius/releases/tag/v0.1.6) in the
+standard HACS release channel. The tag points to the tested commit and the published
+ZIP matches the local checksum above. HACS discovery and installation on the user's
+server are not remotely verified.
+
 ## v0.1.5
 
 Local validation on 2026-10-04: **111 Python tests passed**, with **97.07%** engine
