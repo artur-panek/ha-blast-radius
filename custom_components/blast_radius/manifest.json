@@ -12,7 +12,6 @@
     "@artur-panek"
   ],
   "config_flow": true,
-  "single_config_entry": true,
   "dependencies": [
     "frontend",
     "http",
@@ -24,5 +23,6 @@
   "iot_class": "calculated",
   "issue_tracker": "https://github.com/artur-panek/ha-blast-radius/issues",
   "requirements": [],
+  "single_config_entry": true,
   "version": "0.2.0"
 }
