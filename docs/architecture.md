@@ -106,8 +106,9 @@ contract, checked against
 [HA's validator](https://github.com/home-assistant/core/blob/2026.9.4/homeassistant/components/device_automation/helpers.py)
 and [entity registry resolver](https://github.com/home-assistant/core/blob/2026.9.4/homeassistant/helpers/entity_registry.py).
 The original configuration is untouched. Resolved IDs retain the exact source path
-and role with `reason: "Entity registry ID resolved"`. Device conditions embedded
-as sequence steps remain reads. Renames follow the current registry identity;
+and role with `reason: "Entity registry ID resolved"`. Conditions embedded
+as sequence steps remain reads, including state/numeric-state/compound conditions
+since v0.2.3. Renames follow the current registry identity;
 missing IDs remain unresolved. Arbitrary source values and raw templates are not
 added to exports. Service payloads, variable dictionaries, templates and custom cards
 are not treated as native device nodes merely because their field names look similar.

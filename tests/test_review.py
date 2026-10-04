@@ -212,6 +212,39 @@ def test_nested_wait_condition_and_parallel_device_actions_keep_their_roles():
     assert [ref["role"] for ref in refs] == ["read", "read", "write", "write"]
 
 
+@pytest.mark.parametrize(
+    "condition",
+    [
+        {"condition": "state", "entity_id": "binary_sensor.guard", "state": "on"},
+        {"condition": "numeric_state", "entity_id": "sensor.guard", "above": 0},
+        {
+            "condition": "and",
+            "conditions": [
+                {"condition": "state", "entity_id": "binary_sensor.guard", "state": "on"},
+            ],
+        },
+    ],
+)
+def test_sequence_conditions_are_dependencies_but_not_downstream_effects(condition):
+    source = Source(
+        "script.example",
+        "script",
+        "Example",
+        {
+            "sequence": [
+                condition,
+                {"action": "cover.open_cover", "target": {"entity_id": "cover.example"}},
+            ]
+        },
+    )
+    engine = Analyzer((source,), set())
+    report = engine.analyze("script.example")
+    assert {n["id"] for n in report["graph"]["nodes"]} == {"script.example", "cover.example"}
+    guard = next(ref for ref in engine.references if ref.path.startswith("sequence[0]"))
+    assert guard.role == "read"
+    assert engine.analyze(guard.target)["references"][0]["role"] == "read"
+
+
 def test_missing_registry_id_is_unresolved_without_exporting_arbitrary_field_content():
     source = replace(keypad_source(), entity_registry={})
     report = Analyzer((source,), set()).analyze("cover.example")

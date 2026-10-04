@@ -145,9 +145,9 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                 and key in {"trigger", "triggers", "wait_for_trigger"}
                 and value.get("trigger", value.get("platform")) == "event"
             )
-            if device_node and (
-                value.get("condition") == "device"
-                or value.get("trigger", value.get("platform")) == "device"
+            if native_source and (
+                isinstance(value.get("condition"), str)
+                or (device_node and value.get("trigger", value.get("platform")) == "device")
             ):
                 # A condition used as a sequence step still reads its entity.
                 role = Role.READ
