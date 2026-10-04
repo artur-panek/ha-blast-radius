@@ -26,6 +26,15 @@ visually reviewed; screenshots and test reports use synthetic data only.
 The 24-file local installation ZIP has SHA-256:
 `9036ef291ec567b3eba2fe49f6a26922023e922f9870983f3a577f191d2c982a`.
 
+All six jobs passed in the [v0.1.5 CI run](https://github.com/artur-panek/ha-blast-radius/actions/runs/37167766656)
+at `44c0217b820c275eaf393c1b40077a2fa6f7d445`: Python 3.12 (100 tests, HA module
+skipped), Python 3.14 (111 tests, 97.07% engine coverage), frontend (13 browser tests),
+hassfest, HACS and automatic publication. The workflow published
+[v0.1.5](https://github.com/artur-panek/ha-blast-radius/releases/tag/v0.1.5) in the
+standard HACS release channel. The tag points to the tested commit and the published
+ZIP matches the local checksum above. HACS discovery and installation on the user's
+server are not remotely verified.
+
 ## v0.1.4
 
 Local validation on 2026-10-04: 90 Python tests passed, with 97.65% engine coverage;
