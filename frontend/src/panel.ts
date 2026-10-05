@@ -1174,9 +1174,13 @@ export class BlastRadiusPanel extends LitElement {
                 </div>
                 <details class="card" id="coverage">
                   <summary>
-                    Coverage and limitations · ${report.coverage.sources}
-                    sources inspected
+                    Coverage · ${report.coverage.sources} sources inspected${(report.coverage.warnings || []).length ? ` · ${(report.coverage.warnings || []).length} ${(report.coverage.warnings || []).length === 1 ? "warning" : "warnings"}` : ""}
                   </summary>
+                  <p class="muted coverage-explainer">
+                    Coverage describes what the scanner could inspect. It is
+                    separate from direct-reference confidence and is not a
+                    safety verdict.
+                  </p>
                   <p class="muted">
                     ${Object.entries(report.coverage.source_types)
                       .map(([kind, count]) => `${count} ${kind}`)
@@ -1185,10 +1189,11 @@ export class BlastRadiusPanel extends LitElement {
                   <ul>
                     ${report.warnings.map((warning) => html`<li>${warning}</li>`)}
                     <li>
+                      <strong>System-wide diagnostics:</strong>
                       ${report.unresolved_total} locations without an entity
                       target across the full snapshot. These include device IDs,
-                      selectors and expressions; they cannot be attributed to
-                      this entity.
+                      selectors and expressions; they are not direct references
+                      to this entity.
                     </li>
                     <li>
                       ${reviewCounts(report.uncertain_references)} in linked
