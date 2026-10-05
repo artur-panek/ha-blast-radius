@@ -990,6 +990,14 @@ export const styles = css`
     .columns {
       grid-template-columns: 1fr;
     }
+    .impact-summary {
+      grid-template-columns: 1fr;
+    }
+    .impact-metrics {
+      border-left: 0;
+      border-top: 1px solid var(--br-border);
+      padding-top: 12px;
+    }
     main {
       padding: 22px 18px;
     }
@@ -1017,6 +1025,31 @@ export const styles = css`
     }
     h1 {
       font-size: 23px;
+    }
+    .result-heading {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .result-badges {
+      justify-content: flex-start;
+    }
+    .impact-summary {
+      padding: 14px;
+    }
+    .impact-primary > strong {
+      font-size: 30px;
+    }
+    .impact-metrics > div {
+      padding: 0 10px;
+    }
+    .coverage-inline,
+    .indirect-callout {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .analysis-options {
+      margin-left: 0;
     }
     .stats {
       grid-template-columns: repeat(2, 1fr);
@@ -1054,6 +1087,9 @@ export const styles = css`
     }
     .source-heading {
       gap: 8px;
+    }
+    .purpose {
+      margin-left: 30px;
     }
     .source-icon {
       width: 22px;
