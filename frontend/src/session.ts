@@ -1,4 +1,4 @@
-export type AnalysisTab = "impact" | "graph" | "raw";
+export type AnalysisTab = "overview" | "usage" | "effects" | "graph" | "raw";
 export interface RecentSearch {
   entityId: string;
   depth: number;
@@ -63,20 +63,31 @@ export function readSession(key?: string): PanelSession {
         }
       }
     }
-    const last = parsed?.last as SavedView | undefined;
+    const rawLast = parsed?.last as
+      | (Omit<SavedView, "tab"> & { tab?: string })
+      | undefined;
+    const tab =
+      rawLast?.tab === "impact"
+        ? "overview"
+        : rawLast?.tab &&
+            ["overview", "usage", "effects", "graph", "raw"].includes(
+              rawLast.tab,
+            )
+          ? (rawLast.tab as AnalysisTab)
+          : undefined;
     return {
       recent,
-      ...(isSearch(last) &&
-      ["impact", "graph", "raw"].includes(last.tab) &&
-      Number.isFinite(last.scrollTop) &&
-      last.scrollTop >= 0 &&
-      last.scrollTop <= 10_000_000
+      ...(isSearch(rawLast) &&
+      tab &&
+      Number.isFinite(rawLast.scrollTop) &&
+      rawLast.scrollTop >= 0 &&
+      rawLast.scrollTop <= 10_000_000
         ? {
             last: {
-              entityId: last.entityId,
-              depth: last.depth,
-              tab: last.tab,
-              scrollTop: last.scrollTop,
+              entityId: rawLast.entityId,
+              depth: rawLast.depth,
+              tab,
+              scrollTop: rawLast.scrollTop,
             },
           }
         : {}),
