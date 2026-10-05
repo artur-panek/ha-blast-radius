@@ -673,32 +673,387 @@ export class BlastRadiusPanel extends LitElement {
     </p>`;
   }
 
-  private impact(report: Report) {
-    const refs = report.references.filter(this.matchesFilter);
-    const sources = new Set(refs.map((ref) => ref.source_id)).size;
-    return html`<div class="section-heading impact-heading">
+  private quickRead(report: Report) {
+    const stats = usageStats(report.references);
+    const effects = effectNodeCount(report);
+    if (!stats.totalSources) {
+      return effects
+        ? `No other configuration directly uses this entity. The selected configuration still reaches ${effects} ${effects === 1 ? "effect node" : "effect nodes"}.`
+        : "No direct users were found in the inspected sources.";
+    }
+    const parts = [
+      `${stats.actionSources} act on it`,
+      `${stats.observeSources} read or react to it`,
+      `${stats.contextSources} display or contain it`,
+    ];
+    return `${stats.totalSources} ${stats.totalSources === 1 ? "configuration directly uses" : "configurations directly use"} this entity: ${parts.join(", ")}. ${effects ? `The same related flows reach ${effects} other ${effects === 1 ? "node" : "nodes"}.` : "No other action targets were reached through those flows."}`;
+  }
+
+  private relationshipSummary(report: Report) {
+    const stats = usageStats(report.references);
+    const effects = effectNodeCount(report);
+    const metrics = [
+      {
+        className: "action",
+        direction: "configuration → entity",
+        value: stats.actionSources,
+        label: "acts on it",
+        detail: `${stats.actionReferences} direct ${stats.actionReferences === 1 ? "reference" : "references"}`,
+      },
+      {
+        className: "observe",
+        direction: "entity → configuration",
+        value: stats.observeSources,
+        label: "reads / reacts",
+        detail: `${stats.observeReferences} direct ${stats.observeReferences === 1 ? "reference" : "references"}`,
+      },
+      {
+        className: "context",
+        direction: "entity → UI / group",
+        value: stats.contextSources,
+        label: "displays / contains",
+        detail: `${stats.contextReferences} direct ${stats.contextReferences === 1 ? "reference" : "references"}`,
+      },
+      {
+        className: "effects",
+        direction: "same flow → other nodes",
+        value: effects,
+        label: "related effects",
+        detail: "not necessarily caused by this entity",
+      },
+    ];
+    return html`<section class="impact-summary relationship-summary" aria-label="Relationship summary">
+      <div class="impact-verdict">
+        <span class="eyebrow">Quick read</span>
+        <strong>
+          ${stats.totalSources
+            ? `${stats.totalSources} direct ${stats.totalSources === 1 ? "user" : "users"}`
+            : "No direct users"}
+        </strong>
+        <p>${this.quickRead(report)}</p>
+      </div>
+      <div class="direction-metrics">
+        ${metrics.map(
+          (metric) => html`<div class="direction-metric ${metric.className}">
+            <span class="metric-direction">${metric.direction}</span>
+            <strong>${metric.value}</strong>
+            <span class="metric-label">${metric.label}</span>
+            <small>${metric.detail}</small>
+          </div>`,
+        )}
+      </div>
+    </section>`;
+  }
+
+  private sourcePreview(refs: Reference[]) {
+    const ids = [...new Set(refs.map((ref) => ref.source_id))];
+    if (!ids.length) return "None found";
+    const shown = ids.slice(0, 3).map((id) => this.sourceName(id));
+    return `${shown.join(", ")}${ids.length > shown.length ? ` +${ids.length - shown.length} more` : ""}`;
+  }
+
+  private bucketDirection(bucket: UsageBucket) {
+    if (bucket.category === "action") return "Configuration → selected entity";
+    if (bucket.category === "observe") return "Selected entity → configuration logic";
+    return "Selected entity → dashboard / group";
+  }
+
+  private usageBucketSection(bucket: UsageBucket) {
+    return html`<section class="usage-section usage-${bucket.category}">
+      <div class="usage-section-heading">
         <div>
-          <h2>Direct impact</h2>
-          <p>Configurations with direct references to this entity.</p>
+          <span class="direction-label">${this.bucketDirection(bucket)}</span>
+          <h3>${bucket.title}</h3>
+          <p>${bucket.description}</p>
         </div>
         <span class="count"
-          >${sources} visible ${sources === 1 ? "source" : "sources"}</span
+          >${bucket.sources} ${bucket.sources === 1 ? "source" : "sources"} ·
+          ${bucket.refs.length}
+          ${bucket.refs.length === 1 ? "reference" : "references"}</span
         >
       </div>
-      ${
-        refs.length
-          ? html`<div class="source-grid">${this.references(refs)}</div>`
-          : html`<div class="empty">
-              <div class="symbol">${brandMark()}</div>
-              <h3>
-                ${this.filtersActive ? "No matching direct references" : "No direct references found"}
-              </h3>
-              <p class="muted">
-                ${this.filtersActive ? "Try All sources or All confidence to show more results. Full totals and exports are unchanged." : "Nothing in the inspected sources points to this entity. Check coverage before changing it."}
+      ${bucket.refs.length
+        ? html`<div class="source-grid">${this.references(bucket.refs, false, false)}</div>`
+        : html`<div class="semantic-empty">
+            No direct references in this category.
+          </div>`}
+    </section>`;
+  }
+
+  private overviewReviewNotice(report: Report) {
+    const unresolved = report.uncertain_references.filter(
+      (ref) => reviewResolution(ref) === "unresolved",
+    );
+    if (!unresolved.length) return nothing;
+    return html`<div class="review-strip">
+      <div>
+        <strong>Some linked logic still needs review</strong>
+        <span
+          >${reviewCounts(unresolved)} could not be resolved statically inside
+          configurations that use this entity.</span
+        >
+      </div>
+      <button @click=${() => this.selectTab("usage")}>Review blind spots</button>
+    </div>`;
+  }
+
+  private overview(report: Report) {
+    const buckets = usageBuckets(report.references);
+    const groups = effectGroups(report);
+    const effects = effectNodeCount(report);
+    return html`<div class="overview-grid">
+        <section class="overview-panel">
+          <div class="section-heading">
+            <div>
+              <span class="direction-label">Incoming relationships</span>
+              <h2>What uses this entity?</h2>
+              <p>
+                Direct references grouped by what the source actually does with
+                the selected entity.
               </p>
-            </div>`
-      }
+            </div>
+          </div>
+          <div class="relationship-list">
+            ${buckets.map(
+              (bucket) => html`<div class="relationship-row ${bucket.category}">
+                <div class="relationship-row-main">
+                  <strong>${bucket.shortLabel}</strong>
+                  <span>${this.sourcePreview(bucket.refs)}</span>
+                </div>
+                <div class="relationship-row-count">
+                  <strong>${bucket.sources}</strong>
+                  <span>${bucket.sources === 1 ? "source" : "sources"}</span>
+                </div>
+              </div>`,
+            )}
+          </div>
+          <button class="section-action" @click=${() => this.selectTab("usage")}>
+            Inspect direct usage →
+          </button>
+        </section>
+
+        <section class="overview-panel">
+          <div class="section-heading">
+            <div>
+              <span class="direction-label">Related flow effects</span>
+              <h2>What else can those flows affect?</h2>
+              <p>
+                Other action targets, calls or memberships reachable from the
+                same configurations.
+              </p>
+            </div>
+          </div>
+          ${effects
+            ? html`<div class="effects-overview">
+                <strong
+                  >${effects} other ${effects === 1 ? "node" : "nodes"} across
+                  ${groups.length}
+                  ${groups.length === 1 ? "flow" : "flows"}</strong
+                >
+                <div class="flow-summary-list">
+                  ${groups.slice(0, 4).map(
+                    (group) => html`<div class="flow-summary-row">
+                      <span>${this.sourceName(group.sourceId)}</span>
+                      <strong>${group.items.length}</strong>
+                    </div>`,
+                  )}
+                  ${groups.length > 4
+                    ? html`<div class="flow-summary-row muted">
+                        <span>More related flows</span>
+                        <strong>+${groups.length - 4}</strong>
+                      </div>`
+                    : nothing}
+                </div>
+                <p class="causality-note">
+                  These are <strong>co-effects of the same flows</strong>. For a
+                  normal entity, they are not effects caused by the selected
+                  entity.
+                </p>
+              </div>`
+            : html`<div class="semantic-empty">
+                No other action targets or calls were reached through the
+                related flows.
+              </div>`}
+          <button class="section-action" @click=${() => this.selectTab("effects")}>
+            Explore related effects →
+          </button>
+        </section>
+      </div>
+      ${this.overviewReviewNotice(report)}`;
+  }
+
+  private directUsage(report: Report) {
+    const refs = report.references.filter(this.matchesFilter);
+    const buckets = usageBuckets(refs);
+    return html`<div class="section-heading">
+        <div>
+          <span class="direction-label">Source → selected entity</span>
+          <h2>Direct usage</h2>
+          <p>
+            Every confirmed reference to the selected entity, separated by
+            direction and intent.
+          </p>
+        </div>
+        <span class="count"
+          >${new Set(refs.map((ref) => ref.source_id)).size} visible
+          ${new Set(refs.map((ref) => ref.source_id)).size === 1
+            ? "source"
+            : "sources"}</span
+        >
+      </div>
+      <div class="usage-sections">
+        ${buckets.map((bucket) => this.usageBucketSection(bucket))}
+      </div>
       ${this.uncertainty(report)}`;
+  }
+
+  private effectGroupSummary(group: EffectGroup) {
+    const roles = new Map<string, number>();
+    for (const item of group.items) {
+      const role = effectRoleLabel(item.edge?.role);
+      roles.set(role, (roles.get(role) || 0) + 1);
+    }
+    return [...roles]
+      .map(([role, count]) => `${count} ${role}`)
+      .join(" · ");
+  }
+
+  private effectItem(item: EffectItem) {
+    const node = item.node;
+    const kind = node.id.split(".")[0];
+    return html`<div class="effect-row" data-source=${node.id}>
+      <div class="effect-row-main">
+        ${sourceIcon(kind)}
+        <div>
+          <h3>${this.sourceControl(node.id)}</h3>
+          <span class="source-meta">
+            ${sourceLabels[kind] || kind.replaceAll("_", " ")} ·
+            ${effectRoleLabel(item.edge?.role)}
+            ${item.chained && node.via
+              ? html` · via ${this.sourceName(node.via)}`
+              : nothing}
+          </span>
+        </div>
+      </div>
+      <div class="node-actions">
+        ${this.sourceControl(node.id, true)}
+        ${/^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/.test(node.id)
+          ? html`<button
+              class="analyze-node"
+              aria-label=${`Analyze this: ${node.id}`}
+              @click=${() => this.analyzeNode(node.id)}
+            >
+              Analyze
+            </button>`
+          : nothing}
+      </div>
+      ${node.path
+        ? html`<details class="technical effect-details">
+            <summary>Connection</summary>
+            <div class="technical-row">
+              <div class="path">
+                <span>${readablePath(node.path)}</span>
+                ${node.confidence ? this.badge(node.confidence) : nothing}
+              </div>
+              <code>${node.path}</code>
+            </div>
+          </details>`
+        : nothing}
+    </div>`;
+  }
+
+  private effectFlow(group: EffectGroup, report: Report) {
+    const ownFlow = group.sourceId === report.entity_id;
+    return html`<article class="effect-flow" data-flow=${group.sourceId}>
+      <div class="effect-flow-heading">
+        <div class="source-heading">
+          ${sourceIcon(group.sourceType)}
+          <div>
+            <span class="direction-label">
+              ${ownFlow ? "Selected configuration → targets" : "Shared flow"}
+            </span>
+            <h3>${this.sourceControl(group.sourceId)}</h3>
+            <span class="source-meta">
+              ${ownFlow
+                ? "These are direct effects from the selected configuration."
+                : `${referenceSummary(group.directReferences)} to the selected entity.`}
+            </span>
+          </div>
+        </div>
+        <span class="count"
+          >${group.items.length}
+          ${group.items.length === 1 ? "effect" : "effects"}</span
+        >
+      </div>
+      <div class="flow-relationship">
+        ${ownFlow
+          ? html`<span class="relation-chip outgoing">
+              selected configuration → ${group.items.length} effect
+              ${group.items.length === 1 ? "" : "nodes"}
+            </span>`
+          : html`<span class="relation-chip incoming">
+                this flow → selected entity
+              </span>
+              <span class="flow-arrow">and</span>
+              <span class="relation-chip outgoing">
+                this flow → ${group.items.length} other
+                ${group.items.length === 1 ? "node" : "nodes"}
+              </span>`}
+      </div>
+      <p class="effect-flow-summary">${this.effectGroupSummary(group)}</p>
+      ${group.directItems.length
+        ? html`<div class="effect-list">
+            ${group.directItems.map((item) => this.effectItem(item))}
+          </div>`
+        : nothing}
+      ${group.chainedItems.length
+        ? html`<details class="chained-effects">
+            <summary>
+              Chained effects through called / linked configurations
+              <span class="count">${group.chainedItems.length}</span>
+            </summary>
+            <div class="effect-list">
+              ${group.chainedItems.map((item) => this.effectItem(item))}
+            </div>
+          </details>`
+        : nothing}
+    </article>`;
+  }
+
+  private relatedEffects(report: Report) {
+    const groups = effectGroups(report);
+    const effects = effectNodeCount(report);
+    return html`<div class="section-heading">
+        <div>
+          <span class="direction-label">Related configuration → other target</span>
+          <h2>Related effects</h2>
+          <p>
+            Action targets, script calls and memberships reached from the same
+            flows that use the selected entity.
+          </p>
+        </div>
+        <span class="count"
+          >${effects} ${effects === 1 ? "node" : "nodes"}</span
+        >
+      </div>
+      <div class="causality-banner">
+        <strong>Do not read this as entity → target causality.</strong>
+        For ordinary entities, these are other effects of the same automation or
+        script. When the selected entity is itself a configuration, its own
+        direct targets are identified separately.
+      </div>
+      ${groups.length
+        ? html`<div class="effect-flows">
+            ${groups.map((group) => this.effectFlow(group, report))}
+          </div>`
+        : html`<div class="empty">
+            <div class="symbol">${brandMark()}</div>
+            <h3>No related effects found</h3>
+            <p class="muted">
+              The inspected flows do not expose additional action targets,
+              calls or memberships at this traversal depth.
+            </p>
+          </div>`}`;
   }
 
   private showCoverage() {
