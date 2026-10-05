@@ -5,22 +5,29 @@ test.beforeEach(async ({ page }) => {
   await expect(page.getByText("Start with one entity")).toBeVisible();
 });
 
+async function setDepth(page: any, value: string) {
+  const options = page.locator(".analysis-options");
+  if (!(await options.getAttribute("open")))
+    await options.locator(":scope > summary").click();
+  await page.getByLabel("Traversal depth").selectOption(value);
+}
+
 test("depth warnings precede counts and a deeper fresh analysis finds more targets", async ({
   page,
 }) => {
-  await page.getByLabel("Traversal depth").selectOption("1");
+  await setDepth(page, "1");
   await page
     .getByRole("combobox", { name: "Entity", exact: true })
     .fill("binary_sensor.wall_button");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
-  const notice = page.getByRole("status", { name: "Incomplete results" });
+  const notice = page.getByRole("status", { name: "Dependency map limited" });
   await expect(notice).toContainText("reached depth 1");
   expect(
     await notice.evaluate(
       (element) =>
         !!(
           element.compareDocumentPosition(
-            element.getRootNode().querySelector(".stats"),
+            element.getRootNode().querySelector(".impact-summary"),
           ) & Node.DOCUMENT_POSITION_FOLLOWING
         ),
     ),
@@ -69,7 +76,7 @@ for (const limit of ["nodes", "edges", "max-depth"]) {
           },
         };
       }, limit);
-    const notice = page.getByRole("status", { name: "Incomplete results" });
+    const notice = page.getByRole("status", { name: "Dependency map limited" });
     await expect(notice).toBeVisible();
     await expect(notice).toContainText(
       limit === "max-depth"
@@ -107,10 +114,8 @@ test("coverage gaps remain visible with zero references, open details and surviv
     .getByRole("combobox", { name: "Entity", exact: true })
     .fill("sensor.unused");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
-  const notice = page.getByRole("status", { name: "Incomplete results" });
-  await expect(notice).toContainText(
-    "Some configuration could not be fully inspected",
-  );
+  const notice = page.locator(".coverage-inline");
+  await expect(notice).toContainText("Static coverage is partial");
   await expect(page.locator("#coverage")).not.toHaveAttribute("open", "");
   await expect(
     page.getByRole("button", { name: /Inspect to depth/ }),
@@ -126,7 +131,7 @@ test("coverage gaps remain visible with zero references, open details and surviv
   await page.screenshot({
     path: "/tmp/ha-blast-radius-incomplete-desktop.png",
   });
-  await page.getByRole("button", { name: "Review coverage" }).click();
+  await page.getByRole("button", { name: "Coverage details" }).click();
   await expect(page.locator("#coverage")).toHaveAttribute("open", "");
   await expect(page.locator("#coverage > summary")).toBeFocused();
   await expect(page.locator("#coverage")).toContainText("dashboard.broken");
@@ -164,8 +169,8 @@ test("older reports with only a truncation flag still show a warning", async ({
     };
   });
   await expect(
-    page.getByRole("status", { name: "Incomplete results" }),
-  ).toContainText("depth or size limit");
+    page.getByRole("status", { name: "Dependency map limited" }),
+  ).toContainText("traversal limit");
   await expect(
     page.getByRole("button", { name: /Inspect to depth/ }),
   ).toHaveCount(0);

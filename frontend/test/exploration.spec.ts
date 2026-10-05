@@ -2,14 +2,21 @@ import { test, expect, type Page } from "@playwright/test";
 
 const input = (page: Page) =>
   page.getByRole("combobox", { name: "Entity", exact: true });
-const filters = (page: Page) =>
-  page.getByRole("region", { name: "Result filters" });
+const filters = (page: Page) => page.locator("details.result-filters");
 const chip = (page: Page, name: string) =>
   filters(page).getByRole("button", { name, exact: true });
+async function openFilters(page: Page) {
+  const filterPanel = filters(page);
+  await expect(filterPanel).toBeVisible();
+  await filterPanel.evaluate((element: HTMLDetailsElement) => {
+    element.open = true;
+  });
+}
 async function analyze(page: Page, id = "media_player.speaker") {
   await input(page).fill(id);
   await input(page).press("Enter");
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await openFilters(page);
 }
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
@@ -20,7 +27,7 @@ test("source chips filter impact, graph and raw without changing totals or expor
   page,
 }) => {
   await analyze(page);
-  const before = await page.locator(".stats").innerText();
+  const before = await page.locator(".impact-summary").innerText();
   const full = await page
     .locator("blast-radius-panel")
     .evaluate((p: any) => JSON.stringify(p.report));
@@ -44,7 +51,7 @@ test("source chips filter impact, graph and raw without changing totals or expor
     .locator("tbody tr td:first-child")
     .allTextContents())
     expect(text).toContain("script.music_toggle");
-  expect(await page.locator(".stats").innerText()).toBe(before);
+  expect(await page.locator(".impact-summary").innerText()).toBe(before);
   expect(
     await page
       .locator("blast-radius-panel")
@@ -173,6 +180,8 @@ test("filters do not persist across remounts or HA account changes", async ({
     fresh.hass = hass;
     document.body.append(fresh);
   });
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await openFilters(page);
   await expect(chip(page, "All sources")).toHaveAttribute(
     "aria-pressed",
     "true",

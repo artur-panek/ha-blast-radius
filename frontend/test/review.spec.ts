@@ -83,18 +83,27 @@ for (const mobile of [false, true]) {
           review_summary: undefined,
         };
       }, refs);
-    const scope = page.locator(".uncertainty-scope");
-    await expect(scope.locator(":scope > summary")).toContainText(
-      "3 groups · 34 locations",
+    const scope = page.locator(".uncertainty");
+    const dynamicScope = page.locator(
+      ".uncertainty-scope:not(.device-context):not(.dashboard-context)",
     );
-    await expect(scope).not.toHaveAttribute("open", "");
-    await scope.locator(":scope > summary").click();
+    const deviceScope = page.locator(".uncertainty-scope.device-context");
+    await expect(dynamicScope.locator(":scope > summary")).toContainText(
+      "1 group · 9 locations",
+    );
+    await expect(deviceScope.locator(":scope > summary")).toContainText(
+      "2 groups · 25 locations",
+    );
+    await expect(dynamicScope).not.toHaveAttribute("open", "");
+    await expect(deviceScope).not.toHaveAttribute("open", "");
+    await dynamicScope.locator(":scope > summary").click();
+    await deviceScope.locator(":scope > summary").click();
     await expect(scope.locator(".reason-group")).toHaveCount(3);
     await expect(scope.locator('[data-resolution="device"]')).toHaveCount(2);
     await expect(scope.locator('[data-resolution="unresolved"]')).toHaveCount(
       1,
     );
-    await page.locator(".uncertainty").screenshot({
+    await scope.screenshot({
       path: `/tmp/blast-radius-compact-${mobile ? "mobile" : "desktop"}.png`,
     });
     for (const summary of await scope.locator(".reason-group > summary").all())
@@ -137,6 +146,7 @@ for (const mobile of [false, true]) {
     await page
       .getByRole("tab", { name: "Raw references", exact: true })
       .click();
+    await page.locator(".result-filters > summary").click();
     await page
       .getByRole("button", { name: "Needs review", exact: true })
       .click();
