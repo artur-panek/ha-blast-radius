@@ -902,7 +902,13 @@ export class BlastRadiusPanel extends LitElement {
         >
       </div>
       <div class="usage-sections">
-        ${buckets.map((bucket) => this.usageBucketSection(bucket))}
+        ${refs.length
+          ? buckets.map((bucket) => this.usageBucketSection(bucket))
+          : html`<div class="semantic-empty">
+              ${this.filtersActive
+                ? "No direct references match the current filters. Try All sources or All confidence."
+                : "No direct users were found in the inspected sources."}
+            </div>`}
       </div>
       ${this.uncertainty(report)}`;
   }
