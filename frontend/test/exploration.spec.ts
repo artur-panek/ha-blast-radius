@@ -83,25 +83,23 @@ for (const kind of ["Automation", "Script", "Dashboard", "Scene", "Group"]) {
       .getByRole("tab", { name: "Uses this entity", exact: true })
       .click();
     await chip(page, kind).click();
-    const expected = await page
-      .locator("blast-radius-panel")
-      .evaluate(
-        (p: any, type) =>
-          new Set(
-            p.report.references
-              .filter((r: any) => r.source_type === type)
-              .map((r: any) => {
-                const category =
-                  r.role === "write" || r.role === "call"
-                    ? "action"
-                    : r.role === "display" || r.role === "member"
-                      ? "context"
-                      : "observe";
-                return `${r.source_id}:${category}`;
-              }),
-          ).size,
-        kind.toLowerCase(),
-      );
+    const expected = await page.locator("blast-radius-panel").evaluate(
+      (p: any, type) =>
+        new Set(
+          p.report.references
+            .filter((r: any) => r.source_type === type)
+            .map((r: any) => {
+              const category =
+                r.role === "write" || r.role === "call"
+                  ? "action"
+                  : r.role === "display" || r.role === "member"
+                    ? "context"
+                    : "observe";
+              return `${r.source_id}:${category}`;
+            }),
+        ).size,
+      kind.toLowerCase(),
+    );
     await expect(page.locator(".source-grid .source-row")).toHaveCount(
       expected,
     );

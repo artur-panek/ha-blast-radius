@@ -154,9 +154,7 @@ for (const mobile of [false, true]) {
     expect(exported.uncertain_references).toEqual(
       JSON.parse(JSON.stringify(refs)),
     );
-    await page
-      .getByRole("tab", { name: "Technical", exact: true })
-      .click();
+    await page.getByRole("tab", { name: "Technical", exact: true }).click();
     await page
       .getByRole("button", { name: "Needs review", exact: true })
       .click();
