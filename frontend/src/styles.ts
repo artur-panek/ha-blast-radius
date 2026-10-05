@@ -618,15 +618,15 @@ export const styles = css`
     border-radius: 10px;
     padding: 14px;
   }
-  .usage-section.action {
+  .usage-section.usage-action {
     border-left: 3px solid
       color-mix(in srgb, var(--warning-color, #9b6600) 70%, var(--br-border));
   }
-  .usage-section.observe {
+  .usage-section.usage-observe {
     border-left: 3px solid
       color-mix(in srgb, var(--br-accent) 70%, var(--br-border));
   }
-  .usage-section.context {
+  .usage-section.usage-context {
     border-left: 3px solid
       color-mix(
         in srgb,
@@ -1361,7 +1361,8 @@ export const styles = css`
   }
   @media (max-width: 1000px) {
     .source-grid,
-    .map-columns {
+    .map-columns,
+    .overview-grid {
       grid-template-columns: 1fr;
     }
     .reference {
@@ -1402,17 +1403,6 @@ export const styles = css`
       border-right: 0;
       border-bottom: 1px solid var(--br-border);
     }
-    .impact-metrics {
-      grid-template-columns: 1fr;
-    }
-    .impact-metrics > div {
-      border-right: 0;
-      border-bottom: 1px solid var(--br-border);
-      padding: 12px 16px;
-    }
-    .impact-metrics > div:last-child {
-      border-bottom: 0;
-    }
     .result-heading {
       align-items: flex-start;
       flex-direction: column;
@@ -1429,12 +1419,29 @@ export const styles = css`
       width: 100%;
     }
     .section-heading,
-    .diagnostics-link {
+    .usage-section-heading,
+    .effect-flow-heading,
+    .diagnostics-link,
+    .review-strip {
       align-items: stretch;
       flex-direction: column;
     }
-    .diagnostics-link button {
+    .diagnostics-link button,
+    .review-strip button {
       width: 100%;
+    }
+    .effect-row {
+      grid-template-columns: 1fr;
+      align-items: stretch;
+    }
+    .effect-row .node-actions {
+      justify-content: flex-start;
+    }
+    .relationship-row {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .direction-metric {
+      padding: 12px 13px;
     }
     .analysis-options {
       width: 100%;
