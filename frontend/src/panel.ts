@@ -909,6 +909,12 @@ export class BlastRadiusPanel extends LitElement {
 
   protected render() {
     const report = this.report;
+    const scope = report
+      ? this.impactScope(report)
+      : { label: "", tone: "none" };
+    const confidence = report
+      ? this.confidenceSummary(report)
+      : { label: "", tone: "good" };
     const suggestions = this.entities
       .filter((e) =>
         `${e.entity_id} ${e.name}`
@@ -956,18 +962,7 @@ export class BlastRadiusPanel extends LitElement {
           <datalist id="entities">
             ${suggestions.map((e) => html`<option value=${e.entity_id}>${e.name}${e.exists ? "" : " · missing"}</option>`)}
           </datalist>
-          <label class="depth"
-            >Depth<select
-              aria-label="Traversal depth"
-              .value=${String(this.depth)}
-              @change=${(e: Event) => {
-                this.depth = Number((e.target as HTMLSelectElement).value);
-                if (this.report) void this.run();
-              }}
-            >
-              ${[1, 2, 3, 4, 6, 8, 12].map((n) => html`<option value=${n} ?selected=${n === this.depth}>${n}</option>`)}
-            </select></label
-          >
+
           <button
             class="primary"
             ?disabled=${this.loading || !this.query.trim()}
@@ -1008,6 +1003,29 @@ export class BlastRadiusPanel extends LitElement {
               </section>`
             : nothing
         }
+        <details class="analysis-options">
+          <summary>
+            Analysis options <span>Depth ${this.depth}</span>
+          </summary>
+          <div class="analysis-options-body">
+            <label class="depth"
+              >Traversal depth<select
+                aria-label="Traversal depth"
+                .value=${String(this.depth)}
+                @change=${(e: Event) => {
+                  this.depth = Number((e.target as HTMLSelectElement).value);
+                  if (this.report) void this.run();
+                }}
+              >
+                ${[1, 2, 3, 4, 6, 8, 12].map((n) => html`<option value=${n} ?selected=${n === this.depth}>${n}</option>`)}
+              </select></label
+            >
+            <p class="muted">
+              Controls how far the dependency graph follows linked
+              configurations. Direct-reference scanning is unchanged.
+            </p>
+          </div>
+        </details>
         ${this.loading ? html`<progress aria-label="Inspecting configuration"></progress>` : nothing}
         ${
           this.error
@@ -1027,34 +1045,48 @@ export class BlastRadiusPanel extends LitElement {
           report
             ? html`
                 <div class="result-heading">
-                  <h2 tabindex="-1">${this.sourceName(report.entity_id)}</h2>
-                  <code>${report.entity_id}</code>
+                  <div class="result-identity">
+                    <span class="eyebrow">Selected entity</span>
+                    <h2 tabindex="-1">${this.sourceName(report.entity_id)}</h2>
+                    <code>${report.entity_id}</code>
+                  </div>
+                  <div class="result-badges">
+                    <span class="summary-chip impact-${scope.tone}"
+                      >${scope.label}</span
+                    >
+                    <span class="summary-chip confidence-${confidence.tone}"
+                      >${confidence.label}</span
+                    >
+                  </div>
                 </div>
                 ${!report.exists ? html`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>` : nothing}
                 ${this.completeness(report)}
-                <p class="muted totals-label">
-                  Full analysis totals · filters below affect visible results
-                  only
-                </p>
-                <div class="stats">
-                  <div class="stat">
-                    <strong>${report.summary.references}</strong
-                    ><span>Direct references</span>
+                <section class="impact-summary" aria-label="Impact summary">
+                  <div class="impact-primary">
+                    <strong>${report.summary.sources}</strong>
+                    <div>
+                      <b>
+                        ${report.summary.sources === 1 ? "configuration uses" : "configurations use"}
+                        this entity
+                      </b>
+                      <span>
+                        Known references in the inspected Home Assistant
+                        configuration.
+                      </span>
+                    </div>
                   </div>
-                  <div class="stat">
-                    <strong>${report.summary.sources}</strong
-                    ><span>Linked configurations</span>
+                  <div class="impact-metrics">
+                    <div>
+                      <strong>${report.summary.references}</strong>
+                      <span>direct references</span>
+                    </div>
+                    <div>
+                      <strong>${report.summary.downstream}</strong>
+                      <span>related downstream nodes</span>
+                    </div>
                   </div>
-                  <div class="stat">
-                    <strong>${report.summary.downstream}</strong
-                    ><span>Downstream targets</span>
-                  </div>
-                  <div class="stat">
-                    <strong
-                      >${report.summary.template_literal + report.summary.unknown}</strong
-                    ><span>Direct refs to review</span>
-                  </div>
-                </div>
+                </section>
+                ${this.coverageStatus(report)}
                 <div class="columns">
                   <section class="card">
                     <nav role="tablist" aria-label="Analysis views">
