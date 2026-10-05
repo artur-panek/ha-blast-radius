@@ -208,7 +208,7 @@ for (const related of [0, 1]) {
       ),
     ).toBeVisible();
     await expect(
-      page.getByText("they cannot be attributed to this entity", {
+      page.getByText("they are not direct references to this entity", {
         exact: false,
       }),
     ).toBeVisible();
@@ -307,7 +307,7 @@ for (const theme of ["light", "dark", "custom-dark"]) {
       ".badge.dynamic",
       ".badge.unknown",
       ".source-meta",
-      ".stat span",
+      ".impact-metrics span",
       "button.primary",
       '.filter-row button[aria-pressed="true"]',
     ]) {
@@ -324,7 +324,7 @@ for (const theme of ["light", "dark", "custom-dark"]) {
         const style = getComputedStyle(element);
         const background =
           style.backgroundColor === "rgba(0, 0, 0, 0)"
-            ? getComputedStyle(element.closest(".card, .stat")!).backgroundColor
+            ? getComputedStyle(element.closest(".card, .impact-summary")!).backgroundColor
             : style.backgroundColor;
         return {
           text: rgb(style.color),
