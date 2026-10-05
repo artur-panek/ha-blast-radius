@@ -159,6 +159,18 @@ export function effectRoleLabel(role?: string): string {
   return role || "references";
 }
 
+export function effectRoleCountLabel(role: string | undefined, count: number) {
+  const noun =
+    role === "write"
+      ? "target"
+      : role === "call"
+        ? "call"
+        : role === "member"
+          ? "membership"
+          : "reference";
+  return `${count} ${noun}${count === 1 ? "" : "s"}`;
+}
+
 function rootSourceFor(
   node: GraphNode,
   selectedId: string,
@@ -201,6 +213,10 @@ export function effectGroups(report: Report): EffectGroup[] {
       const sourceRef =
         report.references.find((ref) => ref.source_id === sourceId) ||
         report.graph.edges.find((ref) => ref.source_id === sourceId);
+      const sortedItems = [...items].sort(
+        (a, b) =>
+          a.node.depth - b.node.depth || a.node.id.localeCompare(b.node.id),
+      );
       return {
         sourceId,
         sourceType: sourceRef?.source_type || sourceId.split(".")[0],
@@ -208,12 +224,9 @@ export function effectGroups(report: Report): EffectGroup[] {
           (ref) =>
             ref.source_id === sourceId && ref.target === report.entity_id,
         ),
-        items: [...items].sort(
-          (a, b) =>
-            a.node.depth - b.node.depth || a.node.id.localeCompare(b.node.id),
-        ),
-        directItems: items.filter((item) => !item.chained),
-        chainedItems: items.filter((item) => item.chained),
+        items: sortedItems,
+        directItems: sortedItems.filter((item) => !item.chained),
+        chainedItems: sortedItems.filter((item) => item.chained),
       };
     })
     .sort((a, b) => {
