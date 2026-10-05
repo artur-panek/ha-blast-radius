@@ -37,10 +37,10 @@ test("inspect, traverse, preview rename and removal, export JSON", async ({
     .fill("binary_sensor.wall_button");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
   await expect(
-    page.getByText("Used by a trigger", { exact: true }).first(),
+    page.getByRole("heading", { name: "What uses this entity?", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Potential blind spots", exact: true }),
+    page.getByText("Some linked logic still needs review", { exact: true }),
   ).toBeVisible();
   await page.getByRole("tab", { name: "Graph", exact: true }).click();
   await expect(
@@ -68,9 +68,9 @@ test("empty, missing, error and retry states", async ({ page }) => {
   const search = page.getByRole("combobox", { name: "Entity", exact: true });
   await search.fill("sensor.unused");
   await search.press("Enter");
-  await expect(
-    page.getByText("No direct references found", { exact: true }),
-  ).toBeVisible();
+  await expect(page.locator(".impact-summary")).toContainText(
+    "No direct users",
+  );
   await search.fill("light.removed");
   await search.press("Enter");
   await expect(
@@ -89,7 +89,7 @@ test("dark mobile layout has no horizontal overflow", async ({ page }) => {
   await search.fill("binary_sensor.wall_button");
   await search.press("Enter");
   await expect(
-    page.getByText("Used by a trigger", { exact: true }).first(),
+    page.getByRole("heading", { name: "What uses this entity?", exact: true }),
   ).toBeVisible();
   expect(
     await page
@@ -111,7 +111,7 @@ test("desktop screenshots and depth change", async ({ page }) => {
   await search.fill("binary_sensor.wall_button");
   await search.press("Enter");
   await expect(
-    page.getByText("Used by a trigger", { exact: true }).first(),
+    page.getByRole("heading", { name: "What uses this entity?", exact: true }),
   ).toBeVisible();
   await screenshotPanel(page, "../docs/panel-light.png");
   await page.getByRole("button", { name: "Toggle theme" }).click();
@@ -252,6 +252,9 @@ for (const theme of ["light", "dark", "custom-dark"]) {
         ],
       };
     });
+    await page
+      .getByRole("tab", { name: "Uses this entity", exact: true })
+      .click();
     await page.locator(".uncertainty-scope > summary").first().click();
     await page.locator(".reason-group > summary").first().click();
     for (const summary of await page
@@ -264,7 +267,7 @@ for (const theme of ["light", "dark", "custom-dark"]) {
       ".badge.dynamic",
       ".badge.unknown",
       ".source-meta",
-      ".impact-metrics span",
+      ".direction-metric .metric-label",
       "button.primary",
       '.filter-row button[aria-pressed="true"]',
     ]) {
@@ -331,13 +334,7 @@ test("a large dashboard stays compact, explains unknowns and retains exact paths
     };
   });
   await expect(page.locator(".impact-summary")).not.toContainText("51");
-  await expect(
-    page.getByText(
-      "Additional scanner diagnostics are available in Coverage.",
-      { exact: true },
-    ),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "View coverage" }).click();
+  await page.getByText("Coverage & diagnostics", { exact: false }).click();
   const elsewhere = page.locator("#coverage .dashboard-context");
   await expect(elsewhere.locator("summary .count").first()).toHaveText(
     "1 group · 51 locations",
@@ -348,7 +345,10 @@ test("a large dashboard stays compact, explains unknowns and retains exact paths
   await expect(
     page.getByText("triggers[0].entity_id", { exact: true }),
   ).not.toBeVisible();
-  await page.locator(".technical > summary").first().click();
+  await page
+    .getByRole("tab", { name: "Uses this entity", exact: true })
+    .click();
+  await page.locator(".source-grid .technical > summary").first().click();
   await expect(
     page.getByText("triggers[0].entity_id", { exact: true }),
   ).toBeVisible();
@@ -384,15 +384,18 @@ test("analysis tabs support keyboard navigation and readable configuration locat
     .getByRole("combobox", { name: "Entity", exact: true })
     .fill("binary_sensor.wall_button");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
-  const impact = page.getByRole("tab", { name: "Impact", exact: true });
-  await impact.focus();
-  await impact.press("ArrowRight");
+  const overview = page.getByRole("tab", {
+    name: "Overview",
+    exact: true,
+  });
+  await overview.focus();
+  await overview.press("ArrowRight");
   await expect(
-    page.getByRole("tab", { name: "Graph", exact: true }),
+    page.getByRole("tab", { name: "Uses this entity", exact: true }),
   ).toBeFocused();
   await expect(page.getByRole("tabpanel")).toHaveAttribute(
     "aria-labelledby",
-    "tab-graph",
+    "tab-usage",
   );
   await page.setViewportSize({ width: 390, height: 844 });
   expect(
@@ -402,7 +405,7 @@ test("analysis tabs support keyboard navigation and readable configuration locat
   ).toBe(true);
   await page.keyboard.press("End");
   await expect(
-    page.getByRole("tab", { name: "Raw references", exact: true }),
+    page.getByRole("tab", { name: "Technical", exact: true }),
   ).toBeFocused();
   await expect(
     page
@@ -410,7 +413,10 @@ test("analysis tabs support keyboard navigation and readable configuration locat
       .getByText("triggers[0].entity_id", { exact: false }),
   ).toBeVisible();
   await page.keyboard.press("Home");
-  await expect(impact).toBeFocused();
+  await expect(overview).toBeFocused();
+  await page
+    .getByRole("tab", { name: "Uses this entity", exact: true })
+    .click();
   await page.locator(".source-grid .technical > summary").first().click();
   await expect(
     page.getByText("Trigger 1 › Entity ID", { exact: true }),
@@ -429,6 +435,9 @@ test("source links open loaded configurations and notify the Home Assistant rout
   const search = page.getByRole("combobox", { name: "Entity", exact: true });
   await search.fill("binary_sensor.wall_button");
   await search.press("Enter");
+  await page
+    .getByRole("tab", { name: "Uses this entity", exact: true })
+    .click();
   const automation = page.locator(
     '.source-grid [data-source="automation.wall_button"]',
   );
@@ -483,6 +492,9 @@ test("scenes open their editor and ordinary entities open the native more-info d
   const search = page.getByRole("combobox", { name: "Entity", exact: true });
   await search.fill("media_player.speaker");
   await search.press("Enter");
+  await page
+    .getByRole("tab", { name: "Uses this entity", exact: true })
+    .click();
   await expect(
     page.locator('.source-grid [data-source="scene.evening"] .open-source'),
   ).toHaveAttribute("href", "/config/scene/edit/evening_01");
@@ -574,7 +586,12 @@ test("panel uses the current HA body font and hides technical details initially"
     .getByRole("combobox", { name: "Entity", exact: true })
     .fill("binary_sensor.wall_button");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
-  const purpose = page.getByText("Used by a trigger", { exact: true }).first();
+  await page
+    .getByRole("tab", { name: "Uses this entity", exact: true })
+    .click();
+  const purpose = page
+    .getByText("Triggers from this entity", { exact: true })
+    .first();
   await expect(purpose).toBeVisible();
   expect(
     await purpose.evaluate((element) => getComputedStyle(element).fontFamily),
