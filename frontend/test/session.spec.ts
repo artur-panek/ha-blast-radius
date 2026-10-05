@@ -12,8 +12,9 @@ async function analyze(page: Page, id: string) {
 
 async function setDepth(page: Page, value: string) {
   const options = page.locator(".analysis-options");
-  if (!(await options.getAttribute("open")))
-    await options.locator(":scope > summary").click();
+  await options.evaluate((element: HTMLDetailsElement) => {
+    element.open = true;
+  });
   await page.getByLabel("Traversal depth").selectOption(value);
 }
 
