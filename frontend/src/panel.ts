@@ -12,6 +12,7 @@ import { sourceIcon } from "./icons";
 import {
   effectGroups,
   effectNodeCount,
+  effectRoleCountLabel,
   effectRoleLabel,
   referenceSummary,
   referenceUseLabel,
@@ -682,11 +683,17 @@ export class BlastRadiusPanel extends LitElement {
         : "No direct users were found in the inspected sources.";
     }
     const parts = [
-      `${stats.actionSources} act on it`,
-      `${stats.observeSources} read or react to it`,
-      `${stats.contextSources} display or contain it`,
-    ];
-    return `${stats.totalSources} ${stats.totalSources === 1 ? "configuration directly uses" : "configurations directly use"} this entity: ${parts.join(", ")}. ${effects ? `The same related flows reach ${effects} other ${effects === 1 ? "node" : "nodes"}.` : "No other action targets were reached through those flows."}`;
+      stats.actionSources
+        ? `${stats.actionSources} ${stats.actionSources === 1 ? "acts" : "act"} on it`
+        : "",
+      stats.observeSources
+        ? `${stats.observeSources} read or react to it`
+        : "",
+      stats.contextSources
+        ? `${stats.contextSources} ${stats.contextSources === 1 ? "displays or contains" : "display or contain"} it`
+        : "",
+    ].filter(Boolean);
+    return `${stats.totalSources} ${stats.totalSources === 1 ? "configuration directly uses" : "configurations directly use"} this entity: ${parts.join("; ")}. ${effects ? `Those related flows also reach ${effects} other ${effects === 1 ? "node" : "nodes"}.` : "No other action targets were reached through those flows."}`;
   }
 
   private relationshipSummary(report: Report) {
@@ -702,7 +709,7 @@ export class BlastRadiusPanel extends LitElement {
       },
       {
         className: "observe",
-        direction: "entity → configuration",
+        direction: "entity state → configuration",
         value: stats.observeSources,
         label: "reads / reacts",
         detail: `${stats.observeReferences} direct ${stats.observeReferences === 1 ? "reference" : "references"}`,
@@ -945,12 +952,14 @@ export class BlastRadiusPanel extends LitElement {
   }
 
   private effectGroupSummary(group: EffectGroup) {
-    const roles = new Map<string, number>();
+    const roles = new Map<string | undefined, number>();
     for (const item of group.items) {
-      const role = effectRoleLabel(item.edge?.role);
+      const role = item.edge?.role;
       roles.set(role, (roles.get(role) || 0) + 1);
     }
-    return [...roles].map(([role, count]) => `${count} ${role}`).join(" · ");
+    return [...roles]
+      .map(([role, count]) => effectRoleCountLabel(role, count))
+      .join(" · ");
   }
 
   private effectItem(item: EffectItem) {
@@ -1032,8 +1041,8 @@ export class BlastRadiusPanel extends LitElement {
         ${
           ownFlow
             ? html`<span class="relation-chip outgoing">
-                selected configuration → ${group.items.length} effect
-                ${group.items.length === 1 ? "" : "nodes"}
+                selected configuration → ${group.items.length}
+                ${group.items.length === 1 ? "effect node" : "effect nodes"}
               </span>`
             : html`<span class="relation-chip incoming">
                   this flow → selected entity
