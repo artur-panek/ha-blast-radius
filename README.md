@@ -45,8 +45,8 @@ The screenshot uses synthetic fixtures, not a real household's configuration.
 - Recursive script calls, action targets, scene membership and exposed group membership.
 - Configured Lovelace dashboards, including YAML, through HA's own loader.
 - Jinja literals found without executing templates; unresolved expressions kept separate.
-- Bounded dependency view with cycle detection and adjustable depth. Visible
-  notices for incomplete results, with deeper inspection when a depth limit is reached.
+- Bounded dependency view with cycle detection and adjustable depth. Traversal
+  limits are called out separately from static scanner coverage gaps.
 - Clickable sources: inspect loaded automations/scripts in HA's read-only view,
   open scenes in their editor, dashboards in their view, and entities in details.
 - Return to your last search, depth and tab after opening a source. Reopen any of
@@ -94,7 +94,8 @@ and select the latest numbered release. Updates do not install or restart HA aut
 ## Usage
 
 1. Select or type an entity ID. Missing old IDs are accepted.
-2. Choose a traversal depth and press **Analyze**.
+2. Press **Analyze**. Traversal depth stays under **Analysis options** for cases
+   where you need to tune the graph.
 3. Read **Impact**, **Graph**, or **Raw references**. Click a source name or **Open**
    to inspect it in Home Assistant; **Analyze this** makes a graph node the new root
    without leaving the panel. Expand reference details for exact paths.
@@ -133,11 +134,11 @@ actions on other cards do not become downstream effects of the selected entity.
 Different locations remain separate references; identical references are deduplicated.
 Nodes appear once and the edge list retains alternative paths. Default depth is 6,
 adjustable from 1 to 12. Graphs cap at 500 nodes and 2,000 edges; scans cap at
-50,000 references and 80 nested levels. Depth/size limits and specific snapshot
-coverage gaps produce a **Results are incomplete** notice above the counts.
-The notice offers a deeper search for depth-only limits below 12, and opens the
-coverage details for skipped sources, failed blueprint expansion and scan limits.
-Warnings also appear in Markdown and JSON exports. The static-analysis limitations
+50,000 references and 80 nested levels. Depth/size limits produce a **Dependency map limited** notice and can offer a
+deeper search when only the traversal depth was reached. Snapshot coverage gaps
+are shown separately as scanner coverage so they are not confused with the
+confidence of the direct references found for the selected entity. Coverage and
+warnings also appear in Markdown and JSON exports. The static-analysis limitations
 below apply even when no warning is shown.
 
 ### Confidence model
