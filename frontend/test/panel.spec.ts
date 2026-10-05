@@ -117,6 +117,7 @@ test("desktop screenshots and depth change", async ({ page }) => {
   await page.getByRole("button", { name: "Toggle theme" }).click();
   await page.getByRole("tab", { name: "Graph", exact: true }).click();
   await screenshotPanel(page, "../docs/panel-dark.png");
+  await page.getByText("Analysis options", { exact: false }).click();
   await page.getByLabel("Traversal depth").selectOption("1");
   await expect(
     page.locator('.tree .graph-node[data-source="media_player.tablet"]'),
