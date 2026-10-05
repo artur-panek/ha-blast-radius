@@ -324,7 +324,8 @@ for (const theme of ["light", "dark", "custom-dark"]) {
         const style = getComputedStyle(element);
         const background =
           style.backgroundColor === "rgba(0, 0, 0, 0)"
-            ? getComputedStyle(element.closest(".card, .impact-summary")!).backgroundColor
+            ? getComputedStyle(element.closest(".card, .impact-summary")!)
+                .backgroundColor
             : style.backgroundColor;
         return {
           text: rgb(style.color),
