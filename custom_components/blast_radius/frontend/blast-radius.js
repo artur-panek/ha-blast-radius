@@ -1892,7 +1892,7 @@ function Ze(e, t) {
 }
 //#endregion
 //#region package.json
-var Qe = "0.2.3";
+var Qe = "0.2.4";
 //#endregion
 //#region src/review.ts
 function Q(e) {
