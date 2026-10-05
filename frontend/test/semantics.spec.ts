@@ -25,11 +25,19 @@ const ref = (overrides: Partial<Reference> = {}): Reference => ({
 test("usage semantics distinguish actions, reads, triggers, checks and context", () => {
   const refs = [
     ref(),
-    ref({ role: "call", target: "script.scene_mode", path: "actions[1].action" }),
+    ref({
+      role: "call",
+      target: "script.scene_mode",
+      path: "actions[1].action",
+    }),
     ref({ role: "read", path: "triggers[0].entity_id" }),
     ref({ role: "read", path: "conditions[0].entity_id" }),
     ref({ role: "read", path: "variables.source" }),
-    ref({ role: "display", source_id: "dashboard.home", source_type: "dashboard" }),
+    ref({
+      role: "display",
+      source_id: "dashboard.home",
+      source_type: "dashboard",
+    }),
     ref({ role: "member", source_id: "group.rooms", source_type: "group" }),
   ];
 
@@ -44,7 +52,9 @@ test("usage semantics distinguish actions, reads, triggers, checks and context",
   expect(referenceUseLabel(refs[3])).toBe("Checks this entity");
 
   const buckets = usageBuckets(refs);
-  expect(buckets.map((bucket) => [bucket.category, bucket.refs.length])).toEqual([
+  expect(
+    buckets.map((bucket) => [bucket.category, bucket.refs.length]),
+  ).toEqual([
     ["action", 2],
     ["observe", 3],
     ["context", 2],

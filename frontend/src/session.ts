@@ -64,8 +64,7 @@ export function readSession(key?: string): PanelSession {
       }
     }
     const rawLast = parsed?.last as
-      | (Omit<SavedView, "tab"> & { tab?: string })
-      | undefined;
+      (Omit<SavedView, "tab"> & { tab?: string }) | undefined;
     const tab =
       rawLast?.tab === "impact"
         ? "overview"

@@ -722,24 +722,30 @@ export class BlastRadiusPanel extends LitElement {
         detail: "not necessarily caused by this entity",
       },
     ];
-    return html`<section class="impact-summary relationship-summary" aria-label="Relationship summary">
+    return html`<section
+      class="impact-summary relationship-summary"
+      aria-label="Relationship summary"
+    >
       <div class="impact-verdict">
         <span class="eyebrow">Quick read</span>
         <strong>
-          ${stats.totalSources
-            ? `${stats.totalSources} direct ${stats.totalSources === 1 ? "user" : "users"}`
-            : "No direct users"}
+          ${
+            stats.totalSources
+              ? `${stats.totalSources} direct ${stats.totalSources === 1 ? "user" : "users"}`
+              : "No direct users"
+          }
         </strong>
         <p>${this.quickRead(report)}</p>
       </div>
       <div class="direction-metrics">
         ${metrics.map(
-          (metric) => html`<div class="direction-metric ${metric.className}">
-            <span class="metric-direction">${metric.direction}</span>
-            <strong>${metric.value}</strong>
-            <span class="metric-label">${metric.label}</span>
-            <small>${metric.detail}</small>
-          </div>`,
+          (metric) =>
+            html`<div class="direction-metric ${metric.className}">
+              <span class="metric-direction">${metric.direction}</span>
+              <strong>${metric.value}</strong>
+              <span class="metric-label">${metric.label}</span>
+              <small>${metric.detail}</small>
+            </div>`,
         )}
       </div>
     </section>`;
@@ -754,7 +760,8 @@ export class BlastRadiusPanel extends LitElement {
 
   private bucketDirection(bucket: UsageBucket) {
     if (bucket.category === "action") return "Configuration → selected entity";
-    if (bucket.category === "observe") return "Selected entity → configuration logic";
+    if (bucket.category === "observe")
+      return "Selected entity → configuration logic";
     return "Selected entity → dashboard / group";
   }
 
@@ -772,11 +779,15 @@ export class BlastRadiusPanel extends LitElement {
           ${bucket.refs.length === 1 ? "reference" : "references"}</span
         >
       </div>
-      ${bucket.refs.length
-        ? html`<div class="source-grid">${this.references(bucket.refs, false, false)}</div>`
-        : html`<div class="semantic-empty">
-            No direct references in this category.
-          </div>`}
+      ${
+        bucket.refs.length
+          ? html`<div class="source-grid">
+              ${this.references(bucket.refs, false, false)}
+            </div>`
+          : html`<div class="semantic-empty">
+              No direct references in this category.
+            </div>`
+      }
     </section>`;
   }
 
@@ -793,7 +804,9 @@ export class BlastRadiusPanel extends LitElement {
           configurations that use this entity.</span
         >
       </div>
-      <button @click=${() => this.selectTab("usage")}>Review blind spots</button>
+      <button @click=${() => this.selectTab("usage")}>
+        Review blind spots
+      </button>
     </div>`;
   }
 
@@ -815,19 +828,23 @@ export class BlastRadiusPanel extends LitElement {
           </div>
           <div class="relationship-list">
             ${buckets.map(
-              (bucket) => html`<div class="relationship-row ${bucket.category}">
-                <div class="relationship-row-main">
-                  <strong>${bucket.shortLabel}</strong>
-                  <span>${this.sourcePreview(bucket.refs)}</span>
-                </div>
-                <div class="relationship-row-count">
-                  <strong>${bucket.sources}</strong>
-                  <span>${bucket.sources === 1 ? "source" : "sources"}</span>
-                </div>
-              </div>`,
+              (bucket) =>
+                html`<div class="relationship-row ${bucket.category}">
+                  <div class="relationship-row-main">
+                    <strong>${bucket.shortLabel}</strong>
+                    <span>${this.sourcePreview(bucket.refs)}</span>
+                  </div>
+                  <div class="relationship-row-count">
+                    <strong>${bucket.sources}</strong>
+                    <span>${bucket.sources === 1 ? "source" : "sources"}</span>
+                  </div>
+                </div>`,
             )}
           </div>
-          <button class="section-action" @click=${() => this.selectTab("usage")}>
+          <button
+            class="section-action"
+            @click=${() => this.selectTab("usage")}
+          >
             Inspect direct usage →
           </button>
         </section>
@@ -843,38 +860,46 @@ export class BlastRadiusPanel extends LitElement {
               </p>
             </div>
           </div>
-          ${effects
-            ? html`<div class="effects-overview">
-                <strong
-                  >${effects} other ${effects === 1 ? "node" : "nodes"} across
-                  ${groups.length}
-                  ${groups.length === 1 ? "flow" : "flows"}</strong
-                >
-                <div class="flow-summary-list">
-                  ${groups.slice(0, 4).map(
-                    (group) => html`<div class="flow-summary-row">
-                      <span>${this.sourceName(group.sourceId)}</span>
-                      <strong>${group.items.length}</strong>
-                    </div>`,
-                  )}
-                  ${groups.length > 4
-                    ? html`<div class="flow-summary-row muted">
-                        <span>More related flows</span>
-                        <strong>+${groups.length - 4}</strong>
-                      </div>`
-                    : nothing}
-                </div>
-                <p class="causality-note">
-                  These are <strong>co-effects of the same flows</strong>. For a
-                  normal entity, they are not effects caused by the selected
-                  entity.
-                </p>
-              </div>`
-            : html`<div class="semantic-empty">
-                No other action targets or calls were reached through the
-                related flows.
-              </div>`}
-          <button class="section-action" @click=${() => this.selectTab("effects")}>
+          ${
+            effects
+              ? html`<div class="effects-overview">
+                  <strong
+                    >${effects} other ${effects === 1 ? "node" : "nodes"} across
+                    ${groups.length}
+                    ${groups.length === 1 ? "flow" : "flows"}</strong
+                  >
+                  <div class="flow-summary-list">
+                    ${groups.slice(0, 4).map(
+                      (group) =>
+                        html`<div class="flow-summary-row">
+                          <span>${this.sourceName(group.sourceId)}</span>
+                          <strong>${group.items.length}</strong>
+                        </div>`,
+                    )}
+                    ${
+                      groups.length > 4
+                        ? html`<div class="flow-summary-row muted">
+                            <span>More related flows</span>
+                            <strong>+${groups.length - 4}</strong>
+                          </div>`
+                        : nothing
+                    }
+                  </div>
+                  <p class="causality-note">
+                    These are <strong>co-effects of the same flows</strong>. For
+                    a normal entity, they are not effects caused by the selected
+                    entity.
+                  </p>
+                </div>`
+              : html`<div class="semantic-empty">
+                  No other action targets or calls were reached through the
+                  related flows.
+                </div>`
+          }
+          <button
+            class="section-action"
+            @click=${() => this.selectTab("effects")}
+          >
             Explore related effects →
           </button>
         </section>
@@ -896,19 +921,25 @@ export class BlastRadiusPanel extends LitElement {
         </div>
         <span class="count"
           >${new Set(refs.map((ref) => ref.source_id)).size} visible
-          ${new Set(refs.map((ref) => ref.source_id)).size === 1
-            ? "source"
-            : "sources"}</span
+          ${
+            new Set(refs.map((ref) => ref.source_id)).size === 1
+              ? "source"
+              : "sources"
+          }</span
         >
       </div>
       <div class="usage-sections">
-        ${refs.length
-          ? buckets.map((bucket) => this.usageBucketSection(bucket))
-          : html`<div class="semantic-empty">
-              ${this.filtersActive
-                ? "No direct references match the current filters. Try All sources or All confidence."
-                : "No direct users were found in the inspected sources."}
-            </div>`}
+        ${
+          refs.length
+            ? buckets.map((bucket) => this.usageBucketSection(bucket))
+            : html`<div class="semantic-empty">
+                ${
+                  this.filtersActive
+                    ? "No direct references match the current filters. Try All sources or All confidence."
+                    : "No direct users were found in the inspected sources."
+                }
+              </div>`
+        }
       </div>
       ${this.uncertainty(report)}`;
   }
@@ -919,9 +950,7 @@ export class BlastRadiusPanel extends LitElement {
       const role = effectRoleLabel(item.edge?.role);
       roles.set(role, (roles.get(role) || 0) + 1);
     }
-    return [...roles]
-      .map(([role, count]) => `${count} ${role}`)
-      .join(" · ");
+    return [...roles].map(([role, count]) => `${count} ${role}`).join(" · ");
   }
 
   private effectItem(item: EffectItem) {
@@ -935,36 +964,42 @@ export class BlastRadiusPanel extends LitElement {
           <span class="source-meta">
             ${sourceLabels[kind] || kind.replaceAll("_", " ")} ·
             ${effectRoleLabel(item.edge?.role)}
-            ${item.chained && node.via
-              ? html` · via ${this.sourceName(node.via)}`
-              : nothing}
+            ${
+              item.chained && node.via
+                ? html` · via ${this.sourceName(node.via)}`
+                : nothing
+            }
           </span>
         </div>
       </div>
       <div class="node-actions">
         ${this.sourceControl(node.id, true)}
-        ${/^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/.test(node.id)
-          ? html`<button
-              class="analyze-node"
-              aria-label=${`Analyze this: ${node.id}`}
-              @click=${() => this.analyzeNode(node.id)}
-            >
-              Analyze
-            </button>`
-          : nothing}
+        ${
+          /^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/.test(node.id)
+            ? html`<button
+                class="analyze-node"
+                aria-label=${`Analyze this: ${node.id}`}
+                @click=${() => this.analyzeNode(node.id)}
+              >
+                Analyze
+              </button>`
+            : nothing
+        }
       </div>
-      ${node.path
-        ? html`<details class="technical effect-details">
-            <summary>Connection</summary>
-            <div class="technical-row">
-              <div class="path">
-                <span>${readablePath(node.path)}</span>
-                ${node.confidence ? this.badge(node.confidence) : nothing}
+      ${
+        node.path
+          ? html`<details class="technical effect-details">
+              <summary>Connection</summary>
+              <div class="technical-row">
+                <div class="path">
+                  <span>${readablePath(node.path)}</span>
+                  ${node.confidence ? this.badge(node.confidence) : nothing}
+                </div>
+                <code>${node.path}</code>
               </div>
-              <code>${node.path}</code>
-            </div>
-          </details>`
-        : nothing}
+            </details>`
+          : nothing
+      }
     </div>`;
   }
 
@@ -980,9 +1015,11 @@ export class BlastRadiusPanel extends LitElement {
             </span>
             <h3>${this.sourceControl(group.sourceId)}</h3>
             <span class="source-meta">
-              ${ownFlow
-                ? "These are direct effects from the selected configuration."
-                : `${referenceSummary(group.directReferences)} to the selected entity.`}
+              ${
+                ownFlow
+                  ? "These are direct effects from the selected configuration."
+                  : `${referenceSummary(group.directReferences)} to the selected entity.`
+              }
             </span>
           </div>
         </div>
@@ -992,37 +1029,43 @@ export class BlastRadiusPanel extends LitElement {
         >
       </div>
       <div class="flow-relationship">
-        ${ownFlow
-          ? html`<span class="relation-chip outgoing">
-              selected configuration → ${group.items.length} effect
-              ${group.items.length === 1 ? "" : "nodes"}
-            </span>`
-          : html`<span class="relation-chip incoming">
-                this flow → selected entity
-              </span>
-              <span class="flow-arrow">and</span>
-              <span class="relation-chip outgoing">
-                this flow → ${group.items.length} other
-                ${group.items.length === 1 ? "node" : "nodes"}
-              </span>`}
+        ${
+          ownFlow
+            ? html`<span class="relation-chip outgoing">
+                selected configuration → ${group.items.length} effect
+                ${group.items.length === 1 ? "" : "nodes"}
+              </span>`
+            : html`<span class="relation-chip incoming">
+                  this flow → selected entity
+                </span>
+                <span class="flow-arrow">and</span>
+                <span class="relation-chip outgoing">
+                  this flow → ${group.items.length} other
+                  ${group.items.length === 1 ? "node" : "nodes"}
+                </span>`
+        }
       </div>
       <p class="effect-flow-summary">${this.effectGroupSummary(group)}</p>
-      ${group.directItems.length
-        ? html`<div class="effect-list">
-            ${group.directItems.map((item) => this.effectItem(item))}
-          </div>`
-        : nothing}
-      ${group.chainedItems.length
-        ? html`<details class="chained-effects">
-            <summary>
-              Chained effects through called / linked configurations
-              <span class="count">${group.chainedItems.length}</span>
-            </summary>
-            <div class="effect-list">
-              ${group.chainedItems.map((item) => this.effectItem(item))}
-            </div>
-          </details>`
-        : nothing}
+      ${
+        group.directItems.length
+          ? html`<div class="effect-list">
+              ${group.directItems.map((item) => this.effectItem(item))}
+            </div>`
+          : nothing
+      }
+      ${
+        group.chainedItems.length
+          ? html`<details class="chained-effects">
+              <summary>
+                Chained effects through called / linked configurations
+                <span class="count">${group.chainedItems.length}</span>
+              </summary>
+              <div class="effect-list">
+                ${group.chainedItems.map((item) => this.effectItem(item))}
+              </div>
+            </details>`
+          : nothing
+      }
     </article>`;
   }
 
@@ -1031,7 +1074,9 @@ export class BlastRadiusPanel extends LitElement {
     const effects = effectNodeCount(report);
     return html`<div class="section-heading">
         <div>
-          <span class="direction-label">Related configuration → other target</span>
+          <span class="direction-label"
+            >Related configuration → other target</span
+          >
           <h2>Related effects</h2>
           <p>
             Action targets, script calls and memberships reached from the same
@@ -1048,18 +1093,20 @@ export class BlastRadiusPanel extends LitElement {
         script. When the selected entity is itself a configuration, its own
         direct targets are identified separately.
       </div>
-      ${groups.length
-        ? html`<div class="effect-flows">
-            ${groups.map((group) => this.effectFlow(group, report))}
-          </div>`
-        : html`<div class="empty">
-            <div class="symbol">${brandMark()}</div>
-            <h3>No related effects found</h3>
-            <p class="muted">
-              The inspected flows do not expose additional action targets,
-              calls or memberships at this traversal depth.
-            </p>
-          </div>`}`;
+      ${
+        groups.length
+          ? html`<div class="effect-flows">
+              ${groups.map((group) => this.effectFlow(group, report))}
+            </div>`
+          : html`<div class="empty">
+              <div class="symbol">${brandMark()}</div>
+              <h3>No related effects found</h3>
+              <p class="muted">
+                The inspected flows do not expose additional action targets,
+                calls or memberships at this traversal depth.
+              </p>
+            </div>`
+      }`;
   }
 
   private showCoverage() {
@@ -1117,13 +1164,11 @@ export class BlastRadiusPanel extends LitElement {
       node.relationship === "dependent"
         ? report.graph.edges.find(
             (candidate) =>
-              candidate.source_id === node.id &&
-              candidate.target === node.via,
+              candidate.source_id === node.id && candidate.target === node.via,
           )
         : report.graph.edges.find(
             (candidate) =>
-              candidate.source_id === node.via &&
-              candidate.target === node.id,
+              candidate.source_id === node.via && candidate.target === node.id,
           );
     if (!edge)
       return node.relationship === "dependent"
@@ -1153,8 +1198,12 @@ export class BlastRadiusPanel extends LitElement {
         changing the selected entity causes the right-hand targets.
       </p>
       <div class="direction-legend" aria-label="Relationship directions">
-        <span><strong>Incoming use</strong> configuration → selected entity</span>
-        <span><strong>Related effect</strong> configuration → other target</span>
+        <span
+          ><strong>Incoming use</strong> configuration → selected entity</span
+        >
+        <span
+          ><strong>Related effect</strong> configuration → other target</span
+        >
       </div>
       ${this.filtersActive ? html`<p class="filter-note">Showing ${nodes.length - 1} of ${report.graph.nodes.length - 1} linked nodes. Paths may pass through hidden configurations; filtering does not recalculate the graph.</p>` : nothing}
       <div class="tree dependency-map">
@@ -1219,14 +1268,18 @@ export class BlastRadiusPanel extends LitElement {
           ${/^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/.test(node.id) ? html`<button class="analyze-node" aria-label=${`Analyze this: ${node.id}`} @click=${() => this.analyzeNode(node.id)}>Analyze this</button>` : nothing}
         </div>
       </div>
-      ${node.via
-        ? html`<p class="via">
-            <strong>${this.graphConnection(node)}</strong>
-            ${node.relationship === "dependent"
-              ? html` · via ${this.sourceControl(node.via)}`
-              : nothing}
-          </p>`
-        : nothing}
+      ${
+        node.via
+          ? html`<p class="via">
+              <strong>${this.graphConnection(node)}</strong>
+              ${
+                node.relationship === "dependent"
+                  ? html` · via ${this.sourceControl(node.via)}`
+                  : nothing
+              }
+            </p>`
+          : nothing
+      }
       <details class="technical">
         <summary>${node.path ? "Connection details" : "Entity ID"}</summary>
         <code class="source-id">${node.id}</code>
@@ -1420,14 +1473,16 @@ export class BlastRadiusPanel extends LitElement {
                     <span class="summary-pill"
                       >${this.directConfidence(report)}</span
                     >
-                    ${(report.coverage.warnings || []).length
-                      ? html`<button
-                          class="summary-pill summary-action"
-                          @click=${this.showCoverage}
-                        >
-                          Coverage partial
-                        </button>`
-                      : nothing}
+                    ${
+                      (report.coverage.warnings || []).length
+                        ? html`<button
+                            class="summary-pill summary-action"
+                            @click=${this.showCoverage}
+                          >
+                            Coverage partial
+                          </button>`
+                        : nothing
+                    }
                   </div>
                 </div>
                 ${!report.exists ? html`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>` : nothing}
@@ -1460,25 +1515,29 @@ export class BlastRadiusPanel extends LitElement {
                           </button>`,
                       )}
                     </nav>
-                    ${this.tab === "usage" ||
-                    this.tab === "graph" ||
-                    this.tab === "raw"
-                      ? this.filters(report)
-                      : nothing}
+                    ${
+                      this.tab === "usage" ||
+                      this.tab === "graph" ||
+                      this.tab === "raw"
+                        ? this.filters(report)
+                        : nothing
+                    }
                     <div
                       role="tabpanel"
                       id="analysis-view"
                       aria-labelledby=${`tab-${this.tab}`}
                     >
-                      ${this.tab === "overview"
-                        ? this.overview(report)
-                        : this.tab === "usage"
-                          ? this.directUsage(report)
-                          : this.tab === "effects"
-                            ? this.relatedEffects(report)
-                            : this.tab === "graph"
-                              ? this.graph(report)
-                              : this.raw(report)}
+                      ${
+                        this.tab === "overview"
+                          ? this.overview(report)
+                          : this.tab === "usage"
+                            ? this.directUsage(report)
+                            : this.tab === "effects"
+                              ? this.relatedEffects(report)
+                              : this.tab === "graph"
+                                ? this.graph(report)
+                                : this.raw(report)
+                      }
                     </div>
                     <div class="controls">
                       <button @click=${this.copy}>Copy Markdown</button

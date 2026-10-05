@@ -119,7 +119,8 @@ export function referenceUseLabel(ref: Reference): string {
   if (ref.role === "member") return "Contains this entity as a member";
   if (readKind(ref) === "trigger") return "Triggers from this entity";
   if (readKind(ref) === "check") return "Checks this entity";
-  if (ref.confidence === "template_literal") return "Reads this entity in a template";
+  if (ref.confidence === "template_literal")
+    return "Reads this entity in a template";
   return "Reads this entity";
 }
 
@@ -204,7 +205,8 @@ export function effectGroups(report: Report): EffectGroup[] {
         sourceId,
         sourceType: sourceRef?.source_type || sourceId.split(".")[0],
         directReferences: report.references.filter(
-          (ref) => ref.source_id === sourceId && ref.target === report.entity_id,
+          (ref) =>
+            ref.source_id === sourceId && ref.target === report.entity_id,
         ),
         items: [...items].sort(
           (a, b) =>
