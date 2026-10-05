@@ -20,7 +20,7 @@ test("source chips filter impact, graph and raw without changing totals or expor
   page,
 }) => {
   await analyze(page);
-  const before = await page.locator(".stats").innerText();
+  const before = await page.locator(".impact-summary").innerText();
   const full = await page
     .locator("blast-radius-panel")
     .evaluate((p: any) => JSON.stringify(p.report));
@@ -44,7 +44,7 @@ test("source chips filter impact, graph and raw without changing totals or expor
     .locator("tbody tr td:first-child")
     .allTextContents())
     expect(text).toContain("script.music_toggle");
-  expect(await page.locator(".stats").innerText()).toBe(before);
+  expect(await page.locator(".impact-summary").innerText()).toBe(before);
   expect(
     await page
       .locator("blast-radius-panel")
@@ -429,12 +429,16 @@ test("selector presentation separates known identity from unexpanded entity memb
     p.report = { ...p.report, uncertain_references: [ref] };
   });
   await chip(page, "Needs review").click();
-  await page.locator(".uncertainty-scope > summary").click();
-  await page.locator(".reason-group > summary").click();
-  await expect(page.locator(".selector-detail")).toContainText(
+  await page.getByRole("button", { name: "View coverage" }).click();
+  const selectorScope = page
+    .locator("#coverage .uncertainty-scope")
+    .filter({ hasText: "Device and selector context" });
+  await selectorScope.locator(":scope > summary").click();
+  await selectorScope.locator(".reason-group > summary").click();
+  await expect(selectorScope.locator(".selector-detail")).toContainText(
     "Identity found in HA registry.",
   );
-  await expect(page.locator(".selector-detail")).toContainText(
+  await expect(selectorScope.locator(".selector-detail")).toContainText(
     "Entity membership and runtime eligibility are not expanded.",
   );
 });

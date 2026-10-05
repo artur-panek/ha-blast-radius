@@ -393,13 +393,15 @@ export class BlastRadiusPanel extends LitElement {
     >`;
   }
 
-  private references(refs: Reference[], unresolved = false) {
+  private references(
+    refs: Reference[],
+    unresolved = false,
+    applyFilters = true,
+  ) {
     const groups = new Map<string, Reference[]>();
-    refs
-      .filter(this.matchesFilter)
-      .forEach((ref) =>
-        groups.set(ref.source_id, [...(groups.get(ref.source_id) || []), ref]),
-      );
+    (applyFilters ? refs.filter(this.matchesFilter) : refs).forEach((ref) =>
+      groups.set(ref.source_id, [...(groups.get(ref.source_id) || []), ref]),
+    );
     return [...groups].map(
       ([source, references]) =>
         html`<article class="reference source-row" data-source=${source}>
@@ -411,7 +413,7 @@ export class BlastRadiusPanel extends LitElement {
                 <span class="source-meta"
                   >${sourceLabels[references[0].source_type] || references[0].source_type}
                   ·
-                  ${unresolved ? reviewCounts(references) : `${references.length} ${references.length === 1 ? "reference" : "references"}`}</span
+                  ${unresolved ? reviewCounts(references) : this.referenceRoleSummary(references)}</span
                 >
               </div>
             </div>
@@ -420,7 +422,7 @@ export class BlastRadiusPanel extends LitElement {
           ${
             unresolved
               ? this.unresolvedGroups(references)
-              : html`<p class="purpose">${referencePurpose(references)}</p>
+              : html`${this.shouldShowPurpose(references) ? html`<p class="purpose">${referencePurpose(references)}</p>` : nothing}
                   ${references.some((ref) => ref.confidence !== "explicit") ? html`<span class="review-hint">Includes references to review</span>` : nothing}
                   <details class="technical">
                     <summary>Reference details (${references.length})</summary>
@@ -440,6 +442,29 @@ export class BlastRadiusPanel extends LitElement {
           }
         </article>`,
     );
+  }
+
+  private referenceRoleSummary(refs: Reference[]) {
+    const roles = [...new Set(refs.map((ref) => ref.role))];
+    if (roles.length !== 1)
+      return `${refs.length} ${refs.length === 1 ? "reference" : "references"}`;
+    const role = roles[0];
+    return `${refs.length} ${role}${refs.length === 1 ? "" : "s"}`;
+  }
+
+  private shouldShowPurpose(refs: Reference[]) {
+    const roles = [...new Set(refs.map((ref) => ref.role))];
+    return (
+      roles.length !== 1 || !["write", "call", "display"].includes(roles[0])
+    );
+  }
+
+  private directConfidence(report: Report) {
+    if (report.references.some((ref) => ref.confidence === "unknown"))
+      return "Needs review";
+    if (report.references.some((ref) => ref.confidence !== "explicit"))
+      return "Mixed confidence";
+    return report.references.length ? "High confidence" : "No direct matches";
   }
 
   private unresolvedGroups(refs: Reference[]) {
@@ -475,53 +500,90 @@ export class BlastRadiusPanel extends LitElement {
 
   private uncertainty(report: Report) {
     const local = report.uncertain_references.filter(this.matchesFilter);
-    const elsewhere = (report.other_dashboard_references || []).filter(
-      this.matchesFilter,
+    const unresolvedLocal = local.filter(
+      (ref) => reviewResolution(ref) === "unresolved",
     );
-    if (!local.length && !elsewhere.length) return nothing;
-    return html`<section class="uncertainty" aria-label="References to review">
-      <h2>References to review</h2>
-      <p>
-        These are limits of static analysis, not a count of broken entities.
-        Device IDs and selectors are listed separately from dynamic or
-        unrecognized targets. Repeated locations are grouped; a shared
-        configuration does not prove a dependency.
-      </p>
+    const relatedContext = report.uncertain_references.filter(
+      (ref) => reviewResolution(ref) !== "unresolved",
+    );
+    const elsewhere = report.other_dashboard_references || [];
+    if (!unresolvedLocal.length && !relatedContext.length && !elsewhere.length)
+      return nothing;
+    return html`<section class="uncertainty" aria-label="Potential blind spots">
       ${
-        local.length
-          ? html`<details class="uncertainty-scope">
+        unresolvedLocal.length
+          ? html`<div class="section-heading">
+                <div>
+                  <h2>Potential blind spots</h2>
+                  <p>
+                    These unresolved expressions are inside configurations that
+                    also reference this entity. They are not confirmed
+                    dependencies.
+                  </p>
+                </div>
+              </div>
+              <details class="uncertainty-scope">
+                <summary>
+                  Unresolved in related configurations
+                  <span class="count">${reviewCounts(unresolvedLocal)}</span>
+                </summary>
+                ${this.references(unresolvedLocal, true)}
+              </details>`
+          : nothing
+      }
+      ${
+        relatedContext.length || elsewhere.length
+          ? html`<div class="diagnostics-link">
+              <span>
+                Additional scanner diagnostics are available in Coverage.
+              </span>
+              <button @click=${this.showCoverage}>View coverage</button>
+            </div>`
+          : nothing
+      }
+    </section>`;
+  }
+
+  private coverageDiagnostics(report: Report) {
+    const relatedContext = report.uncertain_references.filter(
+      (ref) => reviewResolution(ref) !== "unresolved",
+    );
+    const elsewhere = report.other_dashboard_references || [];
+    if (!relatedContext.length && !elsewhere.length) return nothing;
+    return html`<div class="coverage-diagnostics">
+      ${
+        relatedContext.length
+          ? html`<details class="uncertainty-scope secondary-context">
               <summary>
-                In linked configurations
-                <span class="count">${reviewCounts(local)}</span>
+                Device and selector context
+                <span class="count">${reviewCounts(relatedContext)}</span>
               </summary>
               <p>
-                References in linked automation/script configurations or
-                dashboard cards, including other conditional branches.
+                Device identities and unexpanded selectors from configurations
+                linked to the selected entity. They do not establish an entity
+                dependency.
               </p>
-              ${this.references(local, true)}
+              ${this.references(relatedContext, true, false)}
             </details>`
-          : html`<p class="muted">
-              No references requiring review in the linked configurations or
-              cards.
-            </p>`
+          : nothing
       }
       ${
         elsewhere.length
           ? html`<details class="uncertainty-scope dashboard-context">
               <summary>
-                Elsewhere in linked dashboards
+                System-wide dashboard diagnostics
                 <span class="count">${reviewCounts(elsewhere)}</span>
               </summary>
               <p>
-                Outside cards with known links, or at dashboard level. Kept for
-                context; these expressions are not attributed to the selected
+                Unresolved dashboard expressions elsewhere in Home Assistant.
+                They are scanner context and are not attributed to the selected
                 entity.
               </p>
-              ${this.references(elsewhere, true)}
+              ${this.references(elsewhere, true, false)}
             </details>`
           : nothing
       }
-    </section>`;
+    </div>`;
   }
 
   private get filtersActive() {
@@ -559,12 +621,14 @@ export class BlastRadiusPanel extends LitElement {
         </button>
         ${(Object.keys(reviewLabels) as ReviewFilter[]).map((kind) => html`<button aria-pressed=${this.reviewFilters.includes(kind)} @click=${() => (this.reviewFilters = this.reviewFilters.includes(kind) ? this.reviewFilters.filter((item) => item !== kind) : [...this.reviewFilters, kind])}>${reviewLabels[kind]}</button>`)}
       </div>
-      <p class="filter-note" role="status">
-        ${count} of ${report.references.length} direct references visible. Needs
-        review includes unclassified references, device IDs, unexpanded
-        selectors and unresolved expressions. Exports and coverage always
-        include the full analysis.
-      </p>
+      ${
+        this.filtersActive
+          ? html`<p class="filter-note" role="status">
+              ${count} of ${report.references.length} direct references visible.
+              Exported reports still include the full analysis.
+            </p>`
+          : nothing
+      }
     </section>`;
   }
 
@@ -584,13 +648,16 @@ export class BlastRadiusPanel extends LitElement {
 
   private impact(report: Report) {
     const refs = report.references.filter(this.matchesFilter);
-    return html`<h2>
-        Where this entity is used
-        <span class="badge"
-          >${new Set(refs.map((ref) => ref.source_id)).size} visible
-          sources</span
+    const sources = new Set(refs.map((ref) => ref.source_id)).size;
+    return html`<div class="section-heading impact-heading">
+        <div>
+          <h2>Direct impact</h2>
+          <p>Configurations with direct references to this entity.</p>
+        </div>
+        <span class="count"
+          >${sources} visible ${sources === 1 ? "source" : "sources"}</span
         >
-      </h2>
+      </div>
       ${
         refs.length
           ? html`<div class="source-grid">${this.references(refs)}</div>`
@@ -600,33 +667,11 @@ export class BlastRadiusPanel extends LitElement {
                 ${this.filtersActive ? "No matching direct references" : "No direct references found"}
               </h3>
               <p class="muted">
-                ${this.filtersActive ? "Try All sources or All confidence to show more results. Full totals and exports are unchanged." : "Nothing in the inspected sources points to this entity. Check coverage and unresolved references before changing it."}
+                ${this.filtersActive ? "Try All sources or All confidence to show more results. Full totals and exports are unchanged." : "Nothing in the inspected sources points to this entity. Check coverage before changing it."}
               </p>
             </div>`
       }
-      ${this.uncertainty(report)}
-      <details>
-        <summary>How to read confidence</summary>
-        <ul>
-          <li>
-            <strong>Explicit:</strong> an entity ID in a recognized
-            configuration field.
-          </li>
-          <li>
-            <strong>Template literal:</strong> visible in Jinja, but execution
-            is not guaranteed.
-          </li>
-          <li>
-            <strong>Dynamic:</strong> a target that cannot be resolved
-            statically.
-          </li>
-          <li>
-            <strong>Unclassified:</strong> a candidate in a field with unknown
-            semantics, or HA-native metadata without a verified location and
-            role.
-          </li>
-        </ul>
-      </details>`;
+      ${this.uncertainty(report)}`;
   }
 
   private showCoverage() {
@@ -641,41 +686,60 @@ export class BlastRadiusPanel extends LitElement {
   private completeness(report: Report) {
     const limits = report.graph.limits_reached || [];
     const coverageWarnings = report.coverage.warnings || [];
-    if (!report.graph.truncated && !coverageWarnings.length) return nothing;
     const sizeLimited = limits.includes("nodes") || limits.includes("edges");
     const nextDepth = [1, 2, 3, 4, 6, 8, 12].find(
       (depth) => depth > report.graph.max_depth,
     );
+
+    if (report.graph.truncated) {
+      return html`<section
+        class="notice incomplete"
+        role="status"
+        aria-label="Analysis limits reached"
+      >
+        <h3>Analysis limits reached</h3>
+        ${limits.includes("depth") ? html`<p>The dependency map reached depth ${report.graph.max_depth}. More related nodes may exist beyond this depth.</p>` : nothing}
+        ${sizeLimited ? html`<p>The dependency map reached its ${limits.includes("nodes") ? "node" : "edge"} limit. Increasing depth will not remove this cap.</p>` : nothing}
+        ${!limits.length ? html`<p>The dependency map reached a depth or size limit. More related nodes may exist.</p>` : nothing}
+        <div class="controls">
+          ${
+            limits.includes("depth") && !sizeLimited && nextDepth
+              ? html`<button
+                  ?disabled=${this.loading}
+                  @click=${() => {
+                    this.depth = nextDepth;
+                    void this.run();
+                  }}
+                >
+                  Inspect to depth ${nextDepth}
+                </button>`
+              : nothing
+          }
+          <button @click=${this.showCoverage}>Coverage details</button>
+        </div>
+      </section>`;
+    }
+
+    if (!coverageWarnings.length) return nothing;
+
     return html`<section
-      class="notice incomplete"
+      class="coverage-status"
       role="status"
-      aria-label="Incomplete results"
+      aria-label="Static coverage partial"
     >
-      <h3>Results are incomplete</h3>
-      ${limits.includes("depth") ? html`<p>The dependency map reached depth ${report.graph.max_depth}. More dependencies may exist beyond this depth.</p>` : nothing}
-      ${sizeLimited ? html`<p>The dependency map reached its ${limits.includes("nodes") ? "node" : "edge"} limit. Increasing depth will not remove this cap.</p>` : nothing}
-      ${report.graph.truncated && !limits.length ? html`<p>The dependency map reached a depth or size limit. More dependencies may exist.</p>` : nothing}
-      ${coverageWarnings.length ? html`<p>Some configuration could not be fully inspected. Review ${coverageWarnings.length === 1 ? "the coverage warning" : `the ${coverageWarnings.length} coverage warnings`} before changing this entity.</p>` : nothing}
-      <p>
-        Counts below describe only what was found, not everything that may
-        depend on this entity.
-      </p>
-      <div class="controls">
-        ${
-          limits.includes("depth") && !sizeLimited && nextDepth
-            ? html`<button
-                ?disabled=${this.loading}
-                @click=${() => {
-                  this.depth = nextDepth;
-                  void this.run();
-                }}
-              >
-                Inspect to depth ${nextDepth}
-              </button>`
-            : nothing
-        }
-        <button @click=${this.showCoverage}>Review coverage</button>
+      <div>
+        <strong>Static coverage: partial</strong>
+        <p>
+          ${
+            this.directConfidence(report) === "High confidence"
+              ? "Direct matches are high confidence. "
+              : ""
+          }
+          Some Home Assistant configuration cannot be fully inspected
+          statically.
+        </p>
       </div>
+      <button @click=${this.showCoverage}>Coverage details</button>
     </section>`;
   }
 
@@ -836,9 +900,9 @@ export class BlastRadiusPanel extends LitElement {
         >
       </header>
       <main>
-        <h1>Entity dependencies</h1>
+        <h1>Dependency impact</h1>
         <p class="muted intro">
-          Inspect references before renaming or removing an entity.
+          See what references an entity before you rename or remove it.
         </p>
         <form
           class="search"
@@ -860,18 +924,6 @@ export class BlastRadiusPanel extends LitElement {
           <datalist id="entities">
             ${suggestions.map((e) => html`<option value=${e.entity_id}>${e.name}${e.exists ? "" : " · missing"}</option>`)}
           </datalist>
-          <label class="depth"
-            >Depth<select
-              aria-label="Traversal depth"
-              .value=${String(this.depth)}
-              @change=${(e: Event) => {
-                this.depth = Number((e.target as HTMLSelectElement).value);
-                if (this.report) void this.run();
-              }}
-            >
-              ${[1, 2, 3, 4, 6, 8, 12].map((n) => html`<option value=${n} ?selected=${n === this.depth}>${n}</option>`)}
-            </select></label
-          >
           <button
             class="primary"
             ?disabled=${this.loading || !this.query.trim()}
@@ -879,6 +931,27 @@ export class BlastRadiusPanel extends LitElement {
             ${this.loading ? "Inspecting…" : "Analyze"}
           </button>
         </form>
+        <details class="analysis-options">
+          <summary>Analysis options</summary>
+          <div class="analysis-options-body">
+            <label class="depth"
+              >Traversal depth<select
+                aria-label="Traversal depth"
+                .value=${String(this.depth)}
+                @change=${(e: Event) => {
+                  this.depth = Number((e.target as HTMLSelectElement).value);
+                  if (this.report) void this.run();
+                }}
+              >
+                ${[1, 2, 3, 4, 6, 8, 12].map((n) => html`<option value=${n} ?selected=${n === this.depth}>${n}</option>`)}
+              </select></label
+            >
+            <p class="muted">
+              Higher depth expands the surrounding dependency graph. Direct
+              references do not depend on traversal depth.
+            </p>
+          </div>
+        </details>
         ${
           this.recentSearches.length
             ? html`<section
@@ -931,34 +1004,48 @@ export class BlastRadiusPanel extends LitElement {
           report
             ? html`
                 <div class="result-heading">
-                  <h2 tabindex="-1">${this.sourceName(report.entity_id)}</h2>
-                  <code>${report.entity_id}</code>
+                  <div>
+                    <h2 tabindex="-1">${this.sourceName(report.entity_id)}</h2>
+                    <code>${report.entity_id}</code>
+                  </div>
+                  <div class="result-badges" aria-label="Analysis summary">
+                    <span class="summary-pill"
+                      >${this.directConfidence(report)}</span
+                    >
+                  </div>
                 </div>
                 ${!report.exists ? html`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>` : nothing}
-                ${this.completeness(report)}
-                <p class="muted totals-label">
-                  Full analysis totals · filters below affect visible results
-                  only
-                </p>
-                <div class="stats">
-                  <div class="stat">
-                    <strong>${report.summary.references}</strong
-                    ><span>Direct references</span>
+                ${report.graph.truncated ? this.completeness(report) : nothing}
+                <section class="impact-summary" aria-label="Impact summary">
+                  <div class="impact-verdict">
+                    <span class="eyebrow">Direct impact</span>
+                    <strong>
+                      ${
+                        report.summary.sources
+                          ? `${report.summary.sources} ${report.summary.sources === 1 ? "configuration" : "configurations"}`
+                          : "No direct references"
+                      }
+                    </strong>
+                    <p>
+                      ${
+                        report.summary.references
+                          ? `${report.summary.references} direct ${report.summary.references === 1 ? "reference" : "references"} found. Review these before renaming or removing this entity.`
+                          : "Nothing in the inspected sources points directly to this entity."
+                      }
+                    </p>
                   </div>
-                  <div class="stat">
-                    <strong>${report.summary.sources}</strong
-                    ><span>Linked configurations</span>
+                  <div class="impact-metrics">
+                    <div>
+                      <strong>${report.summary.references}</strong>
+                      <span>direct references</span>
+                    </div>
+                    <div>
+                      <strong>${report.summary.downstream}</strong>
+                      <span>related graph nodes</span>
+                    </div>
                   </div>
-                  <div class="stat">
-                    <strong>${report.summary.downstream}</strong
-                    ><span>Downstream targets</span>
-                  </div>
-                  <div class="stat">
-                    <strong
-                      >${report.summary.template_literal + report.summary.unknown}</strong
-                    ><span>Direct refs to review</span>
-                  </div>
-                </div>
+                </section>
+                ${!report.graph.truncated ? this.completeness(report) : nothing}
                 <div class="columns">
                   <section class="card">
                     <nav role="tablist" aria-label="Analysis views">
@@ -1046,8 +1133,8 @@ export class BlastRadiusPanel extends LitElement {
                 </div>
                 <details class="card" id="coverage">
                   <summary>
-                    Coverage and limitations · ${report.coverage.sources}
-                    sources inspected
+                    Coverage & diagnostics · ${report.coverage.sources} sources
+                    inspected
                   </summary>
                   <p class="muted">
                     ${Object.entries(report.coverage.source_types)
@@ -1076,6 +1163,29 @@ export class BlastRadiusPanel extends LitElement {
                       not prove an action will run.
                     </li>
                   </ul>
+                  ${this.coverageDiagnostics(report)}
+                  <details class="confidence-help">
+                    <summary>Reference confidence</summary>
+                    <ul>
+                      <li>
+                        <strong>Explicit:</strong> an entity ID in a recognized
+                        configuration field.
+                      </li>
+                      <li>
+                        <strong>Template literal:</strong> visible in Jinja, but
+                        execution is not guaranteed.
+                      </li>
+                      <li>
+                        <strong>Dynamic:</strong> a target that cannot be
+                        resolved statically.
+                      </li>
+                      <li>
+                        <strong>Unclassified:</strong> a candidate in a field
+                        with unknown semantics, or HA-native metadata without a
+                        verified location and role.
+                      </li>
+                    </ul>
+                  </details>
                 </details>
                 <div class="foot">
                   <span

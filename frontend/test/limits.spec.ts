@@ -3,6 +3,7 @@ import { test, expect } from "@playwright/test";
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("Start with one entity")).toBeVisible();
+  await page.getByText("Analysis options", { exact: true }).click();
 });
 
 test("depth warnings precede counts and a deeper fresh analysis finds more targets", async ({
@@ -13,14 +14,14 @@ test("depth warnings precede counts and a deeper fresh analysis finds more targe
     .getByRole("combobox", { name: "Entity", exact: true })
     .fill("binary_sensor.wall_button");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
-  const notice = page.getByRole("status", { name: "Incomplete results" });
+  const notice = page.getByRole("status", { name: "Analysis limits reached" });
   await expect(notice).toContainText("reached depth 1");
   expect(
     await notice.evaluate(
       (element) =>
         !!(
           element.compareDocumentPosition(
-            element.getRootNode().querySelector(".stats"),
+            element.getRootNode().querySelector(".impact-summary"),
           ) & Node.DOCUMENT_POSITION_FOLLOWING
         ),
     ),
@@ -69,7 +70,9 @@ for (const limit of ["nodes", "edges", "max-depth"]) {
           },
         };
       }, limit);
-    const notice = page.getByRole("status", { name: "Incomplete results" });
+    const notice = page.getByRole("status", {
+      name: "Analysis limits reached",
+    });
     await expect(notice).toBeVisible();
     await expect(notice).toContainText(
       limit === "max-depth"
@@ -107,9 +110,10 @@ test("coverage gaps remain visible with zero references, open details and surviv
     .getByRole("combobox", { name: "Entity", exact: true })
     .fill("sensor.unused");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
-  const notice = page.getByRole("status", { name: "Incomplete results" });
+  const notice = page.getByRole("status", { name: "Static coverage partial" });
+  await expect(notice).toContainText("Static coverage: partial");
   await expect(notice).toContainText(
-    "Some configuration could not be fully inspected",
+    "Some Home Assistant configuration cannot be fully inspected statically",
   );
   await expect(page.locator("#coverage")).not.toHaveAttribute("open", "");
   await expect(
@@ -126,7 +130,7 @@ test("coverage gaps remain visible with zero references, open details and surviv
   await page.screenshot({
     path: "/tmp/ha-blast-radius-incomplete-desktop.png",
   });
-  await page.getByRole("button", { name: "Review coverage" }).click();
+  await page.getByRole("button", { name: "Coverage details" }).click();
   await expect(page.locator("#coverage")).toHaveAttribute("open", "");
   await expect(page.locator("#coverage > summary")).toBeFocused();
   await expect(page.locator("#coverage")).toContainText("dashboard.broken");
@@ -164,7 +168,7 @@ test("older reports with only a truncation flag still show a warning", async ({
     };
   });
   await expect(
-    page.getByRole("status", { name: "Incomplete results" }),
+    page.getByRole("status", { name: "Analysis limits reached" }),
   ).toContainText("depth or size limit");
   await expect(
     page.getByRole("button", { name: /Inspect to depth/ }),

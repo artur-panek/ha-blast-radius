@@ -13,6 +13,7 @@ async function analyze(page: Page, id: string) {
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("Start with one entity")).toBeVisible();
+  await page.getByText("Analysis options", { exact: true }).click();
 });
 
 test("Back recreates the panel with its search, depth, tab and scroll and requests a fresh report", async ({
