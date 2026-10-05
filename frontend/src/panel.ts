@@ -1067,7 +1067,6 @@ export class BlastRadiusPanel extends LitElement {
 
   private completeness(report: Report) {
     const limits = report.graph.limits_reached || [];
-    const coverageWarnings = report.coverage.warnings || [];
     const sizeLimited = limits.includes("nodes") || limits.includes("edges");
     const nextDepth = [1, 2, 3, 4, 6, 8, 12].find(
       (depth) => depth > report.graph.max_depth,
@@ -1102,27 +1101,31 @@ export class BlastRadiusPanel extends LitElement {
       </section>`;
     }
 
-    if (!coverageWarnings.length) return nothing;
+    return nothing;
+  }
 
-    return html`<section
-      class="coverage-status"
-      role="status"
-      aria-label="Static coverage partial"
-    >
-      <div>
-        <strong>Static coverage: partial</strong>
-        <p>
-          ${
-            this.directConfidence(report) === "High confidence"
-              ? "Direct matches are high confidence. "
-              : ""
-          }
-          Some Home Assistant configuration cannot be fully inspected
-          statically.
-        </p>
-      </div>
-      <button @click=${this.showCoverage}>Coverage details</button>
-    </section>`;
+  private graphConnection(node: GraphNode) {
+    const report = this.report;
+    if (!report || !node.via) return "";
+    const edge =
+      node.relationship === "dependent"
+        ? report.graph.edges.find(
+            (candidate) =>
+              candidate.source_id === node.id &&
+              candidate.target === node.via,
+          )
+        : report.graph.edges.find(
+            (candidate) =>
+              candidate.source_id === node.via &&
+              candidate.target === node.id,
+          );
+    if (!edge)
+      return node.relationship === "dependent"
+        ? "Uses the upstream node"
+        : "Related effect";
+    return node.relationship === "dependent"
+      ? referenceUseLabel(edge)
+      : `${effectRoleLabel(edge.role)} from ${this.sourceName(node.via)}`;
   }
 
   private graph(report: Report) {
@@ -1137,12 +1140,16 @@ export class BlastRadiusPanel extends LitElement {
     const downstream = nodes.filter(
       (node) => node.relationship === "downstream",
     );
-    return html`<h2>Dependency map</h2>
+    return html`<h2>Relationship map</h2>
       <p class="muted">
-        Read from the selected entity to its linked configurations and their
-        targets. Conditions are not evaluated; these links do not prove an
-        action will run.
+        Left: configurations that use the selected entity. Right: other effects
+        reached from those same flows. This is a structural map, not proof that
+        changing the selected entity causes the right-hand targets.
       </p>
+      <div class="direction-legend" aria-label="Relationship directions">
+        <span><strong>Incoming use</strong> configuration → selected entity</span>
+        <span><strong>Related effect</strong> configuration → other target</span>
+      </div>
       ${this.filtersActive ? html`<p class="filter-note">Showing ${nodes.length - 1} of ${report.graph.nodes.length - 1} linked nodes. Paths may pass through hidden configurations; filtering does not recalculate the graph.</p>` : nothing}
       <div class="tree dependency-map">
         <div class="map-selected">
@@ -1151,22 +1158,27 @@ export class BlastRadiusPanel extends LitElement {
         </div>
         <div class="map-columns">
           <section class="map-group">
-            <h3>Used by <span class="count">${dependents.length}</span></h3>
+            <h3>
+              Configurations using this entity
+              <span class="count">${dependents.length}</span>
+            </h3>
             <p class="muted">
-              Configurations that reference the selected entity, directly or
-              through another configuration.
+              These configurations depend on, target, display or contain the
+              selected entity.
             </p>
             ${dependents.length ? dependents.map((node) => this.graphNode(node)) : html`<p>${this.filtersActive ? "No matching linked configurations. Try All sources or All confidence." : "No linked configurations found."}</p>`}
           </section>
           <section class="map-group">
             <h3>
-              Possible targets <span class="count">${downstream.length}</span>
+              Other effects in the same flows
+              <span class="count">${downstream.length}</span>
             </h3>
             <p class="muted">
-              Action and membership targets reached through those
-              configurations.
+              Action targets, calls and memberships from the related
+              configurations. They are not necessarily caused by the selected
+              entity.
             </p>
-            ${downstream.length ? downstream.map((node) => this.graphNode(node)) : html`<p>${this.filtersActive ? "No matching possible targets. Try All sources or All confidence." : "No downstream targets found."}</p>`}
+            ${downstream.length ? downstream.map((node) => this.graphNode(node)) : html`<p>${this.filtersActive ? "No matching related effects. Try All sources or All confidence." : "No related effect nodes found."}</p>`}
           </section>
         </div>
       </div>
@@ -1201,7 +1213,14 @@ export class BlastRadiusPanel extends LitElement {
           ${/^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/.test(node.id) ? html`<button class="analyze-node" aria-label=${`Analyze this: ${node.id}`} @click=${() => this.analyzeNode(node.id)}>Analyze this</button>` : nothing}
         </div>
       </div>
-      ${node.via ? html`<p class="via">${node.relationship === "dependent" ? "References" : "Target of"} ${this.sourceControl(node.via)}</p>` : nothing}
+      ${node.via
+        ? html`<p class="via">
+            <strong>${this.graphConnection(node)}</strong>
+            ${node.relationship === "dependent"
+              ? html` · via ${this.sourceControl(node.via)}`
+              : nothing}
+          </p>`
+        : nothing}
       <details class="technical">
         <summary>${node.path ? "Connection details" : "Entity ID"}</summary>
         <code class="source-id">${node.id}</code>
