@@ -598,8 +598,8 @@ export class BlastRadiusPanel extends LitElement {
     const count = report.references.filter(this.matchesFilter).length;
     return html`<details
       class="result-filters"
+      role="region"
       aria-label="Result filters"
-      .open=${this.filtersActive}
     >
       <summary>
         Filters
