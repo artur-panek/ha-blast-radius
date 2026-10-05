@@ -180,7 +180,7 @@ export class BlastRadiusPanel extends LitElement {
       this.lastView = saved.last;
       this.query = saved.last?.entityId || "";
       this.depth = saved.last?.depth || 6;
-      this.tab = saved.last?.tab || "impact";
+      this.tab = saved.last?.tab || "overview";
       this.report = undefined;
       this.sourceFilters = [];
       this.reviewFilters = [];
