@@ -5,11 +5,22 @@ import { brandMark } from "./brand";
 import {
   readablePath,
   explainReason,
-  referencePurpose,
   sourceLabels,
   safeNavigationPath,
 } from "./presentation";
 import { sourceIcon } from "./icons";
+import {
+  effectGroups,
+  effectNodeCount,
+  effectRoleLabel,
+  referenceSummary,
+  referenceUseLabel,
+  usageBuckets,
+  usageStats,
+  type EffectGroup,
+  type EffectItem,
+  type UsageBucket,
+} from "./semantics";
 import {
   readSession,
   writeSession,
@@ -77,7 +88,7 @@ export class BlastRadiusPanel extends LitElement {
   report?: Report;
   loading = false;
   error = "";
-  tab: AnalysisTab = "impact";
+  tab: AnalysisTab = "overview";
   recentSearches: RecentSearch[] = [];
   replacement = "";
   depth = 6;
@@ -300,7 +311,13 @@ export class BlastRadiusPanel extends LitElement {
   }
 
   private tabKeydown(event: KeyboardEvent) {
-    const tabs = ["impact", "graph", "raw"] as const;
+    const tabs: AnalysisTab[] = [
+      "overview",
+      "usage",
+      "effects",
+      "graph",
+      "raw",
+    ];
     let index = tabs.indexOf(this.tab);
     if (event.key === "ArrowRight") index = (index + 1) % tabs.length;
     else if (event.key === "ArrowLeft")
@@ -313,6 +330,11 @@ export class BlastRadiusPanel extends LitElement {
     this.renderRoot
       .querySelector<HTMLButtonElement>(`#tab-${this.tab}`)
       ?.focus();
+  }
+
+  private selectTab(tab: AnalysisTab) {
+    this.tab = tab;
+    this.rememberView();
   }
 
   private sourceName(id: string) {
@@ -422,10 +444,10 @@ export class BlastRadiusPanel extends LitElement {
           ${
             unresolved
               ? this.unresolvedGroups(references)
-              : html`${this.shouldShowPurpose(references) ? html`<p class="purpose">${referencePurpose(references)}</p>` : nothing}
+              : html`${this.referenceUseTags(references)}
                   ${references.some((ref) => ref.confidence !== "explicit") ? html`<span class="review-hint">Includes references to review</span>` : nothing}
                   <details class="technical">
-                    <summary>Reference details (${references.length})</summary>
+                    <summary>Where found (${references.length})</summary>
                     <code class="source-id">${source}</code>
                     ${references.map(
                       (ref) =>
@@ -445,18 +467,23 @@ export class BlastRadiusPanel extends LitElement {
   }
 
   private referenceRoleSummary(refs: Reference[]) {
-    const roles = [...new Set(refs.map((ref) => ref.role))];
-    if (roles.length !== 1)
-      return `${refs.length} ${refs.length === 1 ? "reference" : "references"}`;
-    const role = roles[0];
-    return `${refs.length} ${role}${refs.length === 1 ? "" : "s"}`;
+    return referenceSummary(refs);
   }
 
-  private shouldShowPurpose(refs: Reference[]) {
-    const roles = [...new Set(refs.map((ref) => ref.role))];
-    return (
-      roles.length !== 1 || !["write", "call", "display"].includes(roles[0])
-    );
+  private referenceUseTags(refs: Reference[]) {
+    const grouped = new Map<string, number>();
+    for (const ref of refs) {
+      const label = referenceUseLabel(ref);
+      grouped.set(label, (grouped.get(label) || 0) + 1);
+    }
+    return html`<div class="reference-use-tags">
+      ${[...grouped].map(
+        ([label, count]) =>
+          html`<span class="use-tag"
+            >${label}${count > 1 ? ` ×${count}` : ""}</span
+          >`,
+      )}
+    </div>`;
   }
 
   private directConfidence(report: Report) {
