@@ -686,9 +686,7 @@ export class BlastRadiusPanel extends LitElement {
       stats.actionSources
         ? `${stats.actionSources} ${stats.actionSources === 1 ? "acts" : "act"} on it`
         : "",
-      stats.observeSources
-        ? `${stats.observeSources} read or react to it`
-        : "",
+      stats.observeSources ? `${stats.observeSources} read or react to it` : "",
       stats.contextSources
         ? `${stats.contextSources} ${stats.contextSources === 1 ? "displays or contains" : "display or contain"} it`
         : "",

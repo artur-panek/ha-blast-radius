@@ -29,10 +29,9 @@ test("source chips filter direct usage, graph and technical views without changi
     .evaluate((p: any) => JSON.stringify(p.report));
   await chip(page, "Script").click();
   await expect(page.locator(".source-grid .source-row")).toHaveCount(2);
-  await expect(page.locator(".source-grid .source-row").first()).toHaveAttribute(
-    "data-source",
-    "script.music_toggle",
-  );
+  await expect(
+    page.locator(".source-grid .source-row").first(),
+  ).toHaveAttribute("data-source", "script.music_toggle");
   await expect(page.locator(".source-grid .source-row").last()).toHaveAttribute(
     "data-source",
     "script.music_toggle",

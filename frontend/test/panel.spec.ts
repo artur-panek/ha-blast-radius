@@ -64,7 +64,9 @@ test("inspect, traverse, preview rename and removal, export JSON", async ({
   );
 });
 
-test("overview separates direct usage from same-flow effects", async ({ page }) => {
+test("overview separates direct usage from same-flow effects", async ({
+  page,
+}) => {
   await page
     .getByRole("combobox", { name: "Entity", exact: true })
     .fill("binary_sensor.wall_button");
@@ -98,25 +100,19 @@ test("overview separates direct usage from same-flow effects", async ({ page }) 
     page.getByText("co-effects of the same flows", { exact: false }),
   ).toBeVisible();
 
-  await page
-    .getByRole("tab", { name: "Related effects", exact: true })
-    .click();
+  await page.getByRole("tab", { name: "Related effects", exact: true }).click();
   await expect(
     page.getByText("Do not read this as entity → target causality.", {
       exact: true,
     }),
   ).toBeVisible();
-  const flow = page.locator(
-    '.effect-flow[data-flow="automation.wall_button"]',
-  );
+  const flow = page.locator('.effect-flow[data-flow="automation.wall_button"]');
   await expect(flow).toContainText("Wall button");
   await expect(flow).toContainText("1 call");
   await expect(
     flow.locator('.effect-row[data-source="script.music_toggle"]'),
   ).toBeVisible();
-  await expect(flow.locator(".chained-effects")).toContainText(
-    "2",
-  );
+  await expect(flow.locator(".chained-effects")).toContainText("2");
 });
 
 test("empty, missing, error and retry states", async ({ page }) => {

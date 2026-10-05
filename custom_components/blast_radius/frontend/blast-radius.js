@@ -254,86 +254,86 @@ var v = class extends HTMLElement {
 v.elementStyles = [], v.shadowRootOptions = { mode: "open" }, v[g("elementProperties")] = /* @__PURE__ */ new Map(), v[g("finalized")] = /* @__PURE__ */ new Map(), ne?.({ ReactiveElement: v }), (h.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var y = globalThis, ae = (e) => e, b = y.trustedTypes, x = b ? b.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, S = "$lit$", C = `lit$${Math.random().toFixed(9).slice(2)}$`, w = "?" + C, oe = `<${w}>`, T = document, E = () => T.createComment(""), D = (e) => e === null || typeof e != "object" && typeof e != "function", O = Array.isArray, se = (e) => O(e) || typeof e?.[Symbol.iterator] == "function", k = "[ 	\n\f\r]", A = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ce = /-->/g, le = />/g, j = RegExp(`>|${k}(?:([^\\s"'>=/]+)(${k}*=${k}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), ue = /'/g, de = /"/g, fe = /^(?:script|style|textarea|title)$/i, pe = (e) => (t, ...n) => ({
+var y = globalThis, ae = (e) => e, b = y.trustedTypes, oe = b ? b.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, x = "$lit$", S = `lit$${Math.random().toFixed(9).slice(2)}$`, C = "?" + S, se = `<${C}>`, w = document, T = () => w.createComment(""), E = (e) => e === null || typeof e != "object" && typeof e != "function", ce = Array.isArray, le = (e) => ce(e) || typeof e?.[Symbol.iterator] == "function", ue = "[ 	\n\f\r]", D = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, de = /-->/g, fe = />/g, O = RegExp(`>|${ue}(?:([^\\s"'>=/]+)(${ue}*=${ue}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), pe = /'/g, me = /"/g, he = /^(?:script|style|textarea|title)$/i, ge = (e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
-}), M = pe(1), me = pe(2), N = Symbol.for("lit-noChange"), P = Symbol.for("lit-nothing"), he = /* @__PURE__ */ new WeakMap(), F = T.createTreeWalker(T, 129);
-function ge(e, t) {
-	if (!O(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
-	return x === void 0 ? t : x.createHTML(t);
+}), k = ge(1), _e = ge(2), A = Symbol.for("lit-noChange"), j = Symbol.for("lit-nothing"), ve = /* @__PURE__ */ new WeakMap(), M = w.createTreeWalker(w, 129);
+function ye(e, t) {
+	if (!ce(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
+	return oe === void 0 ? t : oe.createHTML(t);
 }
-var _e = (e, t) => {
-	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = A;
+var be = (e, t) => {
+	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = D;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
-		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === A ? c[1] === "!--" ? o = ce : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = j) : (fe.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = j) : o = le : o === j ? c[0] === ">" ? (o = i ?? A, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? j : c[3] === "\"" ? de : ue) : o === de || o === ue ? o = j : o === ce || o === le ? o = A : (o = j, i = void 0);
-		let d = o === j && e[t + 1].startsWith("/>") ? " " : "";
-		a += o === A ? n + oe : l >= 0 ? (r.push(s), n.slice(0, l) + S + n.slice(l) + C + d) : n + C + (l === -2 ? t : d);
+		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === D ? c[1] === "!--" ? o = de : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = O) : (he.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = O) : o = fe : o === O ? c[0] === ">" ? (o = i ?? D, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? O : c[3] === "\"" ? me : pe) : o === me || o === pe ? o = O : o === de || o === fe ? o = D : (o = O, i = void 0);
+		let d = o === O && e[t + 1].startsWith("/>") ? " " : "";
+		a += o === D ? n + se : l >= 0 ? (r.push(s), n.slice(0, l) + x + n.slice(l) + S + d) : n + S + (l === -2 ? t : d);
 	}
-	return [ge(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, I = class e {
+	return [ye(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
+}, N = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
-		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = _e(t, n);
-		if (this.el = e.createElement(l, r), F.currentNode = this.el.content, n === 2 || n === 3) {
+		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = be(t, n);
+		if (this.el = e.createElement(l, r), M.currentNode = this.el.content, n === 2 || n === 3) {
 			let e = this.el.content.firstChild;
 			e.replaceWith(...e.childNodes);
 		}
-		for (; (i = F.nextNode()) !== null && c.length < s;) {
+		for (; (i = M.nextNode()) !== null && c.length < s;) {
 			if (i.nodeType === 1) {
-				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(S)) {
-					let t = u[o++], n = i.getAttribute(e).split(C), r = /([.?@])?(.*)/.exec(t);
+				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(x)) {
+					let t = u[o++], n = i.getAttribute(e).split(S), r = /([.?@])?(.*)/.exec(t);
 					c.push({
 						type: 1,
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? ve : r[1] === "?" ? ye : r[1] === "@" ? be : B
+						ctor: r[1] === "." ? Se : r[1] === "?" ? Ce : r[1] === "@" ? we : I
 					}), i.removeAttribute(e);
-				} else e.startsWith(C) && (c.push({
+				} else e.startsWith(S) && (c.push({
 					type: 6,
 					index: a
 				}), i.removeAttribute(e));
-				if (fe.test(i.tagName)) {
-					let e = i.textContent.split(C), t = e.length - 1;
+				if (he.test(i.tagName)) {
+					let e = i.textContent.split(S), t = e.length - 1;
 					if (t > 0) {
 						i.textContent = b ? b.emptyScript : "";
-						for (let n = 0; n < t; n++) i.append(e[n], E()), F.nextNode(), c.push({
+						for (let n = 0; n < t; n++) i.append(e[n], T()), M.nextNode(), c.push({
 							type: 2,
 							index: ++a
 						});
-						i.append(e[t], E());
+						i.append(e[t], T());
 					}
 				}
 			} else if (i.nodeType === 8) {
-				if (i.data === w) c.push({
+				if (i.data === C) c.push({
 					type: 2,
 					index: a
 				});
 				else {
 					let e = -1;
-					for (; (e = i.data.indexOf(C, e + 1)) !== -1;) c.push({
+					for (; (e = i.data.indexOf(S, e + 1)) !== -1;) c.push({
 						type: 7,
 						index: a
-					}), e += C.length - 1;
+					}), e += S.length - 1;
 				}
 			}
 			a++;
 		}
 	}
 	static createElement(e, t) {
-		let n = T.createElement("template");
+		let n = w.createElement("template");
 		return n.innerHTML = e, n;
 	}
 };
-function L(e, t, n = e, r) {
-	if (t === N) return t;
-	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = D(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = L(e, i._$AS(e, t.values), i, r)), t;
+function P(e, t, n = e, r) {
+	if (t === A) return t;
+	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = E(t) ? void 0 : t._$litDirective$;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = P(e, i._$AS(e, t.values), i, r)), t;
 }
-var R = class {
+var xe = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -344,28 +344,28 @@ var R = class {
 		return this._$AM._$AU;
 	}
 	u(e) {
-		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? T).importNode(t, !0);
-		F.currentNode = r;
-		let i = F.nextNode(), a = 0, o = 0, s = n[0];
+		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? w).importNode(t, !0);
+		M.currentNode = r;
+		let i = M.nextNode(), a = 0, o = 0, s = n[0];
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new z(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new xe(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new F(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new Te(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
-			a !== s?.index && (i = F.nextNode(), a++);
+			a !== s?.index && (i = M.nextNode(), a++);
 		}
-		return F.currentNode = T, r;
+		return M.currentNode = w, r;
 	}
 	p(e) {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, z = class e {
+}, F = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
 	constructor(e, t, n, r) {
-		this.type = 2, this._$AH = P, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
+		this.type = 2, this._$AH = j, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
 	}
 	get parentNode() {
 		let e = this._$AA.parentNode, t = this._$AM;
@@ -378,7 +378,7 @@ var R = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = L(this, e, t), D(e) ? e === P || e == null || e === "" ? (this._$AH !== P && this._$AR(), this._$AH = P) : e !== this._$AH && e !== N && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? se(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = P(this, e, t), E(e) ? e === j || e == null || e === "" ? (this._$AH !== j && this._$AR(), this._$AH = j) : e !== this._$AH && e !== A && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? le(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -387,24 +387,24 @@ var R = class {
 		this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
 	}
 	_(e) {
-		this._$AH !== P && D(this._$AH) ? this._$AA.nextSibling.data = e : this.T(T.createTextNode(e)), this._$AH = e;
+		this._$AH !== j && E(this._$AH) ? this._$AA.nextSibling.data = e : this.T(w.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = I.createElement(ge(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = N.createElement(ye(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new R(r, this), n = e.u(this.options);
+			let e = new xe(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
-		let t = he.get(e.strings);
-		return t === void 0 && he.set(e.strings, t = new I(e)), t;
+		let t = ve.get(e.strings);
+		return t === void 0 && ve.set(e.strings, t = new N(e)), t;
 	}
 	k(t) {
-		O(this._$AH) || (this._$AH = [], this._$AR());
+		ce(this._$AH) || (this._$AH = [], this._$AR());
 		let n = this._$AH, r, i = 0;
-		for (let a of t) i === n.length ? n.push(r = new e(this.O(E()), this.O(E()), this, this.options)) : r = n[i], r._$AI(a), i++;
+		for (let a of t) i === n.length ? n.push(r = new e(this.O(T()), this.O(T()), this, this.options)) : r = n[i], r._$AI(a), i++;
 		i < n.length && (this._$AR(r && r._$AB.nextSibling, i), n.length = i);
 	}
 	_$AR(e = this._$AA.nextSibling, t) {
@@ -416,7 +416,7 @@ var R = class {
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, B = class {
+}, I = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -424,47 +424,47 @@ var R = class {
 		return this._$AM._$AU;
 	}
 	constructor(e, t, n, r, i) {
-		this.type = 1, this._$AH = P, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = P;
+		this.type = 1, this._$AH = j, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = j;
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = L(this, e, t, 0), a = !D(e) || e !== this._$AH && e !== N, a && (this._$AH = e);
+		if (i === void 0) e = P(this, e, t, 0), a = !E(e) || e !== this._$AH && e !== A, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = L(this, r[n + o], t, o), s === N && (s = this._$AH[o]), a ||= !D(s) || s !== this._$AH[o], s === P ? e = P : e !== P && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = P(this, r[n + o], t, o), s === A && (s = this._$AH[o]), a ||= !E(s) || s !== this._$AH[o], s === j ? e = j : e !== j && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
-		e === P ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
+		e === j ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, ve = class extends B {
+}, Se = class extends I {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
-		this.element[this.name] = e === P ? void 0 : e;
+		this.element[this.name] = e === j ? void 0 : e;
 	}
-}, ye = class extends B {
+}, Ce = class extends I {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
-		this.element.toggleAttribute(this.name, !!e && e !== P);
+		this.element.toggleAttribute(this.name, !!e && e !== j);
 	}
-}, be = class extends B {
+}, we = class extends I {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = L(this, e, t, 0) ?? P) === N) return;
-		let n = this._$AH, r = e === P && n !== P || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== P && (n === P || r);
+		if ((e = P(this, e, t, 0) ?? j) === A) return;
+		let n = this._$AH, r = e === j && n !== j || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== j && (n === j || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, xe = class {
+}, Te = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -472,33 +472,33 @@ var R = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		L(this, e);
+		P(this, e);
 	}
-}, Se = {
-	M: S,
-	P: C,
-	A: w,
+}, Ee = {
+	M: x,
+	P: S,
+	A: C,
 	C: 1,
-	L: _e,
-	R,
-	D: se,
-	V: L,
-	I: z,
-	H: B,
-	N: ye,
-	U: be,
-	B: ve,
-	F: xe
-}, Ce = y.litHtmlPolyfillSupport;
-Ce?.(I, z), (y.litHtmlVersions ??= []).push("3.3.3");
-var we = (e, t, n) => {
+	L: be,
+	R: xe,
+	D: le,
+	V: P,
+	I: F,
+	H: I,
+	N: Ce,
+	U: we,
+	B: Se,
+	F: Te
+}, De = y.litHtmlPolyfillSupport;
+De?.(N, F), (y.litHtmlVersions ??= []).push("3.3.3");
+var Oe = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new z(t.insertBefore(E(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new F(t.insertBefore(T(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, V = globalThis, H = class extends v {
+}, L = globalThis, R = class extends v {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -508,7 +508,7 @@ var we = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = we(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Oe(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -517,25 +517,25 @@ var we = (e, t, n) => {
 		super.disconnectedCallback(), this._$Do?.setConnected(!1);
 	}
 	render() {
-		return N;
+		return A;
 	}
 };
-H._$litElement$ = !0, H.finalized = !0, V.litElementHydrateSupport?.({ LitElement: H });
-var Te = V.litElementPolyfillSupport;
-Te?.({ LitElement: H }), (V.litElementVersions ??= []).push("4.2.2");
+R._$litElement$ = !0, R.finalized = !0, L.litElementHydrateSupport?.({ LitElement: R });
+var ke = L.litElementPolyfillSupport;
+ke?.({ LitElement: R }), (L.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region node_modules/lit-html/directive.js
-var Ee = {
+var Ae = {
 	ATTRIBUTE: 1,
 	CHILD: 2,
 	PROPERTY: 3,
 	BOOLEAN_ATTRIBUTE: 4,
 	EVENT: 5,
 	ELEMENT: 6
-}, De = (e) => (...t) => ({
+}, je = (e) => (...t) => ({
 	_$litDirective$: e,
 	values: t
-}), Oe = class {
+}), Me = class {
 	constructor(e) {}
 	get _$AU() {
 		return this._$AM._$AU;
@@ -549,9 +549,9 @@ var Ee = {
 	update(e, t) {
 		return this.render(...t);
 	}
-}, { I: ke } = Se, Ae = (e) => e, je = () => document.createComment(""), U = (e, t, n) => {
+}, { I: Ne } = Ee, Pe = (e) => e, Fe = () => document.createComment(""), z = (e, t, n) => {
 	let r = e._$AA.parentNode, i = t === void 0 ? e._$AB : t._$AA;
-	if (n === void 0) n = new ke(r.insertBefore(je(), i), r.insertBefore(je(), i), e, e.options);
+	if (n === void 0) n = new Ne(r.insertBefore(Fe(), i), r.insertBefore(Fe(), i), e, e.options);
 	else {
 		let t = n._$AB.nextSibling, a = n._$AM, o = a !== e;
 		if (o) {
@@ -561,21 +561,21 @@ var Ee = {
 		if (t !== i || o) {
 			let e = n._$AA;
 			for (; e !== t;) {
-				let t = Ae(e).nextSibling;
-				Ae(r).insertBefore(e, i), e = t;
+				let t = Pe(e).nextSibling;
+				Pe(r).insertBefore(e, i), e = t;
 			}
 		}
 	}
 	return n;
-}, W = (e, t, n = e) => (e._$AI(t, n), e), Me = {}, Ne = (e, t = Me) => e._$AH = t, Pe = (e) => e._$AH, G = (e) => {
+}, B = (e, t, n = e) => (e._$AI(t, n), e), Ie = {}, Le = (e, t = Ie) => e._$AH = t, Re = (e) => e._$AH, V = (e) => {
 	e._$AR(), e._$AA.remove();
-}, Fe = (e, t, n) => {
+}, ze = (e, t, n) => {
 	let r = /* @__PURE__ */ new Map();
 	for (let i = t; i <= n; i++) r.set(e[i], i);
 	return r;
-}, Ie = De(class extends Oe {
+}, Be = je(class extends Me {
 	constructor(e) {
-		if (super(e), e.type !== Ee.CHILD) throw Error("repeat() can only be used in text expressions");
+		if (super(e), e.type !== Ae.CHILD) throw Error("repeat() can only be used in text expressions");
 	}
 	dt(e, t, n) {
 		let r;
@@ -591,36 +591,36 @@ var Ee = {
 		return this.dt(e, t, n).values;
 	}
 	update(e, [t, n, r]) {
-		let i = Pe(e), { values: a, keys: o } = this.dt(t, n, r);
+		let i = Re(e), { values: a, keys: o } = this.dt(t, n, r);
 		if (!Array.isArray(i)) return this.ut = o, a;
 		let s = this.ut ??= [], c = [], l, u, d = 0, f = i.length - 1, p = 0, m = a.length - 1;
 		for (; d <= f && p <= m;) if (i[d] === null) d++;
 		else if (i[f] === null) f--;
-		else if (s[d] === o[p]) c[p] = W(i[d], a[p]), d++, p++;
-		else if (s[f] === o[m]) c[m] = W(i[f], a[m]), f--, m--;
-		else if (s[d] === o[m]) c[m] = W(i[d], a[m]), U(e, c[m + 1], i[d]), d++, m--;
-		else if (s[f] === o[p]) c[p] = W(i[f], a[p]), U(e, i[d], i[f]), f--, p++;
-		else if (l === void 0 && (l = Fe(o, p, m), u = Fe(s, d, f)), l.has(s[d])) {
+		else if (s[d] === o[p]) c[p] = B(i[d], a[p]), d++, p++;
+		else if (s[f] === o[m]) c[m] = B(i[f], a[m]), f--, m--;
+		else if (s[d] === o[m]) c[m] = B(i[d], a[m]), z(e, c[m + 1], i[d]), d++, m--;
+		else if (s[f] === o[p]) c[p] = B(i[f], a[p]), z(e, i[d], i[f]), f--, p++;
+		else if (l === void 0 && (l = ze(o, p, m), u = ze(s, d, f)), l.has(s[d])) {
 			if (l.has(s[f])) {
 				let t = u.get(o[p]), n = t === void 0 ? null : i[t];
 				if (n === null) {
-					let t = U(e, i[d]);
-					W(t, a[p]), c[p] = t;
-				} else c[p] = W(n, a[p]), U(e, i[d], n), i[t] = null;
+					let t = z(e, i[d]);
+					B(t, a[p]), c[p] = t;
+				} else c[p] = B(n, a[p]), z(e, i[d], n), i[t] = null;
 				p++;
-			} else G(i[f]), f--;
-		} else G(i[d]), d++;
+			} else V(i[f]), f--;
+		} else V(i[d]), d++;
 		for (; p <= m;) {
-			let t = U(e, c[m + 1]);
-			W(t, a[p]), c[p++] = t;
+			let t = z(e, c[m + 1]);
+			B(t, a[p]), c[p++] = t;
 		}
 		for (; d <= f;) {
 			let e = i[d++];
-			e !== null && G(e);
+			e !== null && V(e);
 		}
-		return this.ut = o, Ne(e, c), N;
+		return this.ut = o, Le(e, c), A;
 	}
-}), Le = o`
+}), Ve = o`
   :host {
     display: block;
     height: 100%;
@@ -896,7 +896,7 @@ var Ee = {
   }
   .impact-summary {
     display: grid;
-    grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.28fr);
+    grid-template-columns: minmax(250px, 0.78fr) minmax(0, 1.22fr);
     gap: 0;
     margin: 18px 0 22px;
     border: 1px solid var(--br-border);
@@ -905,48 +905,90 @@ var Ee = {
     overflow: hidden;
   }
   .impact-verdict {
-    padding: 18px 20px;
+    padding: 20px 22px;
     border-right: 1px solid var(--br-border);
   }
   .impact-verdict .eyebrow {
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
     color: var(--br-muted);
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 650;
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
   .impact-verdict > strong {
     display: block;
     font-size: 25px;
-    font-weight: 600;
+    font-weight: 650;
+    line-height: 1.25;
   }
   .impact-verdict p {
-    margin: 7px 0 0;
+    margin: 8px 0 0;
     color: var(--br-muted);
     font-size: 13px;
+    line-height: 1.6;
   }
-  .impact-metrics {
+  .direction-metrics {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .impact-metrics > div {
-    padding: 18px 16px;
+  .direction-metric {
+    min-width: 0;
+    padding: 15px 17px;
     border-right: 1px solid var(--br-border);
+    border-bottom: 1px solid var(--br-border);
   }
-  .impact-metrics > div:last-child {
+  .direction-metric:nth-child(2n) {
     border-right: 0;
   }
-  .impact-metrics strong {
-    display: block;
-    margin-bottom: 4px;
-    font-size: 23px;
-    font-weight: 500;
+  .direction-metric:nth-last-child(-n + 2) {
+    border-bottom: 0;
   }
-  .impact-metrics span {
+  .direction-metric strong {
+    display: block;
+    margin: 2px 0 0;
+    font-size: 23px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .metric-direction,
+  .direction-label {
+    display: block;
     color: var(--br-muted);
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+  }
+  .metric-label {
+    display: block;
+    margin-top: 1px;
     font-size: 13px;
+    font-weight: 600;
+  }
+  .direction-metric small {
+    display: block;
+    margin-top: 3px;
+    color: var(--br-muted);
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .direction-metric.action {
+    box-shadow: inset 3px 0 0
+      color-mix(in srgb, var(--warning-color, #9b6600) 70%, transparent);
+  }
+  .direction-metric.observe {
+    box-shadow: inset 3px 0 0
+      color-mix(in srgb, var(--br-accent) 70%, transparent);
+  }
+  .direction-metric.context {
+    box-shadow: inset 3px 0 0
+      color-mix(in srgb, var(--primary-text-color, #212121) 38%, transparent);
+  }
+  .direction-metric.effects {
+    box-shadow: inset 3px 0 0
+      color-mix(in srgb, var(--success-color, #288048) 65%, transparent);
   }
 
   .columns {
@@ -964,17 +1006,21 @@ var Ee = {
   }
   nav {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     border-bottom: 1px solid var(--br-border);
     margin: -8px -8px 20px;
+    overflow-x: auto;
+    scrollbar-width: thin;
   }
   nav button {
+    flex: 0 0 auto;
     border: 0;
     border-bottom: 3px solid transparent;
     border-radius: 0;
     background: transparent;
-    font-size: 15px;
-    padding: 14px;
+    font-size: 14px;
+    padding: 13px 12px;
+    white-space: nowrap;
   }
   nav button[aria-selected="true"] {
     color: var(--primary-text-color, #212121);
@@ -991,6 +1037,380 @@ var Ee = {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
     align-items: start;
+  }
+  .reference-use-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 9px;
+  }
+  .use-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: color-mix(
+      in srgb,
+      var(--primary-text-color, #212121) 8%,
+      var(--br-card)
+    );
+    color: var(--br-muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .overview-panel {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    border: 1px solid var(--br-border);
+    border-radius: 10px;
+    padding: 16px;
+    background: color-mix(
+      in srgb,
+      var(--br-card) 98%,
+      var(--primary-text-color, #212121)
+    );
+  }
+  .overview-panel .section-heading {
+    margin-bottom: 14px;
+  }
+  .relationship-list {
+    display: grid;
+    gap: 7px;
+  }
+  .relationship-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 10px 11px;
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    background: var(--br-card);
+  }
+  .relationship-row.action {
+    border-left: 3px solid
+      color-mix(in srgb, var(--warning-color, #9b6600) 70%, var(--br-border));
+  }
+  .relationship-row.observe {
+    border-left: 3px solid
+      color-mix(in srgb, var(--br-accent) 70%, var(--br-border));
+  }
+  .relationship-row.context {
+    border-left: 3px solid
+      color-mix(
+        in srgb,
+        var(--primary-text-color, #212121) 45%,
+        var(--br-border)
+      );
+  }
+  .relationship-row-main {
+    min-width: 0;
+  }
+  .relationship-row-main strong,
+  .relationship-row-main span {
+    display: block;
+  }
+  .relationship-row-main strong {
+    font-size: 13px;
+  }
+  .relationship-row-main span {
+    margin-top: 2px;
+    overflow: hidden;
+    color: var(--br-muted);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .relationship-row-count {
+    min-width: 58px;
+    text-align: right;
+  }
+  .relationship-row-count strong,
+  .relationship-row-count span {
+    display: block;
+  }
+  .relationship-row-count strong {
+    font-size: 19px;
+    font-variant-numeric: tabular-nums;
+  }
+  .relationship-row-count span {
+    color: var(--br-muted);
+    font-size: 11px;
+  }
+  .section-action {
+    align-self: flex-start;
+    min-height: 36px;
+    margin-top: auto;
+    padding: 7px 10px;
+    border-color: transparent;
+    background: transparent;
+    color: var(--primary-text-color, #212121);
+    font-size: 12px;
+  }
+  .section-action:hover {
+    border-color: var(--br-border);
+  }
+  .effects-overview > strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  .flow-summary-list {
+    display: grid;
+    gap: 6px;
+  }
+  .flow-summary-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--br-border);
+    font-size: 12px;
+  }
+  .flow-summary-row:last-child {
+    border-bottom: 0;
+  }
+  .flow-summary-row span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .causality-note {
+    margin: 11px 0 0;
+    color: var(--br-muted);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+  .review-strip,
+  .diagnostics-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 14px;
+    padding: 11px 12px;
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    background: color-mix(
+      in srgb,
+      var(--br-card) 96%,
+      var(--warning-color, #9b6600)
+    );
+  }
+  .review-strip > div {
+    min-width: 0;
+  }
+  .review-strip strong,
+  .review-strip span {
+    display: block;
+  }
+  .review-strip strong {
+    font-size: 13px;
+  }
+  .review-strip span {
+    margin-top: 2px;
+    color: var(--br-muted);
+    font-size: 12px;
+  }
+  .review-strip button,
+  .diagnostics-link button {
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  .usage-sections {
+    display: grid;
+    gap: 14px;
+  }
+  .usage-section {
+    border: 1px solid var(--br-border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .usage-section.usage-action {
+    border-left: 3px solid
+      color-mix(in srgb, var(--warning-color, #9b6600) 70%, var(--br-border));
+  }
+  .usage-section.usage-observe {
+    border-left: 3px solid
+      color-mix(in srgb, var(--br-accent) 70%, var(--br-border));
+  }
+  .usage-section.usage-context {
+    border-left: 3px solid
+      color-mix(
+        in srgb,
+        var(--primary-text-color, #212121) 45%,
+        var(--br-border)
+      );
+  }
+  .usage-section-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 11px;
+  }
+  .usage-section-heading h3 {
+    margin: 3px 0 2px;
+    font-size: 16px;
+  }
+  .usage-section-heading p {
+    max-width: 760px;
+    margin: 0;
+    color: var(--br-muted);
+    font-size: 12px;
+  }
+  .semantic-empty {
+    padding: 16px;
+    border: 1px dashed var(--br-border);
+    border-radius: 8px;
+    color: var(--br-muted);
+    font-size: 13px;
+  }
+  .causality-banner {
+    margin: 0 0 14px;
+    padding: 11px 13px;
+    border-left: 3px solid var(--br-accent);
+    background: color-mix(in srgb, var(--br-card) 96%, var(--br-accent));
+    color: var(--br-muted);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+  .causality-banner strong {
+    color: var(--primary-text-color, #212121);
+  }
+  .effect-flows {
+    display: grid;
+    gap: 12px;
+  }
+  .effect-flow {
+    border: 1px solid var(--br-border);
+    border-radius: 10px;
+    padding: 14px;
+    background: var(--br-card);
+  }
+  .effect-flow-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  .effect-flow-heading h3 {
+    margin: 2px 0 0;
+  }
+  .flow-relationship {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 12px 0 8px;
+  }
+  .relation-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 27px;
+    padding: 4px 8px;
+    border: 1px solid var(--br-border);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 650;
+  }
+  .relation-chip.incoming {
+    background: color-mix(in srgb, var(--br-card) 94%, var(--br-accent));
+  }
+  .relation-chip.outgoing {
+    background: color-mix(
+      in srgb,
+      var(--br-card) 94%,
+      var(--success-color, #288048)
+    );
+  }
+  .flow-arrow {
+    color: var(--br-muted);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .effect-flow-summary {
+    margin: 0 0 10px;
+    color: var(--br-muted);
+    font-size: 12px;
+  }
+  .effect-list {
+    display: grid;
+    gap: 6px;
+  }
+  .effect-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    background: color-mix(
+      in srgb,
+      var(--br-card) 98%,
+      var(--primary-text-color, #212121)
+    );
+  }
+  .effect-row-main {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+  }
+  .effect-row-main > div {
+    min-width: 0;
+  }
+  .effect-row h3 {
+    margin: 0;
+    font-size: 14px;
+  }
+  .effect-row .source-icon {
+    width: 22px;
+    height: 22px;
+    flex-basis: 22px;
+  }
+  .effect-details {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+  .effect-details > summary {
+    padding: 5px 0;
+    font-size: 12px;
+  }
+  .chained-effects {
+    margin-top: 10px;
+    border-top: 1px solid var(--br-border);
+  }
+  .chained-effects > summary {
+    font-weight: 600;
+  }
+  .direction-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin: 10px 0 16px;
+    padding: 9px 11px;
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    color: var(--br-muted);
+    font-size: 12px;
+  }
+  .direction-legend strong {
+    color: var(--primary-text-color, #212121);
   }
   .reference-title {
     display: flex;
@@ -1209,6 +1629,18 @@ var Ee = {
     font-weight: 600;
     white-space: nowrap;
   }
+  button.summary-pill {
+    min-height: 28px;
+    cursor: pointer;
+  }
+  .summary-action {
+    color: var(--br-muted);
+    background: color-mix(
+      in srgb,
+      var(--br-card) 95%,
+      var(--warning-color, #9b6600)
+    );
+  }
   .technical {
     margin-top: 8px;
     color: var(--br-muted);
@@ -1277,22 +1709,13 @@ var Ee = {
     );
   }
   .diagnostics-link {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-top: 12px;
-    padding: 10px 12px;
-    border: 1px solid var(--br-border);
-    border-radius: 8px;
     color: var(--br-muted);
     font-size: 13px;
-  }
-  .diagnostics-link button {
-    flex: 0 0 auto;
-    min-height: 36px;
-    padding: 6px 10px;
-    font-size: 12px;
+    background: color-mix(
+      in srgb,
+      var(--br-card) 98%,
+      var(--primary-text-color, #212121)
+    );
   }
   .coverage-diagnostics {
     margin-top: 18px;
@@ -1558,7 +1981,8 @@ var Ee = {
   }
   @media (max-width: 1000px) {
     .source-grid,
-    .map-columns {
+    .map-columns,
+    .overview-grid {
       grid-template-columns: 1fr;
     }
     .reference {
@@ -1599,17 +2023,6 @@ var Ee = {
       border-right: 0;
       border-bottom: 1px solid var(--br-border);
     }
-    .impact-metrics {
-      grid-template-columns: 1fr;
-    }
-    .impact-metrics > div {
-      border-right: 0;
-      border-bottom: 1px solid var(--br-border);
-      padding: 12px 16px;
-    }
-    .impact-metrics > div:last-child {
-      border-bottom: 0;
-    }
     .result-heading {
       align-items: flex-start;
       flex-direction: column;
@@ -1626,12 +2039,29 @@ var Ee = {
       width: 100%;
     }
     .section-heading,
-    .diagnostics-link {
+    .usage-section-heading,
+    .effect-flow-heading,
+    .diagnostics-link,
+    .review-strip {
       align-items: stretch;
       flex-direction: column;
     }
-    .diagnostics-link button {
+    .diagnostics-link button,
+    .review-strip button {
       width: 100%;
+    }
+    .effect-row {
+      grid-template-columns: 1fr;
+      align-items: stretch;
+    }
+    .effect-row .node-actions {
+      justify-content: flex-start;
+    }
+    .relationship-row {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .direction-metric {
+      padding: 12px 13px;
     }
     .analysis-options {
       width: 100%;
@@ -1690,26 +2120,23 @@ var Ee = {
       flex-direction: column;
     }
   }
-`, K = {
+`, H = {
 	viewBox: "0 0 32 32",
 	rings: "M 28.943 12.532 A 13.399999999999999 13.399999999999999 0 1 1 19.468 3.057 A 1.2 1.2 0 0 1 18.847 5.375 A 11.0 11.0 0 1 0 26.625 13.153 A 1.2 1.2 0 0 1 28.943 12.532 Z M 23.921 13.878 A 8.2 8.2 0 1 1 18.122 8.079 A 1.2 1.2 0 0 1 17.501 10.398 A 5.8 5.8 0 1 0 21.602 14.499 A 1.2 1.2 0 0 1 23.921 13.878 Z",
 	radius: "M 15.222 15.222 L 23.849 6.595 L 25.405 8.151 L 16.778 16.778 Z M 13.600 16.000 a 2.4 2.4 0 1 1 4.8 0 a 2.4 2.4 0 1 1 -4.8 0 Z M 22.227 7.373 a 2.4 2.4 0 1 1 4.8 0 a 2.4 2.4 0 1 1 -4.8 0 Z"
-}, q = () => me`
-  <svg class="brand-mark" viewBox=${K.viewBox} aria-hidden="true" focusable="false">
-    <path fill="currentColor" d=${K.rings}></path>
-    <path class="radius" d=${K.radius}></path>
+}, U = () => _e`
+  <svg class="brand-mark" viewBox=${H.viewBox} aria-hidden="true" focusable="false">
+    <path fill="currentColor" d=${H.rings}></path>
+    <path class="radius" d=${H.radius}></path>
   </svg>
-`, J = {
+`, W = {
 	automation: "Automation",
 	script: "Script",
 	scene: "Scene",
 	dashboard: "Dashboard",
 	group: "Group"
 };
-function Re(e) {
-	return [...new Set(e.map((e) => e.source_type === "dashboard" ? "Used on this dashboard" : e.source_type === "scene" ? "Included in this scene" : e.role === "member" ? "Member of this group" : e.role === "call" ? "Called by this configuration" : e.role === "write" ? "Listed as an action target" : /^(triggers?|wait_for_trigger)(\[|\.)/.test(e.path) ? "Used by a trigger" : e.confidence === "template_literal" ? "Referenced in a template" : e.confidence === "unknown" ? "Reference needs review" : "Read by this configuration"))].join(" · ");
-}
-function ze(e) {
+function He(e) {
 	if (e.kind === "entity") return;
 	let { path: t } = e;
 	if (e.kind === "dashboard") return /^\/[a-z0-9_-]+$/.test(t) ? t : void 0;
@@ -1724,7 +2151,7 @@ function ze(e) {
 		"new"
 	].includes(t.slice(n.length)) ? t : void 0;
 }
-var Be = {
+var Ue = {
 	views: "View",
 	sections: "Section",
 	cards: "Card",
@@ -1744,13 +2171,13 @@ var Be = {
 	entity: "Entity",
 	value_template: "Template"
 };
-function Y(e) {
+function G(e) {
 	return e.split(".").map((e) => {
 		let t = /^(.*?)(?:\[(\d+)\])?$/.exec(e), n = t[1];
-		return `${Be[n] || n.replaceAll("_", " ").replace(/^./, (e) => e.toUpperCase())}${t[2] === void 0 ? "" : ` ${Number(t[2]) + 1}`}`;
+		return `${Ue[n] || n.replaceAll("_", " ").replace(/^./, (e) => e.toUpperCase())}${t[2] === void 0 ? "" : ` ${Number(t[2]) + 1}`}`;
 	}).join(" › ");
 }
-var Ve = {
+var We = {
 	"Computed entity lookup": "The entity ID is calculated at runtime.",
 	"External template variable": "A variable comes from runtime context or the card. Its value is not available here.",
 	"Template helper or macro": "A helper or macro may read additional entities that are not visible in this expression.",
@@ -1767,13 +2194,13 @@ var Ve = {
 	"Device identity reference": "This is a device ID used by a trigger, event filter, condition or device action. It does not select every entity on the device or establish a dependency on the entity being analyzed.",
 	"Entity registry ID resolved": "Home Assistant's entity registry maps this internal ID to the displayed entity. Conditional execution is not evaluated."
 };
-function X(e) {
-	return e.startsWith("Unexpanded ") ? "This configuration names a device, area, floor or label. Its entity membership and runtime eligibility are not expanded." : e.split("; ").map((e) => Ve[e] || e || "The target cannot be determined from the loaded configuration.").join(" ");
+function K(e) {
+	return e.startsWith("Unexpanded ") ? "This configuration names a device, area, floor or label. Its entity membership and runtime eligibility are not expanded." : e.split("; ").map((e) => We[e] || e || "The target cannot be determined from the loaded configuration.").join(" ");
 }
 //#endregion
 //#region src/icons.ts
-function He(e) {
-	return M`<svg class="source-icon" viewBox="0 0 24 24" aria-hidden="true">
+function q(e) {
+	return k`<svg class="source-icon" viewBox="0 0 24 24" aria-hidden="true">
     <path
       d=${{
 		automation: "M6 8v8m0-4h12M18 8v8M3 5h6v4H3zm12 10h6v4h-6zM15 5h6v4h-6z",
@@ -1791,8 +2218,113 @@ function He(e) {
   </svg>`;
 }
 //#endregion
+//#region src/semantics.ts
+var Ge = (e) => new Set(e.map((e) => e.source_id)).size, Ke = (e) => /(?:^|\.)(?:triggers?|wait_for_trigger)(?:\[|\.|$)/.test(e), qe = (e) => /(?:^|\.)(?:conditions?|condition|if|while|until|wait_template)(?:\[|\.|$)/.test(e);
+function Je(e) {
+	return Ke(e.path) ? "trigger" : qe(e.path) ? "check" : "read";
+}
+function Ye(e) {
+	return e.role === "write" || e.role === "call" ? "action" : e.role === "display" || e.role === "member" ? "context" : "observe";
+}
+var Xe = {
+	action: {
+		title: "Can change or invoke this entity",
+		shortLabel: "Acts on it",
+		description: "Action targets and script calls. These references can directly change the selected entity or invoke it when it is callable."
+	},
+	observe: {
+		title: "Reads, checks or reacts to this entity",
+		shortLabel: "Reads / reacts",
+		description: "Triggers, conditions, templates and other reads. These references depend on the selected entity without directly changing it."
+	},
+	context: {
+		title: "Displays or contains this entity",
+		shortLabel: "Displays / contains",
+		description: "Dashboard displays and group membership. These references expose or organize the entity rather than driving its state."
+	}
+};
+function J(e) {
+	return Object.keys(Xe).map((t) => {
+		let n = e.filter((e) => Ye(e) === t);
+		return {
+			category: t,
+			...Xe[t],
+			refs: n,
+			sources: Ge(n)
+		};
+	});
+}
+function Ze(e) {
+	let t = J(e), n = Object.fromEntries(t.map((e) => [e.category, e]));
+	return {
+		totalSources: Ge(e),
+		actionSources: n.action.sources,
+		observeSources: n.observe.sources,
+		contextSources: n.context.sources,
+		actionReferences: n.action.refs.length,
+		observeReferences: n.observe.refs.length,
+		contextReferences: n.context.refs.length
+	};
+}
+function Y(e) {
+	return e.role === "write" ? "Changes / targets this entity" : e.role === "call" ? "Calls this script" : e.role === "display" ? "Displays this entity" : e.role === "member" ? "Contains this entity as a member" : Je(e) === "trigger" ? "Triggers from this entity" : Je(e) === "check" ? "Checks this entity" : e.confidence === "template_literal" ? "Reads this entity in a template" : "Reads this entity";
+}
+function Qe(e) {
+	if (!e.length) return "0 references";
+	let t = /* @__PURE__ */ new Map();
+	for (let n of e) {
+		let e = Y(n);
+		t.set(e, (t.get(e) || 0) + 1);
+	}
+	if (t.size === 1) {
+		let [e, n] = [...t][0];
+		return `${n} ${e === "Changes / targets this entity" ? "action target" : e === "Calls this script" ? "call" : e === "Displays this entity" ? "display" : e === "Contains this entity as a member" ? "membership" : e === "Triggers from this entity" ? "trigger" : e === "Checks this entity" ? "check" : "read"}${n === 1 ? "" : "s"}`;
+	}
+	return `${e.length} references · ${t.size} kinds`;
+}
+function $e(e) {
+	return e === "write" ? "changes / targets" : e === "call" ? "calls" : e === "member" ? "contains" : e || "references";
+}
+function et(e, t) {
+	return `${t} ${e === "write" ? "target" : e === "call" ? "call" : e === "member" ? "membership" : "reference"}${t === 1 ? "" : "s"}`;
+}
+function tt(e, t, n) {
+	let r = e.via, i = t, a = 0;
+	for (; r && r !== t && a++ < 64;) i = r, r = n.get(r)?.via;
+	return i;
+}
+function nt(e, t) {
+	if (t.via) return e.graph.edges.find((e) => e.source_id === t.via && e.target === t.id);
+}
+function rt(e) {
+	let t = new Map(e.graph.nodes.map((e) => [e.id, e])), n = /* @__PURE__ */ new Map();
+	for (let r of e.graph.nodes) {
+		if (r.relationship !== "downstream") continue;
+		let i = tt(r, e.entity_id, t), a = {
+			node: r,
+			edge: nt(e, r),
+			chained: r.via !== i
+		};
+		n.set(i, [...n.get(i) || [], a]);
+	}
+	return [...n.entries()].map(([t, n]) => {
+		let r = e.references.find((e) => e.source_id === t) || e.graph.edges.find((e) => e.source_id === t), i = [...n].sort((e, t) => e.node.depth - t.node.depth || e.node.id.localeCompare(t.node.id));
+		return {
+			sourceId: t,
+			sourceType: r?.source_type || t.split(".")[0],
+			directReferences: e.references.filter((n) => n.source_id === t && n.target === e.entity_id),
+			items: i,
+			directItems: i.filter((e) => !e.chained),
+			chainedItems: i.filter((e) => e.chained)
+		};
+	}).sort((t, n) => t.sourceId === e.entity_id ? -1 : n.sourceId === e.entity_id ? 1 : t.sourceId.localeCompare(n.sourceId));
+}
+function X(e) {
+	return e.graph.nodes.filter((e) => e.relationship === "downstream").length;
+}
+//#endregion
 //#region src/session.ts
-var Z = /* @__PURE__ */ new Map(), Ue = [
+var Z = /* @__PURE__ */ new Map(), it = [
 	1,
 	2,
 	3,
@@ -1800,18 +2332,18 @@ var Z = /* @__PURE__ */ new Map(), Ue = [
 	6,
 	8,
 	12
-], We = (e) => {
+], at = (e) => {
 	if (!e || typeof e != "object") return !1;
 	let t = e;
-	return typeof t.entityId == "string" && t.entityId.length <= 512 && /^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/.test(t.entityId) && Ue.includes(t.depth);
+	return typeof t.entityId == "string" && t.entityId.length <= 512 && /^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/.test(t.entityId) && it.includes(t.depth);
 };
-function Ge(e) {
+function ot(e) {
 	return e ? `blast-radius:session:v1:${e}` : void 0;
 }
-function Ke(e, t) {
+function st(e, t) {
 	return [t, ...e.filter((e) => e.entityId !== t.entityId)].slice(0, 6);
 }
-function qe(e) {
+function ct(e) {
 	if (!e) return { recent: [] };
 	if (Z.has(e)) return Z.get(e);
 	let t;
@@ -1824,22 +2356,24 @@ function qe(e) {
 		if (!t || t.length > 16384) return { recent: [] };
 		let e = JSON.parse(t), n = [];
 		if (Array.isArray(e?.recent)) {
-			for (let t of e.recent) if (We(t) && !n.some((e) => e.entityId === t.entityId) && (n.push({
+			for (let t of e.recent) if (at(t) && !n.some((e) => e.entityId === t.entityId) && (n.push({
 				entityId: t.entityId,
 				depth: t.depth
 			}), n.length === 6)) break;
 		}
-		let r = e?.last;
+		let r = e?.last, i = r?.tab === "impact" ? "overview" : r?.tab && [
+			"overview",
+			"usage",
+			"effects",
+			"graph",
+			"raw"
+		].includes(r.tab) ? r.tab : void 0;
 		return {
 			recent: n,
-			...We(r) && [
-				"impact",
-				"graph",
-				"raw"
-			].includes(r.tab) && Number.isFinite(r.scrollTop) && r.scrollTop >= 0 && r.scrollTop <= 1e7 ? { last: {
+			...at(r) && i && Number.isFinite(r.scrollTop) && r.scrollTop >= 0 && r.scrollTop <= 1e7 ? { last: {
 				entityId: r.entityId,
 				depth: r.depth,
-				tab: r.tab,
+				tab: i,
 				scrollTop: r.scrollTop
 			} } : {}
 		};
@@ -1847,7 +2381,7 @@ function qe(e) {
 		return { recent: [] };
 	}
 }
-function Je(e, t) {
+function lt(e, t) {
 	if (e) {
 		Z.set(e, t);
 		try {
@@ -1857,18 +2391,18 @@ function Je(e, t) {
 }
 //#endregion
 //#region src/filters.ts
-var Ye = [
+var ut = [
 	"automation",
 	"script",
 	"dashboard",
 	"scene",
 	"group"
 ];
-function Xe(e, t, n) {
+function dt(e, t, n) {
 	let r = e.confidence === "dynamic" || e.confidence === "unknown" ? "review" : e.confidence;
 	return (!t.length || t.includes(e.source_type)) && (!n.length || n.includes(r));
 }
-function Ze(e, t) {
+function ft(e, t) {
 	let n = e.graph.edges.filter(t), r = new Map(e.graph.nodes.map((e) => [e.id, e]));
 	return e.graph.nodes.flatMap((e) => {
 		if (e.relationship === "selected") return [e];
@@ -1892,13 +2426,13 @@ function Ze(e, t) {
 }
 //#endregion
 //#region package.json
-var Qe = "0.2.4";
+var pt = "0.2.4";
 //#endregion
 //#region src/review.ts
 function Q(e) {
 	return e.resolution || (e.target === null ? e.selector ? "selector" : "unresolved" : "entity");
 }
-function $e(e) {
+function mt(e) {
 	let t = /* @__PURE__ */ new Map();
 	for (let n of e) {
 		let e = JSON.stringify([
@@ -1919,10 +2453,10 @@ function $e(e) {
 	}
 	return [...t.values()];
 }
-function et(e) {
+function ht(e) {
 	return Q(e) === "device" ? "Device reference" : Q(e) === "selector" ? "Entity set not expanded" : e.reason || "Dynamic or unrecognized target";
 }
-function tt(e) {
+function gt(e) {
 	return {
 		read: "Read or trigger",
 		write: "Action",
@@ -1932,20 +2466,20 @@ function tt(e) {
 	}[e.role] || e.role;
 }
 function $(e) {
-	let t = $e(e).length;
+	let t = mt(e).length;
 	return `${t} ${t === 1 ? "group" : "groups"} · ${e.length} ${e.length === 1 ? "location" : "locations"}`;
 }
 //#endregion
 //#region src/panel.ts
-var nt = {
+var _t = {
 	explicit: "Explicit",
 	template_literal: "Template literal",
 	dynamic: "Dynamic",
 	unknown: "Unclassified"
-}, rt = class extends H {
+}, vt = class extends R {
 	constructor(...e) {
-		super(...e), this.narrow = !1, this.entities = [], this.query = "", this.loading = !1, this.error = "", this.tab = "impact", this.recentSearches = [], this.replacement = "", this.depth = 6, this.status = "", this.copyFallback = !1, this.sourceFilters = [], this.reviewFilters = [], this.analyzedRoot = "", this.initialized = !1, this.requestId = 0, this.saveSession = () => {
-			Je(this.storageKey, {
+		super(...e), this.narrow = !1, this.entities = [], this.query = "", this.loading = !1, this.error = "", this.tab = "overview", this.recentSearches = [], this.replacement = "", this.depth = 6, this.status = "", this.copyFallback = !1, this.sourceFilters = [], this.reviewFilters = [], this.analyzedRoot = "", this.initialized = !1, this.requestId = 0, this.saveSession = () => {
+			lt(this.storageKey, {
 				recent: this.recentSearches,
 				last: this.lastView
 			});
@@ -1954,10 +2488,10 @@ var nt = {
 				...this.lastView,
 				scrollTop: this.scrollTop
 			}, clearTimeout(this.scrollTimer), this.scrollTimer = setTimeout(this.saveSession, 150));
-		}, this.matchesFilter = (e) => Xe(e, this.sourceFilters, this.reviewFilters);
+		}, this.matchesFilter = (e) => dt(e, this.sourceFilters, this.reviewFilters);
 	}
 	static {
-		this.styles = Le;
+		this.styles = Ve;
 	}
 	static {
 		this.properties = {
@@ -2002,11 +2536,11 @@ var nt = {
 		this.recentSearches = [], this.lastView = void 0, clearTimeout(this.scrollTimer), this.saveSession();
 	}
 	updated(e) {
-		let t = Ge(this.hass?.user?.id);
+		let t = ot(this.hass?.user?.id);
 		if (this.hass && (!this.initialized || t !== this.storageKey)) {
 			this.initialized = !0, this.storageKey = t;
-			let e = qe(t);
-			this.recentSearches = e.recent, this.lastView = e.last, this.query = e.last?.entityId || "", this.depth = e.last?.depth || 6, this.tab = e.last?.tab || "impact", this.report = void 0, this.sourceFilters = [], this.reviewFilters = [], this.analyzedRoot = "", this.entities = [], this.replacement = "", this.status = "", this.copyFallback = !1, this.loadEntities();
+			let e = ct(t);
+			this.recentSearches = e.recent, this.lastView = e.last, this.query = e.last?.entityId || "", this.depth = e.last?.depth || 6, this.tab = e.last?.tab || "overview", this.report = void 0, this.sourceFilters = [], this.reviewFilters = [], this.analyzedRoot = "", this.entities = [], this.replacement = "", this.status = "", this.copyFallback = !1, this.loadEntities();
 		} else e.has("tab") && this.lastView && this.rememberView();
 	}
 	async loadEntities() {
@@ -2046,7 +2580,7 @@ var nt = {
 			};
 			e && (i.operation = e), e === "rename" && (i.new_entity_id = this.replacement.trim());
 			let a = await this.hass.callWS(i);
-			r === this.requestId && (this.report = a, this.recentSearches = Ke(this.recentSearches, {
+			r === this.requestId && (this.report = a, this.recentSearches = st(this.recentSearches, {
 				entityId: a.entity_id,
 				depth: a.graph.max_depth
 			}), this.rememberView(t ?? this.scrollTop));
@@ -2072,11 +2606,13 @@ var nt = {
 		r.href = n, r.download = `blast-radius-${t.entity_id}.json`, r.click(), setTimeout(() => URL.revokeObjectURL(n), 1e3), this.status = "JSON report downloaded.";
 	}
 	badge(e) {
-		return M`<span class="badge ${e}">${nt[e]}</span>`;
+		return k`<span class="badge ${e}">${_t[e]}</span>`;
 	}
 	tabKeydown(e) {
 		let t = [
-			"impact",
+			"overview",
+			"usage",
+			"effects",
 			"graph",
 			"raw"
 		], n = t.indexOf(this.tab);
@@ -2086,6 +2622,9 @@ var nt = {
 		else if (e.key === "End") n = t.length - 1;
 		else return;
 		e.preventDefault(), this.tab = t[n], this.renderRoot.querySelector(`#tab-${this.tab}`)?.focus();
+	}
+	selectTab(e) {
+		this.tab = e, this.rememberView();
 	}
 	sourceName(e) {
 		return this.report?.source_names?.[e] || this.entities.find((t) => t.entity_id === e)?.name || e;
@@ -2112,33 +2651,33 @@ var nt = {
 	}
 	sourceControl(e, t = !1) {
 		let n = this.navigationTarget(e), r = t ? "Open →" : this.sourceName(e), i = t ? "open-source" : "source-name";
-		if (!n) return t ? P : M`<span class=${i}>${r}</span>`;
-		if (n.kind === "entity") return M`<button
+		if (!n) return t ? j : k`<span class=${i}>${r}</span>`;
+		if (n.kind === "entity") return k`<button
         class=${i}
         aria-label=${`Open entity details: ${this.sourceName(e)}`}
         @click=${() => this.openEntity(e)}
       >
         ${r}
       </button>`;
-		let a = ze(n);
-		return a ? M`<a
+		let a = He(n);
+		return a ? k`<a
       class=${i}
       href=${a}
       aria-label=${`Open ${n.kind}: ${this.sourceName(e)}`}
       @click=${(e) => this.navigate(e, a)}
       >${r}</a
-    >` : t ? P : M`<span class=${i}>${r}</span>`;
+    >` : t ? j : k`<span class=${i}>${r}</span>`;
 	}
 	references(e, t = !1, n = !0) {
 		let r = /* @__PURE__ */ new Map();
-		return (n ? e.filter(this.matchesFilter) : e).forEach((e) => r.set(e.source_id, [...r.get(e.source_id) || [], e])), [...r].map(([e, n]) => M`<article class="reference source-row" data-source=${e}>
+		return (n ? e.filter(this.matchesFilter) : e).forEach((e) => r.set(e.source_id, [...r.get(e.source_id) || [], e])), [...r].map(([e, n]) => k`<article class="reference source-row" data-source=${e}>
           <div class="reference-title">
             <div class="source-heading">
-              ${He(n[0].source_type)}
+              ${q(n[0].source_type)}
               <div>
                 <h3>${this.sourceControl(e)}</h3>
                 <span class="source-meta"
-                  >${J[n[0].source_type] || n[0].source_type}
+                  >${W[n[0].source_type] || n[0].source_type}
                   ·
                   ${t ? $(n) : this.referenceRoleSummary(n)}</span
                 >
@@ -2146,66 +2685,67 @@ var nt = {
             </div>
             ${this.sourceControl(e, !0)}
           </div>
-          ${t ? this.unresolvedGroups(n) : M`${this.shouldShowPurpose(n) ? M`<p class="purpose">${Re(n)}</p>` : P}
-                  ${n.some((e) => e.confidence !== "explicit") ? M`<span class="review-hint">Includes references to review</span>` : P}
+          ${t ? this.unresolvedGroups(n) : k`${this.referenceUseTags(n)}
+                  ${n.some((e) => e.confidence !== "explicit") ? k`<span class="review-hint">Includes references to review</span>` : j}
                   <details class="technical">
-                    <summary>Reference details (${n.length})</summary>
+                    <summary>Where found (${n.length})</summary>
                     <code class="source-id">${e}</code>
-                    ${n.map((e) => M`<div class="technical-row">
+                    ${n.map((e) => k`<div class="technical-row">
                           <div class="path">
-                            <span>${Y(e.path)}</span
+                            <span>${G(e.path)}</span
                             >${this.badge(e.confidence)}
                           </div>
                           <code>${e.path}</code>
-                          ${e.reason ? M`<p>${X(e.reason)}</p>` : P}
+                          ${e.reason ? k`<p>${K(e.reason)}</p>` : j}
                         </div>`)}
                   </details>`}
         </article>`);
 	}
 	referenceRoleSummary(e) {
-		let t = [...new Set(e.map((e) => e.role))];
-		if (t.length !== 1) return `${e.length} ${e.length === 1 ? "reference" : "references"}`;
-		let n = t[0];
-		return `${e.length} ${n}${e.length === 1 ? "" : "s"}`;
+		return Qe(e);
 	}
-	shouldShowPurpose(e) {
-		let t = [...new Set(e.map((e) => e.role))];
-		return t.length !== 1 || ![
-			"write",
-			"call",
-			"display"
-		].includes(t[0]);
+	referenceUseTags(e) {
+		let t = /* @__PURE__ */ new Map();
+		for (let n of e) {
+			let e = Y(n);
+			t.set(e, (t.get(e) || 0) + 1);
+		}
+		return k`<div class="reference-use-tags">
+      ${[...t].map(([e, t]) => k`<span class="use-tag"
+            >${e}${t > 1 ? ` ×${t}` : ""}</span
+          >`)}
+    </div>`;
 	}
 	directConfidence(e) {
 		return e.references.some((e) => e.confidence === "unknown") ? "Needs review" : e.references.some((e) => e.confidence !== "explicit") ? "Mixed confidence" : e.references.length ? "High confidence" : "No direct matches";
 	}
 	unresolvedGroups(e) {
-		return $e(e).map(({ reference: e, paths: t }) => M` <details
+		return mt(e).map(({ reference: e, paths: t }) => k` <details
           class="reason-group"
           data-resolution=${Q(e)}
         >
           <summary>
-            ${et(e)} · ${tt(e)}
+            ${ht(e)} · ${gt(e)}
             <span class="count"
               >${t.length}
               ${t.length === 1 ? "location" : "locations"}</span
             >
-            ${e.selector ? M`<span class="registry-status">${e.selector.exists === !0 ? "Identity found" : e.selector.exists === !1 ? "Identity not found" : "Identity not checked"}</span>` : P}
+            ${e.selector ? k`<span class="registry-status">${e.selector.exists === !0 ? "Identity found" : e.selector.exists === !1 ? "Identity not found" : "Identity not checked"}</span>` : j}
           </summary>
-          <p>${X(e.reason)}</p>
+          <p>${K(e.reason)}</p>
           ${this.selectorDetail(e)}
-          ${e.selector ? P : M`<p>
+          ${e.selector ? j : k`<p>
                     Locations share a reason, not necessarily the same
                     expression or target.
                   </p>
                   ${this.badge(e.confidence)}`}
-          ${t.map((e) => M`<div class="unresolved-row"><span>${Y(e)}</span><code>${e}</code></div>`)}
+          ${t.map((e) => k`<div class="unresolved-row"><span>${G(e)}</span><code>${e}</code></div>`)}
         </details>`);
 	}
 	uncertainty(e) {
 		let t = e.uncertain_references.filter(this.matchesFilter).filter((e) => Q(e) === "unresolved"), n = e.uncertain_references.filter((e) => Q(e) !== "unresolved"), r = e.other_dashboard_references || [];
-		return !t.length && !n.length && !r.length ? P : M`<section class="uncertainty" aria-label="Potential blind spots">
-      ${t.length ? M`<div class="section-heading">
+		return !t.length && !n.length && !r.length ? j : k`<section class="uncertainty" aria-label="Potential blind spots">
+      ${t.length ? k`<div class="section-heading">
                 <div>
                   <h2>Potential blind spots</h2>
                   <p>
@@ -2221,19 +2761,19 @@ var nt = {
                   <span class="count">${$(t)}</span>
                 </summary>
                 ${this.references(t, !0)}
-              </details>` : P}
-      ${n.length || r.length ? M`<div class="diagnostics-link">
+              </details>` : j}
+      ${n.length || r.length ? k`<div class="diagnostics-link">
               <span>
                 Additional scanner diagnostics are available in Coverage.
               </span>
               <button @click=${this.showCoverage}>View coverage</button>
-            </div>` : P}
+            </div>` : j}
     </section>`;
 	}
 	coverageDiagnostics(e) {
 		let t = e.uncertain_references.filter((e) => Q(e) !== "unresolved"), n = e.other_dashboard_references || [];
-		return !t.length && !n.length ? P : M`<div class="coverage-diagnostics">
-      ${t.length ? M`<details class="uncertainty-scope secondary-context">
+		return !t.length && !n.length ? j : k`<div class="coverage-diagnostics">
+      ${t.length ? k`<details class="uncertainty-scope secondary-context">
               <summary>
                 Device and selector context
                 <span class="count">${$(t)}</span>
@@ -2244,8 +2784,8 @@ var nt = {
                 dependency.
               </p>
               ${this.references(t, !0, !1)}
-            </details>` : P}
-      ${n.length ? M`<details class="uncertainty-scope dashboard-context">
+            </details>` : j}
+      ${n.length ? k`<details class="uncertainty-scope dashboard-context">
               <summary>
                 System-wide dashboard diagnostics
                 <span class="count">${$(n)}</span>
@@ -2256,7 +2796,7 @@ var nt = {
                 entity.
               </p>
               ${this.references(n, !0, !1)}
-            </details>` : P}
+            </details>` : j}
     </div>`;
 	}
 	get filtersActive() {
@@ -2268,7 +2808,7 @@ var nt = {
 			template_literal: "Template literal",
 			review: "Needs review"
 		}, n = e.references.filter(this.matchesFilter).length;
-		return M`<section class="result-filters" aria-label="Result filters">
+		return k`<section class="result-filters" aria-label="Result filters">
       <div role="group" aria-label="Source types" class="filter-row">
         <span class="filter-label">Sources</span>
         <button
@@ -2277,7 +2817,7 @@ var nt = {
         >
           All sources
         </button>
-        ${Ye.map((e) => M`<button aria-pressed=${this.sourceFilters.includes(e)} @click=${() => this.sourceFilters = this.sourceFilters.includes(e) ? this.sourceFilters.filter((t) => t !== e) : [...this.sourceFilters, e]}>${J[e]}</button>`)}
+        ${ut.map((e) => k`<button aria-pressed=${this.sourceFilters.includes(e)} @click=${() => this.sourceFilters = this.sourceFilters.includes(e) ? this.sourceFilters.filter((t) => t !== e) : [...this.sourceFilters, e]}>${W[e]}</button>`)}
       </div>
       <div role="group" aria-label="Reference confidence" class="filter-row">
         <span class="filter-label">Confidence</span>
@@ -2287,18 +2827,18 @@ var nt = {
         >
           All confidence
         </button>
-        ${Object.keys(t).map((e) => M`<button aria-pressed=${this.reviewFilters.includes(e)} @click=${() => this.reviewFilters = this.reviewFilters.includes(e) ? this.reviewFilters.filter((t) => t !== e) : [...this.reviewFilters, e]}>${t[e]}</button>`)}
+        ${Object.keys(t).map((e) => k`<button aria-pressed=${this.reviewFilters.includes(e)} @click=${() => this.reviewFilters = this.reviewFilters.includes(e) ? this.reviewFilters.filter((t) => t !== e) : [...this.reviewFilters, e]}>${t[e]}</button>`)}
       </div>
-      ${this.filtersActive ? M`<p class="filter-note" role="status">
+      ${this.filtersActive ? k`<p class="filter-note" role="status">
               ${n} of ${e.references.length} direct references visible.
               Exported reports still include the full analysis.
-            </p>` : P}
+            </p>` : j}
     </section>`;
 	}
 	selectorDetail(e) {
-		if (!e.selector) return P;
+		if (!e.selector) return j;
 		let t = e.selector;
-		return M`<p class="selector-detail">
+		return k`<p class="selector-detail">
       <strong
         >${t.kind.replace("_id", "")}
         ${Q(e) === "device" ? "reference" : "selector"}</strong
@@ -2308,34 +2848,350 @@ var nt = {
       ${Q(e) === "device" ? "Device identity does not establish an entity dependency or prove an action will run." : "Entity membership and runtime eligibility are not expanded."}
     </p>`;
 	}
-	impact(e) {
-		let t = e.references.filter(this.matchesFilter), n = new Set(t.map((e) => e.source_id)).size;
-		return M`<div class="section-heading impact-heading">
+	quickRead(e) {
+		let t = Ze(e.references), n = X(e);
+		if (!t.totalSources) return n ? `No other configuration directly uses this entity. The selected configuration still reaches ${n} ${n === 1 ? "effect node" : "effect nodes"}.` : "No direct users were found in the inspected sources.";
+		let r = [
+			t.actionSources ? `${t.actionSources} ${t.actionSources === 1 ? "acts" : "act"} on it` : "",
+			t.observeSources ? `${t.observeSources} read or react to it` : "",
+			t.contextSources ? `${t.contextSources} ${t.contextSources === 1 ? "displays or contains" : "display or contain"} it` : ""
+		].filter(Boolean);
+		return `${t.totalSources} ${t.totalSources === 1 ? "configuration directly uses" : "configurations directly use"} this entity: ${r.join("; ")}. ${n ? `Those related flows also reach ${n} other ${n === 1 ? "node" : "nodes"}.` : "No other action targets were reached through those flows."}`;
+	}
+	relationshipSummary(e) {
+		let t = Ze(e.references), n = X(e), r = [
+			{
+				className: "action",
+				direction: "configuration → entity",
+				value: t.actionSources,
+				label: "acts on it",
+				detail: `${t.actionReferences} direct ${t.actionReferences === 1 ? "reference" : "references"}`
+			},
+			{
+				className: "observe",
+				direction: "entity state → configuration",
+				value: t.observeSources,
+				label: "reads / reacts",
+				detail: `${t.observeReferences} direct ${t.observeReferences === 1 ? "reference" : "references"}`
+			},
+			{
+				className: "context",
+				direction: "entity → UI / group",
+				value: t.contextSources,
+				label: "displays / contains",
+				detail: `${t.contextReferences} direct ${t.contextReferences === 1 ? "reference" : "references"}`
+			},
+			{
+				className: "effects",
+				direction: "same flow → other nodes",
+				value: n,
+				label: "related effects",
+				detail: "not necessarily caused by this entity"
+			}
+		];
+		return k`<section
+      class="impact-summary relationship-summary"
+      aria-label="Relationship summary"
+    >
+      <div class="impact-verdict">
+        <span class="eyebrow">Quick read</span>
+        <strong>
+          ${t.totalSources ? `${t.totalSources} direct ${t.totalSources === 1 ? "user" : "users"}` : "No direct users"}
+        </strong>
+        <p>${this.quickRead(e)}</p>
+      </div>
+      <div class="direction-metrics">
+        ${r.map((e) => k`<div class="direction-metric ${e.className}">
+              <span class="metric-direction">${e.direction}</span>
+              <strong>${e.value}</strong>
+              <span class="metric-label">${e.label}</span>
+              <small>${e.detail}</small>
+            </div>`)}
+      </div>
+    </section>`;
+	}
+	sourcePreview(e) {
+		let t = [...new Set(e.map((e) => e.source_id))];
+		if (!t.length) return "None found";
+		let n = t.slice(0, 3).map((e) => this.sourceName(e));
+		return `${n.join(", ")}${t.length > n.length ? ` +${t.length - n.length} more` : ""}`;
+	}
+	bucketDirection(e) {
+		return e.category === "action" ? "Configuration → selected entity" : e.category === "observe" ? "Selected entity → configuration logic" : "Selected entity → dashboard / group";
+	}
+	usageBucketSection(e) {
+		return k`<section class="usage-section usage-${e.category}">
+      <div class="usage-section-heading">
         <div>
-          <h2>Direct impact</h2>
-          <p>Configurations with direct references to this entity.</p>
+          <span class="direction-label">${this.bucketDirection(e)}</span>
+          <h3>${e.title}</h3>
+          <p>${e.description}</p>
         </div>
         <span class="count"
-          >${n} visible ${n === 1 ? "source" : "sources"}</span
+          >${e.sources} ${e.sources === 1 ? "source" : "sources"} ·
+          ${e.refs.length}
+          ${e.refs.length === 1 ? "reference" : "references"}</span
         >
       </div>
-      ${t.length ? M`<div class="source-grid">${this.references(t)}</div>` : M`<div class="empty">
-              <div class="symbol">${q()}</div>
-              <h3>
-                ${this.filtersActive ? "No matching direct references" : "No direct references found"}
-              </h3>
-              <p class="muted">
-                ${this.filtersActive ? "Try All sources or All confidence to show more results. Full totals and exports are unchanged." : "Nothing in the inspected sources points to this entity. Check coverage before changing it."}
-              </p>
+      ${e.refs.length ? k`<div class="source-grid">
+              ${this.references(e.refs, !1, !1)}
+            </div>` : k`<div class="semantic-empty">
+              No direct references in this category.
             </div>`}
+    </section>`;
+	}
+	overviewReviewNotice(e) {
+		let t = e.uncertain_references.filter((e) => Q(e) === "unresolved");
+		return t.length ? k`<div class="review-strip">
+      <div>
+        <strong>Some linked logic still needs review</strong>
+        <span
+          >${$(t)} could not be resolved statically inside
+          configurations that use this entity.</span
+        >
+      </div>
+      <button @click=${() => this.selectTab("usage")}>
+        Review blind spots
+      </button>
+    </div>` : j;
+	}
+	overview(e) {
+		let t = J(e.references), n = rt(e), r = X(e);
+		return k`<div class="overview-grid">
+        <section class="overview-panel">
+          <div class="section-heading">
+            <div>
+              <span class="direction-label">Incoming relationships</span>
+              <h2>What uses this entity?</h2>
+              <p>
+                Direct references grouped by what the source actually does with
+                the selected entity.
+              </p>
+            </div>
+          </div>
+          <div class="relationship-list">
+            ${t.map((e) => k`<div class="relationship-row ${e.category}">
+                  <div class="relationship-row-main">
+                    <strong>${e.shortLabel}</strong>
+                    <span>${this.sourcePreview(e.refs)}</span>
+                  </div>
+                  <div class="relationship-row-count">
+                    <strong>${e.sources}</strong>
+                    <span>${e.sources === 1 ? "source" : "sources"}</span>
+                  </div>
+                </div>`)}
+          </div>
+          <button
+            class="section-action"
+            @click=${() => this.selectTab("usage")}
+          >
+            Inspect direct usage →
+          </button>
+        </section>
+
+        <section class="overview-panel">
+          <div class="section-heading">
+            <div>
+              <span class="direction-label">Related flow effects</span>
+              <h2>What else can those flows affect?</h2>
+              <p>
+                Other action targets, calls or memberships reachable from the
+                same configurations.
+              </p>
+            </div>
+          </div>
+          ${r ? k`<div class="effects-overview">
+                  <strong
+                    >${r} other ${r === 1 ? "node" : "nodes"} across
+                    ${n.length}
+                    ${n.length === 1 ? "flow" : "flows"}</strong
+                  >
+                  <div class="flow-summary-list">
+                    ${n.slice(0, 4).map((e) => k`<div class="flow-summary-row">
+                          <span>${this.sourceName(e.sourceId)}</span>
+                          <strong>${e.items.length}</strong>
+                        </div>`)}
+                    ${n.length > 4 ? k`<div class="flow-summary-row muted">
+                            <span>More related flows</span>
+                            <strong>+${n.length - 4}</strong>
+                          </div>` : j}
+                  </div>
+                  <p class="causality-note">
+                    These are <strong>co-effects of the same flows</strong>. For
+                    a normal entity, they are not effects caused by the selected
+                    entity.
+                  </p>
+                </div>` : k`<div class="semantic-empty">
+                  No other action targets or calls were reached through the
+                  related flows.
+                </div>`}
+          <button
+            class="section-action"
+            @click=${() => this.selectTab("effects")}
+          >
+            Explore related effects →
+          </button>
+        </section>
+      </div>
+      ${this.overviewReviewNotice(e)}`;
+	}
+	directUsage(e) {
+		let t = e.references.filter(this.matchesFilter), n = J(t);
+		return k`<div class="section-heading">
+        <div>
+          <span class="direction-label">Source → selected entity</span>
+          <h2>Direct usage</h2>
+          <p>
+            Every confirmed reference to the selected entity, separated by
+            direction and intent. A source can appear in more than one section
+            when it both reads and acts on the entity.
+          </p>
+        </div>
+        <span class="count"
+          >${new Set(t.map((e) => e.source_id)).size} visible
+          ${new Set(t.map((e) => e.source_id)).size === 1 ? "source" : "sources"}</span
+        >
+      </div>
+      <div class="usage-sections">
+        ${t.length ? n.map((e) => this.usageBucketSection(e)) : k`<div class="semantic-empty">
+                ${this.filtersActive ? "No direct references match the current filters. Try All sources or All confidence." : "No direct users were found in the inspected sources."}
+              </div>`}
+      </div>
       ${this.uncertainty(e)}`;
+	}
+	effectGroupSummary(e) {
+		let t = /* @__PURE__ */ new Map();
+		for (let n of e.items) {
+			let e = n.edge?.role;
+			t.set(e, (t.get(e) || 0) + 1);
+		}
+		return [...t].map(([e, t]) => et(e, t)).join(" · ");
+	}
+	effectItem(e) {
+		let t = e.node, n = t.id.split(".")[0];
+		return k`<div class="effect-row" data-source=${t.id}>
+      <div class="effect-row-main">
+        ${q(n)}
+        <div>
+          <h3>${this.sourceControl(t.id)}</h3>
+          <span class="source-meta">
+            ${W[n] || n.replaceAll("_", " ")} ·
+            ${$e(e.edge?.role)}
+            ${e.chained && t.via ? k` · via ${this.sourceName(t.via)}` : j}
+          </span>
+        </div>
+      </div>
+      <div class="node-actions">
+        ${this.sourceControl(t.id, !0)}
+        ${/^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/.test(t.id) ? k`<button
+                class="analyze-node"
+                aria-label=${`Analyze this: ${t.id}`}
+                @click=${() => this.analyzeNode(t.id)}
+              >
+                Analyze
+              </button>` : j}
+      </div>
+      ${t.path ? k`<details class="technical effect-details">
+              <summary>Connection</summary>
+              <div class="technical-row">
+                <div class="path">
+                  <span>${G(t.path)}</span>
+                  ${t.confidence ? this.badge(t.confidence) : j}
+                </div>
+                <code>${t.path}</code>
+              </div>
+            </details>` : j}
+    </div>`;
+	}
+	effectFlow(e, t) {
+		let n = e.sourceId === t.entity_id;
+		return k`<article class="effect-flow" data-flow=${e.sourceId}>
+      <div class="effect-flow-heading">
+        <div class="source-heading">
+          ${q(e.sourceType)}
+          <div>
+            <span class="direction-label">
+              ${n ? "Selected configuration → targets" : "Shared flow"}
+            </span>
+            <h3>${this.sourceControl(e.sourceId)}</h3>
+            <span class="source-meta">
+              ${n ? "These are direct effects from the selected configuration." : `${Qe(e.directReferences)} to the selected entity.`}
+            </span>
+          </div>
+        </div>
+        <span class="count"
+          >${e.items.length}
+          ${e.items.length === 1 ? "effect" : "effects"}</span
+        >
+      </div>
+      <div class="flow-relationship">
+        ${n ? k`<span class="relation-chip outgoing">
+                selected configuration → ${e.items.length}
+                ${e.items.length === 1 ? "effect node" : "effect nodes"}
+              </span>` : k`<span class="relation-chip incoming">
+                  this flow → selected entity
+                </span>
+                <span class="flow-arrow">and</span>
+                <span class="relation-chip outgoing">
+                  this flow → ${e.items.length} other
+                  ${e.items.length === 1 ? "node" : "nodes"}
+                </span>`}
+      </div>
+      <p class="effect-flow-summary">${this.effectGroupSummary(e)}</p>
+      ${e.directItems.length ? k`<div class="effect-list">
+              ${e.directItems.map((e) => this.effectItem(e))}
+            </div>` : j}
+      ${e.chainedItems.length ? k`<details class="chained-effects">
+              <summary>
+                Chained effects through called / linked configurations
+                <span class="count">${e.chainedItems.length}</span>
+              </summary>
+              <div class="effect-list">
+                ${e.chainedItems.map((e) => this.effectItem(e))}
+              </div>
+            </details>` : j}
+    </article>`;
+	}
+	relatedEffects(e) {
+		let t = rt(e), n = X(e);
+		return k`<div class="section-heading">
+        <div>
+          <span class="direction-label"
+            >Related configuration → other target</span
+          >
+          <h2>Related effects</h2>
+          <p>
+            Action targets, script calls and memberships reached from the same
+            flows that use the selected entity.
+          </p>
+        </div>
+        <span class="count"
+          >${n} ${n === 1 ? "node" : "nodes"}</span
+        >
+      </div>
+      <div class="causality-banner">
+        <strong>Do not read this as entity → target causality.</strong>
+        For ordinary entities, these are other effects of the same automation or
+        script. When the selected entity is itself a configuration, its own
+        direct targets are identified separately.
+      </div>
+      ${t.length ? k`<div class="effect-flows">
+              ${t.map((t) => this.effectFlow(t, e))}
+            </div>` : k`<div class="empty">
+              <div class="symbol">${U()}</div>
+              <h3>No related effects found</h3>
+              <p class="muted">
+                The inspected flows do not expose additional action targets,
+                calls or memberships at this traversal depth.
+              </p>
+            </div>`}`;
 	}
 	showCoverage() {
 		let e = this.renderRoot.querySelector("#coverage");
 		e && (e.open = !0, e.querySelector("summary")?.focus(), e.scrollIntoView({ block: "start" }));
 	}
 	completeness(e) {
-		let t = e.graph.limits_reached || [], n = e.coverage.warnings || [], r = t.includes("nodes") || t.includes("edges"), i = [
+		let t = e.graph.limits_reached || [], n = t.includes("nodes") || t.includes("edges"), r = [
 			1,
 			2,
 			3,
@@ -2344,51 +3200,51 @@ var nt = {
 			8,
 			12
 		].find((t) => t > e.graph.max_depth);
-		return e.graph.truncated ? M`<section
+		return e.graph.truncated ? k`<section
         class="notice incomplete"
         role="status"
         aria-label="Analysis limits reached"
       >
         <h3>Analysis limits reached</h3>
-        ${t.includes("depth") ? M`<p>The dependency map reached depth ${e.graph.max_depth}. More related nodes may exist beyond this depth.</p>` : P}
-        ${r ? M`<p>The dependency map reached its ${t.includes("nodes") ? "node" : "edge"} limit. Increasing depth will not remove this cap.</p>` : P}
-        ${t.length ? P : M`<p>The dependency map reached a depth or size limit. More related nodes may exist.</p>`}
+        ${t.includes("depth") ? k`<p>The dependency map reached depth ${e.graph.max_depth}. More related nodes may exist beyond this depth.</p>` : j}
+        ${n ? k`<p>The dependency map reached its ${t.includes("nodes") ? "node" : "edge"} limit. Increasing depth will not remove this cap.</p>` : j}
+        ${t.length ? j : k`<p>The dependency map reached a depth or size limit. More related nodes may exist.</p>`}
         <div class="controls">
-          ${t.includes("depth") && !r && i ? M`<button
+          ${t.includes("depth") && !n && r ? k`<button
                   ?disabled=${this.loading}
                   @click=${() => {
-			this.depth = i, this.run();
+			this.depth = r, this.run();
 		}}
                 >
-                  Inspect to depth ${i}
-                </button>` : P}
+                  Inspect to depth ${r}
+                </button>` : j}
           <button @click=${this.showCoverage}>Coverage details</button>
         </div>
-      </section>` : n.length ? M`<section
-      class="coverage-status"
-      role="status"
-      aria-label="Static coverage partial"
-    >
-      <div>
-        <strong>Static coverage: partial</strong>
-        <p>
-          ${this.directConfidence(e) === "High confidence" ? "Direct matches are high confidence. " : ""}
-          Some Home Assistant configuration cannot be fully inspected
-          statically.
-        </p>
-      </div>
-      <button @click=${this.showCoverage}>Coverage details</button>
-    </section>` : P;
+      </section>` : j;
+	}
+	graphConnection(e) {
+		let t = this.report;
+		if (!t || !e.via) return "";
+		let n = e.relationship === "dependent" ? t.graph.edges.find((t) => t.source_id === e.id && t.target === e.via) : t.graph.edges.find((t) => t.source_id === e.via && t.target === e.id);
+		return n ? e.relationship === "dependent" ? Y(n) : `${$e(n.role)} from ${this.sourceName(e.via)}` : e.relationship === "dependent" ? "Uses the upstream node" : "Related effect";
 	}
 	graph(e) {
-		let t = this.filtersActive ? Ze(e, this.matchesFilter) : e.graph.nodes, n = e.graph.edges.filter(this.matchesFilter), r = t.find((e) => e.relationship === "selected"), i = t.filter((e) => e.relationship === "dependent"), a = t.filter((e) => e.relationship === "downstream");
-		return M`<h2>Dependency map</h2>
+		let t = this.filtersActive ? ft(e, this.matchesFilter) : e.graph.nodes, n = e.graph.edges.filter(this.matchesFilter), r = t.find((e) => e.relationship === "selected"), i = t.filter((e) => e.relationship === "dependent"), a = t.filter((e) => e.relationship === "downstream");
+		return k`<h2>Relationship map</h2>
       <p class="muted">
-        Read from the selected entity to its linked configurations and their
-        targets. Conditions are not evaluated; these links do not prove an
-        action will run.
+        Left: configurations that use the selected entity. Right: other effects
+        reached from those same flows. This is a structural map, not proof that
+        changing the selected entity causes the right-hand targets.
       </p>
-      ${this.filtersActive ? M`<p class="filter-note">Showing ${t.length - 1} of ${e.graph.nodes.length - 1} linked nodes. Paths may pass through hidden configurations; filtering does not recalculate the graph.</p>` : P}
+      <div class="direction-legend" aria-label="Relationship directions">
+        <span
+          ><strong>Incoming use</strong> configuration → selected entity</span
+        >
+        <span
+          ><strong>Related effect</strong> configuration → other target</span
+        >
+      </div>
+      ${this.filtersActive ? k`<p class="filter-note">Showing ${t.length - 1} of ${e.graph.nodes.length - 1} linked nodes. Paths may pass through hidden configurations; filtering does not recalculate the graph.</p>` : j}
       <div class="tree dependency-map">
         <div class="map-selected">
           <span class="map-label">Selected entity</span
@@ -2396,66 +3252,74 @@ var nt = {
         </div>
         <div class="map-columns">
           <section class="map-group">
-            <h3>Used by <span class="count">${i.length}</span></h3>
+            <h3>
+              Configurations using this entity
+              <span class="count">${i.length}</span>
+            </h3>
             <p class="muted">
-              Configurations that reference the selected entity, directly or
-              through another configuration.
+              These configurations depend on, target, display or contain the
+              selected entity.
             </p>
-            ${i.length ? i.map((e) => this.graphNode(e)) : M`<p>${this.filtersActive ? "No matching linked configurations. Try All sources or All confidence." : "No linked configurations found."}</p>`}
+            ${i.length ? i.map((e) => this.graphNode(e)) : k`<p>${this.filtersActive ? "No matching linked configurations. Try All sources or All confidence." : "No linked configurations found."}</p>`}
           </section>
           <section class="map-group">
             <h3>
-              Possible targets <span class="count">${a.length}</span>
+              Other effects in the same flows
+              <span class="count">${a.length}</span>
             </h3>
             <p class="muted">
-              Action and membership targets reached through those
-              configurations.
+              Action targets, calls and memberships from the related
+              configurations. They are not necessarily caused by the selected
+              entity.
             </p>
-            ${a.length ? a.map((e) => this.graphNode(e)) : M`<p>${this.filtersActive ? "No matching possible targets. Try All sources or All confidence." : "No downstream targets found."}</p>`}
+            ${a.length ? a.map((e) => this.graphNode(e)) : k`<p>${this.filtersActive ? "No matching related effects. Try All sources or All confidence." : "No related effect nodes found."}</p>`}
           </section>
         </div>
       </div>
-      ${e.graph.cycles.length ? M`<div class="notice">Cycles detected. Nodes are shown once.${e.graph.cycles.map((e) => M`<p><code>${e.join(" → ")}</code></p>`)}</div>` : P}
+      ${e.graph.cycles.length ? k`<div class="notice">Cycles detected. Nodes are shown once.${e.graph.cycles.map((e) => k`<p><code>${e.join(" → ")}</code></p>`)}</div>` : j}
       <details>
         <summary>
           ${n.length} visible graph edges / ${e.graph.edges.length}
           total
         </summary>
-        ${n.map((e) => M`<div class="edge"><strong>${this.sourceName(e.source_id)} → ${this.sourceName(e.target)}</strong><code>${e.source_id} → ${e.target}</code><code>${e.path}</code><span class="badge">${e.role}</span> ${this.badge(e.confidence)}</div>`)}
+        ${n.map((e) => k`<div class="edge"><strong>${this.sourceName(e.source_id)} → ${this.sourceName(e.target)}</strong><code>${e.source_id} → ${e.target}</code><code>${e.path}</code><span class="badge">${e.role}</span> ${this.badge(e.confidence)}</div>`)}
       </details>`;
 	}
 	graphNode(e) {
 		let t = e.id.split(".")[0];
-		return M`<article
+		return k`<article
       class="graph-node ${e.relationship}"
       data-source=${e.id}
     >
       <div class="reference-title">
         <div class="source-heading">
-          ${He(t)}
+          ${q(t)}
           <div>
             <h3>${this.sourceControl(e.id)}</h3>
             <span class="source-meta"
-              >${J[t] || t.replaceAll("_", " ")}${e.depth ? ` · ${e.depth} ${e.depth === 1 ? "step" : "steps"} away` : ""}</span
+              >${W[t] || t.replaceAll("_", " ")}${e.depth ? ` · ${e.depth} ${e.depth === 1 ? "step" : "steps"} away` : ""}</span
             >
           </div>
         </div>
         <div class="node-actions">
           ${this.sourceControl(e.id, !0)}
-          ${/^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/.test(e.id) ? M`<button class="analyze-node" aria-label=${`Analyze this: ${e.id}`} @click=${() => this.analyzeNode(e.id)}>Analyze this</button>` : P}
+          ${/^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/.test(e.id) ? k`<button class="analyze-node" aria-label=${`Analyze this: ${e.id}`} @click=${() => this.analyzeNode(e.id)}>Analyze this</button>` : j}
         </div>
       </div>
-      ${e.via ? M`<p class="via">${e.relationship === "dependent" ? "References" : "Target of"} ${this.sourceControl(e.via)}</p>` : P}
+      ${e.via ? k`<p class="via">
+              <strong>${this.graphConnection(e)}</strong>
+              ${e.relationship === "dependent" ? k` · via ${this.sourceControl(e.via)}` : j}
+            </p>` : j}
       <details class="technical">
         <summary>${e.path ? "Connection details" : "Entity ID"}</summary>
         <code class="source-id">${e.id}</code>
-        ${e.path ? M`<div class="technical-row">
+        ${e.path ? k`<div class="technical-row">
                 <div class="path">
-                  <span>${Y(e.path)}</span
-                  >${e.confidence ? this.badge(e.confidence) : P}
+                  <span>${G(e.path)}</span
+                  >${e.confidence ? this.badge(e.confidence) : j}
                 </div>
                 <code>${e.path}</code>
-              </div>` : P}
+              </div>` : j}
       </details>
     </article>`;
 	}
@@ -2465,8 +3329,8 @@ var nt = {
 			...e.uncertain_references,
 			...e.other_dashboard_references || []
 		].filter(this.matchesFilter);
-		return M`<h2>Raw references</h2>
-      ${t.length ? P : M`<p>No matching references. Try All sources or All confidence.</p>`}
+		return k`<h2>Raw references</h2>
+      ${t.length ? j : k`<p>No matching references. Try All sources or All confidence.</p>`}
       <div class="table-wrap">
         <table>
           <thead>
@@ -2477,7 +3341,7 @@ var nt = {
             </tr>
           </thead>
           <tbody>
-            ${t.map((e) => M`<tr>
+            ${t.map((e) => k`<tr>
                   <td>
                     ${this.sourceControl(e.source_id)}<code
                       >${e.source_id}<br />${e.path}</code
@@ -2485,7 +3349,7 @@ var nt = {
                   </td>
                   <td>${e.role}</td>
                   <td>
-                    ${e.selector ? M`<span class="badge">${et(e)}</span>` : this.badge(e.confidence)}${e.reason ? M`<p>${X(e.reason)}</p>` : P}${this.selectorDetail(e)}
+                    ${e.selector ? k`<span class="badge">${ht(e)}</span>` : this.badge(e.confidence)}${e.reason ? k`<p>${K(e.reason)}</p>` : j}${this.selectorDetail(e)}
                   </td>
                 </tr>`)}
           </tbody>
@@ -2494,7 +3358,7 @@ var nt = {
 	}
 	render() {
 		let e = this.report, t = this.entities.filter((e) => `${e.entity_id} ${e.name}`.toLowerCase().includes(this.query.toLowerCase())).slice(0, 80);
-		return M`<header>
+		return k`<header>
         <button
           class="menu"
           aria-label="Open sidebar"
@@ -2506,16 +3370,17 @@ var nt = {
           ☰
         </button>
         <div class="brand-lockup">
-          ${q()}<strong>HA Blast Radius</strong>
+          ${U()}<strong>HA Blast Radius</strong>
         </div>
         <span class="badge"
-          >READ ONLY<span class="release-label"> · α ${Qe}</span></span
+          >READ ONLY<span class="release-label"> · α ${pt}</span></span
         >
       </header>
       <main>
         <h1>Dependency impact</h1>
         <p class="muted intro">
-          See what references an entity before you rename or remove it.
+          See who uses an entity, how they use it, and what else those flows can
+          affect before you rename or remove it.
         </p>
         <form
           class="search"
@@ -2534,7 +3399,7 @@ var nt = {
               spellcheck="false"
           /></label>
           <datalist id="entities">
-            ${t.map((e) => M`<option value=${e.entity_id}>${e.name}${e.exists ? "" : " · missing"}</option>`)}
+            ${t.map((e) => k`<option value=${e.entity_id}>${e.name}${e.exists ? "" : " · missing"}</option>`)}
           </datalist>
           <button
             class="primary"
@@ -2562,7 +3427,7 @@ var nt = {
 			6,
 			8,
 			12
-		].map((e) => M`<option value=${e} ?selected=${e === this.depth}>${e}</option>`)}
+		].map((e) => k`<option value=${e} ?selected=${e === this.depth}>${e}</option>`)}
               </select></label
             >
             <p class="muted">
@@ -2571,13 +3436,13 @@ var nt = {
             </p>
           </div>
         </details>
-        ${this.recentSearches.length ? M`<section
+        ${this.recentSearches.length ? k`<section
                 class="recent-searches"
                 aria-label="Recent searches"
               >
                 <span class="recent-label">Recent</span>
                 <div class="recent-list">
-                  ${Ie(this.recentSearches, (e) => e.entityId, (e) => M`<button
+                  ${Be(this.recentSearches, (e) => e.entityId, (e) => k`<button
                         class="recent-search"
                         title=${`${e.entityId} · depth ${e.depth}`}
                         aria-label=${`Analyze again: ${e.entityId}`}
@@ -2594,9 +3459,9 @@ var nt = {
                 >
                   Clear
                 </button>
-              </section>` : P}
-        ${this.loading ? M`<progress aria-label="Inspecting configuration"></progress>` : P}
-        ${this.error ? M`<div role="alert" class="notice error">
+              </section>` : j}
+        ${this.loading ? k`<progress aria-label="Inspecting configuration"></progress>` : j}
+        ${this.error ? k`<div role="alert" class="notice error">
                 ${this.error}
                 <div class="controls">
                   <button
@@ -2605,8 +3470,8 @@ var nt = {
                     Retry
                   </button>
                 </div>
-              </div>` : P}
-        ${e ? M`
+              </div>` : j}
+        ${e ? k`
                 <div class="result-heading">
                   <div>
                     <h2 tabindex="-1">${this.sourceName(e.entity_id)}</h2>
@@ -2616,48 +3481,46 @@ var nt = {
                     <span class="summary-pill"
                       >${this.directConfidence(e)}</span
                     >
+                    ${(e.coverage.warnings || []).length ? k`<button
+                            class="summary-pill summary-action"
+                            @click=${this.showCoverage}
+                          >
+                            Coverage partial
+                          </button>` : j}
                   </div>
                 </div>
-                ${e.exists ? P : M`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>`}
-                ${e.graph.truncated ? this.completeness(e) : P}
-                <section class="impact-summary" aria-label="Impact summary">
-                  <div class="impact-verdict">
-                    <span class="eyebrow">Direct impact</span>
-                    <strong>
-                      ${e.summary.sources ? `${e.summary.sources} ${e.summary.sources === 1 ? "configuration" : "configurations"}` : "No direct references"}
-                    </strong>
-                    <p>
-                      ${e.summary.references ? `${e.summary.references} direct ${e.summary.references === 1 ? "reference" : "references"} found. Review these before renaming or removing this entity.` : "Nothing in the inspected sources points directly to this entity."}
-                    </p>
-                  </div>
-                  <div class="impact-metrics">
-                    <div>
-                      <strong>${e.summary.references}</strong>
-                      <span>direct references</span>
-                    </div>
-                    <div>
-                      <strong>${e.summary.downstream}</strong>
-                      <span>related graph nodes</span>
-                    </div>
-                  </div>
-                </section>
-                ${e.graph.truncated ? P : this.completeness(e)}
+                ${e.exists ? j : k`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>`}
+                ${e.graph.truncated ? this.completeness(e) : j}
+                ${this.relationshipSummary(e)}
+                ${e.graph.truncated ? j : this.completeness(e)}
                 <div class="columns">
                   <section class="card">
                     <nav role="tablist" aria-label="Analysis views">
                       ${[
-			"impact",
-			"graph",
-			"raw"
-		].map((e) => M`<button role="tab" id=${`tab-${e}`} aria-controls="analysis-view" aria-selected=${this.tab === e} tabindex=${this.tab === e ? 0 : -1} @keydown=${this.tabKeydown} @click=${() => this.tab = e}>${e === "impact" ? "Impact" : e === "graph" ? "Graph" : "Raw references"}</button>`)}
+			["overview", "Overview"],
+			["usage", "Uses this entity"],
+			["effects", "Related effects"],
+			["graph", "Graph"],
+			["raw", "Technical"]
+		].map(([e, t]) => k`<button
+                            role="tab"
+                            id=${`tab-${e}`}
+                            aria-controls="analysis-view"
+                            aria-selected=${this.tab === e}
+                            tabindex=${this.tab === e ? 0 : -1}
+                            @keydown=${this.tabKeydown}
+                            @click=${() => this.selectTab(e)}
+                          >
+                            ${t}
+                          </button>`)}
                     </nav>
-                    ${this.filters(e)}
+                    ${this.tab === "usage" || this.tab === "graph" || this.tab === "raw" ? this.filters(e) : j}
                     <div
                       role="tabpanel"
                       id="analysis-view"
                       aria-labelledby=${`tab-${this.tab}`}
                     >
-                      ${this.tab === "impact" ? this.impact(e) : this.tab === "graph" ? this.graph(e) : this.raw(e)}
+                      ${this.tab === "overview" ? this.overview(e) : this.tab === "usage" ? this.directUsage(e) : this.tab === "effects" ? this.relatedEffects(e) : this.tab === "graph" ? this.graph(e) : this.raw(e)}
                     </div>
                     <div class="controls">
                       <button @click=${this.copy}>Copy Markdown</button
@@ -2677,7 +3540,7 @@ var nt = {
                       >Report issue ↗</a
                     >
                     <p class="status" role="status">${this.status}</p>
-                    ${this.copyFallback ? M`<textarea aria-label="Markdown report" readonly .value=${e.markdown}></textarea>` : P}
+                    ${this.copyFallback ? k`<textarea aria-label="Markdown report" readonly .value=${e.markdown}></textarea>` : j}
                   </section>
                   <details
                     class="card change-preview"
@@ -2709,18 +3572,18 @@ var nt = {
                       >
                         Preview removal
                       </button>
-                      ${e.preview ? M`<div class="preview" role="status">
+                      ${e.preview ? k`<div class="preview" role="status">
                               <h3>
                                 ${e.preview.operation === "rename" ? "Rename preview" : "Removal preview"}
                               </h3>
                               <code>${e.entity_id}</code
-                              >${e.preview.new_entity_id ? M`<code>→ ${e.preview.new_entity_id}</code>` : P}
+                              >${e.preview.new_entity_id ? k`<code>→ ${e.preview.new_entity_id}</code>` : j}
                               <ul>
-                                ${Object.entries(e.preview.affected_sources).map(([e, t]) => M`<li>${t} ${e} source${t === 1 ? "" : "s"}</li>`)}
+                                ${Object.entries(e.preview.affected_sources).map(([e, t]) => k`<li>${t} ${e} source${t === 1 ? "" : "s"}</li>`)}
                               </ul>
                               <p>${e.preview.note}</p>
                               <strong>No changes have been made.</strong>
-                            </div>` : P}
+                            </div>` : j}
                       <p class="muted">
                         Analysis only. No configuration is written.
                       </p>
@@ -2736,7 +3599,7 @@ var nt = {
                     ${Object.entries(e.coverage.source_types).map(([e, t]) => `${t} ${e}`).join(" · ")}
                   </p>
                   <ul>
-                    ${e.warnings.map((e) => M`<li>${e}</li>`)}
+                    ${e.warnings.map((e) => k`<li>${e}</li>`)}
                     <li>
                       ${e.unresolved_total} locations without an entity
                       target across the full snapshot. These include device IDs,
@@ -2751,7 +3614,7 @@ var nt = {
                       reasons and selector identities, not a count of affected
                       entities.
                     </li>
-                    ${e.review_summary?.snapshot.locations === e.unresolved_total ? M`<li>Full snapshot: ${e.review_summary.snapshot.device_locations} device-reference locations · ${e.review_summary.snapshot.selector_locations} unexpanded-selector locations · ${e.review_summary.snapshot.unresolved_locations} dynamic or unrecognized locations.</li>` : P}
+                    ${e.review_summary?.snapshot.locations === e.unresolved_total ? k`<li>Full snapshot: ${e.review_summary.snapshot.device_locations} device-reference locations · ${e.review_summary.snapshot.selector_locations} unexpanded-selector locations · ${e.review_summary.snapshot.unresolved_locations} dynamic or unrecognized locations.</li>` : j}
                     <li>
                       Conditional branches are not evaluated. A reference does
                       not prove an action will run.
@@ -2789,21 +3652,21 @@ var nt = {
                     >Static configuration analysis · No changes applied</span
                   >
                 </div>
-              ` : !this.loading && !this.error ? M`<section class="card empty">
-                  <div class="symbol">${q()}</div>
+              ` : !this.loading && !this.error ? k`<section class="card empty">
+                  <div class="symbol">${U()}</div>
                   <h2>Start with one entity</h2>
                   <p class="muted">
-                    A button, a helper, an old light.<br />Find out what points
-                    to it and what sits downstream.
+                    A button, a helper, an old light.<br />See what acts on it,
+                    what reads it, and what else those same flows can affect.
                   </p>
                   <p class="muted">
                     ${this.entities.length} entity IDs available · Missing IDs
                     can be entered manually
                   </p>
-                </section>` : P}
+                </section>` : j}
       </main>`;
 	}
 };
-customElements.get("blast-radius-panel") || customElements.define("blast-radius-panel", rt);
+customElements.get("blast-radius-panel") || customElements.define("blast-radius-panel", vt);
 //#endregion
-export { rt as BlastRadiusPanel };
+export { vt as BlastRadiusPanel };
