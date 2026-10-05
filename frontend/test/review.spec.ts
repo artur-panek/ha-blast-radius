@@ -155,7 +155,7 @@ for (const mobile of [false, true]) {
       JSON.parse(JSON.stringify(refs)),
     );
     await page
-      .getByRole("tab", { name: "Raw references", exact: true })
+      .getByRole("tab", { name: "Technical", exact: true })
       .click();
     await page
       .getByRole("button", { name: "Needs review", exact: true })
