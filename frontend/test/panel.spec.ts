@@ -185,6 +185,9 @@ for (const related of [0, 1]) {
         unresolved_total: 170,
       };
     }, related);
+    await page
+      .getByRole("tab", { name: "Uses this entity", exact: true })
+      .click();
     const scope = page
       .locator(".uncertainty-scope")
       .filter({ hasText: "Unresolved in related configurations" });
