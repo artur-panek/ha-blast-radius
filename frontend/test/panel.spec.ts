@@ -64,6 +64,61 @@ test("inspect, traverse, preview rename and removal, export JSON", async ({
   );
 });
 
+test("overview separates direct usage from same-flow effects", async ({ page }) => {
+  await page
+    .getByRole("combobox", { name: "Entity", exact: true })
+    .fill("binary_sensor.wall_button");
+  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+
+  const summary = page.getByRole("region", { name: "Relationship summary" });
+  await expect(summary).toContainText("3 direct users");
+  await expect(summary.locator(".direction-metric.action")).toContainText(
+    "0 acts on it",
+  );
+  await expect(summary.locator(".direction-metric.observe")).toContainText(
+    "2 reads / reacts",
+  );
+  await expect(summary.locator(".direction-metric.context")).toContainText(
+    "1 displays / contains",
+  );
+  await expect(summary.locator(".direction-metric.effects")).toContainText(
+    "3 related effects",
+  );
+
+  await expect(
+    page.getByRole("heading", { name: "What uses this entity?", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "What else can those flows affect?",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("co-effects of the same flows", { exact: false }),
+  ).toBeVisible();
+
+  await page
+    .getByRole("tab", { name: "Related effects", exact: true })
+    .click();
+  await expect(
+    page.getByText("Do not read this as entity → target causality.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  const flow = page.locator(
+    '.effect-flow[data-flow="automation.wall_button"]',
+  );
+  await expect(flow).toContainText("Wall button");
+  await expect(flow).toContainText("1 call");
+  await expect(
+    flow.locator('.effect-row[data-source="script.music_toggle"]'),
+  ).toBeVisible();
+  await expect(flow.locator(".chained-effects")).toContainText(
+    "2",
+  );
+});
+
 test("empty, missing, error and retry states", async ({ page }) => {
   const search = page.getByRole("combobox", { name: "Entity", exact: true });
   await search.fill("sensor.unused");

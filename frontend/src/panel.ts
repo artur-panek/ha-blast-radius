@@ -923,7 +923,8 @@ export class BlastRadiusPanel extends LitElement {
           <h2>Direct usage</h2>
           <p>
             Every confirmed reference to the selected entity, separated by
-            direction and intent.
+            direction and intent. A source can appear in more than one section
+            when it both reads and acts on the entity.
           </p>
         </div>
         <span class="count"
