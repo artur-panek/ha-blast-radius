@@ -1,0 +1,39 @@
+name: Format UI branch
+
+on:
+  push:
+    branches: [ui/impact-clarity-pass]
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ui/impact-clarity-pass
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Format and build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npx prettier --write 'src/*.ts' '*.ts' '*.json' 'test/*.ts' index.html
+          npm run build
+      - name: Commit generated frontend
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/src frontend/test custom_components/blast_radius/frontend
+          if git diff --cached --quiet; then
+            echo "No formatting/build changes."
+          else
+            git commit -m "Format and rebuild frontend"
+            git push origin HEAD:ui/impact-clarity-pass
+          fi
