@@ -2346,16 +2346,16 @@ var nt = {
 			explicit: "Explicit",
 			template_literal: "Template literal",
 			review: "Needs review"
-		}, n = e.references.filter(this.matchesFilter).length;
+		};
 		return M`<details
       class="result-filters"
+      role="region"
       aria-label="Result filters"
-      .open=${this.filtersActive}
     >
       <summary>
         Filters
         <span class="count"
-          >${n}/${e.references.length} direct refs</span
+          >${e.references.filter(this.matchesFilter).length}/${e.references.length} direct refs</span
         >
       </summary>
       <div class="filter-body">
