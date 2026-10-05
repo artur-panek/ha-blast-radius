@@ -90,7 +90,15 @@ for (const kind of ["Automation", "Script", "Dashboard", "Scene", "Group"]) {
           new Set(
             p.report.references
               .filter((r: any) => r.source_type === type)
-              .map((r: any) => r.source_id),
+              .map((r: any) => {
+                const category =
+                  r.role === "write" || r.role === "call"
+                    ? "action"
+                    : r.role === "display" || r.role === "member"
+                      ? "context"
+                      : "observe";
+                return `${r.source_id}:${category}`;
+              }),
           ).size,
         kind.toLowerCase(),
       );
