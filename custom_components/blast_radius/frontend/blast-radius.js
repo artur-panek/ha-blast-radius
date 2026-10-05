@@ -2083,8 +2083,13 @@ var Ae = {
     .card {
       padding: 16px;
     }
+    nav {
+      flex-wrap: wrap;
+      overflow-x: visible;
+      gap: 0 4px;
+    }
     nav button {
-      padding: 12px 9px;
+      padding: 10px 8px;
     }
     .path {
       align-items: start;
@@ -2426,7 +2431,7 @@ function ft(e, t) {
 }
 //#endregion
 //#region package.json
-var pt = "0.2.4";
+var pt = "0.2.5";
 //#endregion
 //#region src/review.ts
 function Q(e) {
@@ -2896,7 +2901,7 @@ var _t = {
       <div class="impact-verdict">
         <span class="eyebrow">Quick read</span>
         <strong>
-          ${t.totalSources ? `${t.totalSources} direct ${t.totalSources === 1 ? "user" : "users"}` : "No direct users"}
+          ${t.totalSources ? `${t.totalSources} ${t.totalSources === 1 ? "configuration uses it" : "configurations use it"}` : "No direct usage"}
         </strong>
         <p>${this.quickRead(e)}</p>
       </div>
