@@ -10,6 +10,13 @@ async function analyze(page: Page, id: string) {
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
 }
 
+async function setDepth(page: Page, value: string) {
+  const options = page.locator(".analysis-options");
+  if (!(await options.getAttribute("open")))
+    await options.locator(":scope > summary").click();
+  await page.getByLabel("Traversal depth").selectOption(value);
+}
+
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("Start with one entity")).toBeVisible();
@@ -19,7 +26,7 @@ test("Back recreates the panel with its search, depth, tab and scroll and reques
   page,
 }) => {
   await analyze(page, "binary_sensor.wall_button");
-  await page.getByLabel("Traversal depth").selectOption("12");
+  await setDepth(page, "12");
   await page.getByRole("tab", { name: "Graph", exact: true }).click();
   await page.evaluate(() => {
     const panel = document.querySelector("blast-radius-panel") as any;
@@ -89,9 +96,9 @@ test("Back recreates the panel with its search, depth, tab and scroll and reques
 test("recent searches are bounded, deduplicated, reopen at their depth and can be cleared", async ({
   page,
 }) => {
-  await page.getByLabel("Traversal depth").selectOption("2");
+  await setDepth(page, "2");
   await analyze(page, "binary_sensor.wall_button");
-  await page.getByLabel("Traversal depth").selectOption("6");
+  await setDepth(page, "6");
   for (const id of [
     "light.desk",
     "sensor.unused",
@@ -108,10 +115,10 @@ test("recent searches are bounded, deduplicated, reopen at their depth and can b
       exact: true,
     }),
   ).toHaveCount(0);
-  await page.getByLabel("Traversal depth").selectOption("2");
+  await setDepth(page, "2");
   await analyze(page, "light.desk");
   await analyze(page, "sensor.unused");
-  await page.getByLabel("Traversal depth").selectOption("6");
+  await setDepth(page, "6");
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
   await page
     .getByRole("button", { name: "Analyze again: light.desk", exact: true })
