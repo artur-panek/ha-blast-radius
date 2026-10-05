@@ -1463,8 +1463,13 @@ export const styles = css`
     .card {
       padding: 16px;
     }
+    nav {
+      flex-wrap: wrap;
+      overflow-x: visible;
+      gap: 0 4px;
+    }
     nav button {
-      padding: 12px 9px;
+      padding: 10px 8px;
     }
     .path {
       align-items: start;

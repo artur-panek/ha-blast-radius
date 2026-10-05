@@ -135,7 +135,7 @@ test("coverage gaps remain visible with zero references, open details and surviv
   await expect(page.locator("#coverage > summary")).toBeFocused();
   await expect(page.locator("#coverage")).toContainText("dashboard.broken");
   await expect(page.locator(".impact-summary")).toContainText(
-    "No direct users",
+    "No direct usage",
   );
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export JSON" }).click();

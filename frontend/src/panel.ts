@@ -736,8 +736,8 @@ export class BlastRadiusPanel extends LitElement {
         <strong>
           ${
             stats.totalSources
-              ? `${stats.totalSources} direct ${stats.totalSources === 1 ? "user" : "users"}`
-              : "No direct users"
+              ? `${stats.totalSources} ${stats.totalSources === 1 ? "configuration uses it" : "configurations use it"}`
+              : "No direct usage"
           }
         </strong>
         <p>${this.quickRead(report)}</p>

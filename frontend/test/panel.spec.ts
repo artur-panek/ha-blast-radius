@@ -73,7 +73,7 @@ test("overview separates direct usage from same-flow effects", async ({
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
 
   const summary = page.getByRole("region", { name: "Relationship summary" });
-  await expect(summary).toContainText("3 direct users");
+  await expect(summary).toContainText("3 configurations use it");
   await expect(summary.locator(".direction-metric.action")).toContainText(
     "0 acts on it",
   );
@@ -120,7 +120,7 @@ test("empty, missing, error and retry states", async ({ page }) => {
   await search.fill("sensor.unused");
   await search.press("Enter");
   await expect(page.locator(".impact-summary")).toContainText(
-    "No direct users",
+    "No direct usage",
   );
   await search.fill("light.removed");
   await search.press("Enter");
