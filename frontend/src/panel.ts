@@ -1303,7 +1303,8 @@ export class BlastRadiusPanel extends LitElement {
       <main>
         <h1>Dependency impact</h1>
         <p class="muted intro">
-          See what references an entity before you rename or remove it.
+          See who uses an entity, how they use it, and what else those flows can
+          affect before you rename or remove it.
         </p>
         <form
           class="search"
@@ -1413,52 +1414,65 @@ export class BlastRadiusPanel extends LitElement {
                     <span class="summary-pill"
                       >${this.directConfidence(report)}</span
                     >
+                    ${(report.coverage.warnings || []).length
+                      ? html`<button
+                          class="summary-pill summary-action"
+                          @click=${this.showCoverage}
+                        >
+                          Coverage partial
+                        </button>`
+                      : nothing}
                   </div>
                 </div>
                 ${!report.exists ? html`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>` : nothing}
                 ${report.graph.truncated ? this.completeness(report) : nothing}
-                <section class="impact-summary" aria-label="Impact summary">
-                  <div class="impact-verdict">
-                    <span class="eyebrow">Direct impact</span>
-                    <strong>
-                      ${
-                        report.summary.sources
-                          ? `${report.summary.sources} ${report.summary.sources === 1 ? "configuration" : "configurations"}`
-                          : "No direct references"
-                      }
-                    </strong>
-                    <p>
-                      ${
-                        report.summary.references
-                          ? `${report.summary.references} direct ${report.summary.references === 1 ? "reference" : "references"} found. Review these before renaming or removing this entity.`
-                          : "Nothing in the inspected sources points directly to this entity."
-                      }
-                    </p>
-                  </div>
-                  <div class="impact-metrics">
-                    <div>
-                      <strong>${report.summary.references}</strong>
-                      <span>direct references</span>
-                    </div>
-                    <div>
-                      <strong>${report.summary.downstream}</strong>
-                      <span>related graph nodes</span>
-                    </div>
-                  </div>
-                </section>
+                ${this.relationshipSummary(report)}
                 ${!report.graph.truncated ? this.completeness(report) : nothing}
                 <div class="columns">
                   <section class="card">
                     <nav role="tablist" aria-label="Analysis views">
-                      ${(["impact", "graph", "raw"] as const).map((tab) => html`<button role="tab" id=${`tab-${tab}`} aria-controls="analysis-view" aria-selected=${this.tab === tab} tabindex=${this.tab === tab ? 0 : -1} @keydown=${this.tabKeydown} @click=${() => (this.tab = tab)}>${tab === "impact" ? "Impact" : tab === "graph" ? "Graph" : "Raw references"}</button>`)}
+                      ${(
+                        [
+                          ["overview", "Overview"],
+                          ["usage", "Uses this entity"],
+                          ["effects", "Related effects"],
+                          ["graph", "Graph"],
+                          ["raw", "Technical"],
+                        ] as const
+                      ).map(
+                        ([tab, label]) =>
+                          html`<button
+                            role="tab"
+                            id=${`tab-${tab}`}
+                            aria-controls="analysis-view"
+                            aria-selected=${this.tab === tab}
+                            tabindex=${this.tab === tab ? 0 : -1}
+                            @keydown=${this.tabKeydown}
+                            @click=${() => this.selectTab(tab)}
+                          >
+                            ${label}
+                          </button>`,
+                      )}
                     </nav>
-                    ${this.filters(report)}
+                    ${this.tab === "usage" ||
+                    this.tab === "graph" ||
+                    this.tab === "raw"
+                      ? this.filters(report)
+                      : nothing}
                     <div
                       role="tabpanel"
                       id="analysis-view"
                       aria-labelledby=${`tab-${this.tab}`}
                     >
-                      ${this.tab === "impact" ? this.impact(report) : this.tab === "graph" ? this.graph(report) : this.raw(report)}
+                      ${this.tab === "overview"
+                        ? this.overview(report)
+                        : this.tab === "usage"
+                          ? this.directUsage(report)
+                          : this.tab === "effects"
+                            ? this.relatedEffects(report)
+                            : this.tab === "graph"
+                              ? this.graph(report)
+                              : this.raw(report)}
                     </div>
                     <div class="controls">
                       <button @click=${this.copy}>Copy Markdown</button
@@ -1602,8 +1616,8 @@ export class BlastRadiusPanel extends LitElement {
                   <div class="symbol">${brandMark()}</div>
                   <h2>Start with one entity</h2>
                   <p class="muted">
-                    A button, a helper, an old light.<br />Find out what points
-                    to it and what sits downstream.
+                    A button, a helper, an old light.<br />See what acts on it,
+                    what reads it, and what else those same flows can affect.
                   </p>
                   <p class="muted">
                     ${this.entities.length} entity IDs available · Missing IDs
