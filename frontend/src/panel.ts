@@ -393,6 +393,42 @@ export class BlastRadiusPanel extends LitElement {
     >`;
   }
 
+  private referenceRoleSummary(references: Reference[]) {
+    const names: Record<string, [string, string]> = {
+      read: ["read", "reads"],
+      write: ["write", "writes"],
+      display: ["display", "displays"],
+      call: ["call", "calls"],
+      member: ["membership", "memberships"],
+    };
+    const counts = new Map<string, number>();
+    for (const ref of references)
+      counts.set(ref.role, (counts.get(ref.role) || 0) + 1);
+    return [...counts]
+      .map(([role, count]) => {
+        const [single, plural] = names[role] || [role, `${role}s`];
+        return `${count} ${count === 1 ? single : plural}`;
+      })
+      .join(" · ");
+  }
+
+  private impactScope(report: Report) {
+    const sources = report.summary.sources;
+    if (!sources) return { label: "No direct usage", tone: "none" };
+    if (sources <= 2) return { label: "Narrow impact", tone: "low" };
+    if (sources <= 4) return { label: "Moderate impact", tone: "medium" };
+    return { label: "Broad impact", tone: "high" };
+  }
+
+  private confidenceSummary(report: Report) {
+    const needsReview = report.references.some(
+      (ref) => ref.confidence === "dynamic" || ref.confidence === "unknown",
+    );
+    if (needsReview) return { label: "Needs review", tone: "review" };
+    if (report.references.some((ref) => ref.confidence === "template_literal"))
+      return { label: "Mixed confidence", tone: "mixed" };
+    return { label: "High confidence", tone: "good" };
+  }
   private references(refs: Reference[], unresolved = false) {
     const groups = new Map<string, Reference[]>();
     refs
@@ -411,7 +447,7 @@ export class BlastRadiusPanel extends LitElement {
                 <span class="source-meta"
                   >${sourceLabels[references[0].source_type] || references[0].source_type}
                   ·
-                  ${unresolved ? reviewCounts(references) : `${references.length} ${references.length === 1 ? "reference" : "references"}`}</span
+                  ${unresolved ? reviewCounts(references) : this.referenceRoleSummary(references)}</span
                 >
               </div>
             </div>
@@ -478,32 +514,54 @@ export class BlastRadiusPanel extends LitElement {
     const elsewhere = (report.other_dashboard_references || []).filter(
       this.matchesFilter,
     );
-    if (!local.length && !elsewhere.length) return nothing;
-    return html`<section class="uncertainty" aria-label="References to review">
-      <h2>References to review</h2>
-      <p>
-        These are limits of static analysis, not a count of broken entities.
-        Device IDs and selectors are listed separately from dynamic or
-        unrecognized targets. Repeated locations are grouped; a shared
-        configuration does not prove a dependency.
-      </p>
+    const dynamicLocal = local.filter(
+      (ref) => reviewResolution(ref) !== "device",
+    );
+    const deviceLocal = local.filter(
+      (ref) => reviewResolution(ref) === "device",
+    );
+    if (!dynamicLocal.length && !deviceLocal.length && !elsewhere.length)
+      return nothing;
+    return html`<section class="uncertainty" aria-label="Potential blind spots">
+      <div class="section-heading">
+        <div>
+          <h2>Potential blind spots</h2>
+          <p>
+            These are scanner limits around configurations already linked to
+            this result. They are not additional direct references to the
+            selected entity.
+          </p>
+        </div>
+      </div>
       ${
-        local.length
+        dynamicLocal.length
           ? html`<details class="uncertainty-scope">
               <summary>
-                In linked configurations
-                <span class="count">${reviewCounts(local)}</span>
+                Dynamic or unexpanded in linked configurations
+                <span class="count">${reviewCounts(dynamicLocal)}</span>
               </summary>
               <p>
-                References in linked automation/script configurations or
-                dashboard cards, including other conditional branches.
+                Expressions or selectors inside linked configurations could not
+                be resolved to a fixed entity target.
               </p>
-              ${this.references(local, true)}
+              ${this.references(dynamicLocal, true)}
             </details>`
-          : html`<p class="muted">
-              No references requiring review in the linked configurations or
-              cards.
-            </p>`
+          : nothing
+      }
+      ${
+        deviceLocal.length
+          ? html`<details class="uncertainty-scope device-context">
+              <summary>
+                Device references in linked configurations
+                <span class="count">${reviewCounts(deviceLocal)}</span>
+              </summary>
+              <p>
+                Device IDs are shown for context. A device identity alone does
+                not establish a dependency on this entity.
+              </p>
+              ${this.references(deviceLocal, true)}
+            </details>`
+          : nothing
       }
       ${
         elsewhere.length
@@ -513,8 +571,8 @@ export class BlastRadiusPanel extends LitElement {
                 <span class="count">${reviewCounts(elsewhere)}</span>
               </summary>
               <p>
-                Outside cards with known links, or at dashboard level. Kept for
-                context; these expressions are not attributed to the selected
+                Dynamic dashboard expressions outside cards with known links.
+                They are scanner diagnostics, not impact attributed to this
                 entity.
               </p>
               ${this.references(elsewhere, true)}
