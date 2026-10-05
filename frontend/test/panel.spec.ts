@@ -40,7 +40,7 @@ test("inspect, traverse, preview rename and removal, export JSON", async ({
     page.getByText("Used by a trigger", { exact: true }).first(),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "References to review", exact: true }),
+    page.getByRole("heading", { name: "Potential blind spots", exact: true }),
   ).toBeVisible();
   await page.getByRole("tab", { name: "Graph", exact: true }).click();
   await expect(
@@ -186,16 +186,16 @@ for (const related of [0, 1]) {
     }, related);
     const scope = page
       .locator(".uncertainty-scope")
-      .filter({ hasText: "In linked configurations" });
+      .filter({ hasText: "Dynamic or unexpanded in linked configurations" });
     if (related) {
       await expect(scope.locator("summary .count").first()).toHaveText(
         `${related} group · ${related} location`,
       );
       await expect(scope).not.toHaveAttribute("open", "");
     } else await expect(scope).toHaveCount(0);
-    await expect(page.locator(".stats")).not.toContainText("Unresolved");
-    await expect(page.locator(".stats")).not.toContainText("170");
-    await page.getByText("Coverage and limitations", { exact: false }).click();
+    await expect(page.locator(".impact-summary")).not.toContainText("Unresolved");
+    await expect(page.locator(".impact-summary")).not.toContainText("170");
+    await page.locator("#coverage > summary").click();
     await expect(
       page.getByText(
         "170 locations without an entity target across the full snapshot",
@@ -211,6 +211,48 @@ for (const related of [0, 1]) {
     ).toBeVisible();
   });
 }
+
+test("coverage gaps stay compact while traversal limits get the warning", async ({
+  page,
+}) => {
+  await page
+    .getByRole("combobox", { name: "Entity", exact: true })
+    .fill("binary_sensor.wall_button");
+  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    panel.report = {
+      ...panel.report,
+      coverage: {
+        ...panel.report.coverage,
+        warnings: ["dashboard.home: configuration unavailable."],
+      },
+    };
+  });
+  await expect(
+    page.getByText("Static coverage is partial.", { exact: false }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Results are incomplete" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Dependency map limited" }),
+  ).toHaveCount(0);
+
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    panel.report = {
+      ...panel.report,
+      graph: {
+        ...panel.report.graph,
+        truncated: true,
+        limits_reached: ["depth"],
+      },
+    };
+  });
+  await expect(
+    page.getByRole("heading", { name: "Dependency map limited" }),
+  ).toBeVisible();
+});
 
 for (const theme of ["light", "dark", "custom-dark"]) {
   test(`confidence labels remain readable in ${theme} with low-contrast semantic colors`, async ({
@@ -255,6 +297,7 @@ for (const theme of ["light", "dark", "custom-dark"]) {
       .locator(".source-grid .technical > summary")
       .all())
       await summary.click();
+    await page.locator(".result-filters > summary").click();
     for (const selector of [
       ".badge.explicit",
       ".badge.template_literal",
@@ -331,9 +374,9 @@ test("a large dashboard stays compact, explains unknowns and retains exact paths
     "1 group · 51 locations",
   );
   await expect(elsewhere).not.toHaveAttribute("open", "");
-  await expect(page.locator(".stats")).not.toContainText("51");
+  await expect(page.locator(".impact-summary")).not.toContainText("51");
   await expect(
-    page.getByText("These are limits of static analysis", { exact: false }),
+    page.getByText("These are scanner limits around configurations", { exact: false }),
   ).toBeVisible();
   expect((await elsewhere.boundingBox())!.height).toBeLessThan(80);
   await expect(page.getByText("Wall button", { exact: true })).toBeVisible();
