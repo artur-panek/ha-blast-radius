@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.4 — 2026-10-05
+
+- Redesign the panel around a factual direct-impact summary instead of an
+  arbitrary High/Moderate/Low score, with direct references and related graph
+  nodes visible at a glance.
+- Distinguish real traversal truncation from partial static-analysis coverage so
+  ordinary coverage limitations no longer present the whole result as incomplete.
+- Keep unresolved expressions related to the selected entity in the Impact view,
+  while moving device/selector context and system-wide dashboard diagnostics into
+  Coverage & diagnostics.
+- Tighten source cards, reduce default filter noise, move traversal depth into
+  Analysis options and improve responsive behavior inside the Home Assistant shell.
+- Refresh the distributed frontend and regression coverage for the revised
+  impact-first workflow.
+
 ## 0.2.3 — 2026-10-05
 
 - Keep state, numeric-state and compound conditions used as standalone script
