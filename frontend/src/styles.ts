@@ -528,14 +528,22 @@ export const styles = css`
   }
   .impact-high,
   .confidence-review {
-    border-color: color-mix(in srgb, var(--warning-color, #9b6600) 60%, var(--br-border));
+    border-color: color-mix(
+      in srgb,
+      var(--warning-color, #9b6600) 60%,
+      var(--br-border)
+    );
   }
   .impact-medium,
   .confidence-mixed {
     border-color: color-mix(in srgb, var(--br-accent) 45%, var(--br-border));
   }
   .confidence-good {
-    border-color: color-mix(in srgb, var(--success-color, #288048) 55%, var(--br-border));
+    border-color: color-mix(
+      in srgb,
+      var(--success-color, #288048) 55%,
+      var(--br-border)
+    );
   }
   .impact-summary {
     display: grid;
@@ -624,7 +632,11 @@ export const styles = css`
     padding: 8px 11px;
     border-left: 2px solid var(--warning-color, #9b6600);
     color: var(--br-muted);
-    background: color-mix(in srgb, var(--br-card) 94%, var(--warning-color, #9b6600));
+    background: color-mix(
+      in srgb,
+      var(--br-card) 94%,
+      var(--warning-color, #9b6600)
+    );
     font-size: 12px;
   }
   .coverage-inline strong {
@@ -664,7 +676,11 @@ export const styles = css`
     padding: 12px 14px;
     border: 1px solid var(--br-border);
     border-radius: 8px;
-    background: color-mix(in srgb, var(--br-card) 97%, var(--primary-text-color, #212121));
+    background: color-mix(
+      in srgb,
+      var(--br-card) 97%,
+      var(--primary-text-color, #212121)
+    );
   }
   .indirect-callout p {
     max-width: 760px;
@@ -934,7 +950,11 @@ export const styles = css`
     padding: 10px 12px;
     border: 1px solid var(--br-border);
     border-radius: 8px;
-    background: color-mix(in srgb, var(--br-card) 97%, var(--primary-text-color, #212121));
+    background: color-mix(
+      in srgb,
+      var(--br-card) 97%,
+      var(--primary-text-color, #212121)
+    );
   }
   .filter-row {
     display: flex;

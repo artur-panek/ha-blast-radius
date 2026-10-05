@@ -193,7 +193,9 @@ for (const related of [0, 1]) {
       );
       await expect(scope).not.toHaveAttribute("open", "");
     } else await expect(scope).toHaveCount(0);
-    await expect(page.locator(".impact-summary")).not.toContainText("Unresolved");
+    await expect(page.locator(".impact-summary")).not.toContainText(
+      "Unresolved",
+    );
     await expect(page.locator(".impact-summary")).not.toContainText("170");
     await page.locator("#coverage > summary").click();
     await expect(
@@ -376,7 +378,9 @@ test("a large dashboard stays compact, explains unknowns and retains exact paths
   await expect(elsewhere).not.toHaveAttribute("open", "");
   await expect(page.locator(".impact-summary")).not.toContainText("51");
   await expect(
-    page.getByText("These are scanner limits around configurations", { exact: false }),
+    page.getByText("These are scanner limits around configurations", {
+      exact: false,
+    }),
   ).toBeVisible();
   expect((await elsewhere.boundingBox())!.height).toBeLessThan(80);
   await expect(page.getByText("Wall button", { exact: true })).toBeVisible();

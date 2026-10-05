@@ -1148,14 +1148,22 @@ var Ee = {
   }
   .impact-high,
   .confidence-review {
-    border-color: color-mix(in srgb, var(--warning-color, #9b6600) 60%, var(--br-border));
+    border-color: color-mix(
+      in srgb,
+      var(--warning-color, #9b6600) 60%,
+      var(--br-border)
+    );
   }
   .impact-medium,
   .confidence-mixed {
     border-color: color-mix(in srgb, var(--br-accent) 45%, var(--br-border));
   }
   .confidence-good {
-    border-color: color-mix(in srgb, var(--success-color, #288048) 55%, var(--br-border));
+    border-color: color-mix(
+      in srgb,
+      var(--success-color, #288048) 55%,
+      var(--br-border)
+    );
   }
   .impact-summary {
     display: grid;
@@ -1244,7 +1252,11 @@ var Ee = {
     padding: 8px 11px;
     border-left: 2px solid var(--warning-color, #9b6600);
     color: var(--br-muted);
-    background: color-mix(in srgb, var(--br-card) 94%, var(--warning-color, #9b6600));
+    background: color-mix(
+      in srgb,
+      var(--br-card) 94%,
+      var(--warning-color, #9b6600)
+    );
     font-size: 12px;
   }
   .coverage-inline strong {
@@ -1284,7 +1296,11 @@ var Ee = {
     padding: 12px 14px;
     border: 1px solid var(--br-border);
     border-radius: 8px;
-    background: color-mix(in srgb, var(--br-card) 97%, var(--primary-text-color, #212121));
+    background: color-mix(
+      in srgb,
+      var(--br-card) 97%,
+      var(--primary-text-color, #212121)
+    );
   }
   .indirect-callout p {
     max-width: 760px;
@@ -1554,7 +1570,11 @@ var Ee = {
     padding: 10px 12px;
     border: 1px solid var(--br-border);
     border-radius: 8px;
-    background: color-mix(in srgb, var(--br-card) 97%, var(--primary-text-color, #212121));
+    background: color-mix(
+      in srgb,
+      var(--br-card) 97%,
+      var(--primary-text-color, #212121)
+    );
   }
   .filter-row {
     display: flex;
@@ -2171,6 +2191,48 @@ var nt = {
       >${r}</a
     >` : t ? P : M`<span class=${i}>${r}</span>`;
 	}
+	referenceRoleSummary(e) {
+		let t = {
+			read: ["read", "reads"],
+			write: ["write", "writes"],
+			display: ["display", "displays"],
+			call: ["call", "calls"],
+			member: ["membership", "memberships"]
+		}, n = /* @__PURE__ */ new Map();
+		for (let t of e) n.set(t.role, (n.get(t.role) || 0) + 1);
+		return [...n].map(([e, n]) => {
+			let [r, i] = t[e] || [e, `${e}s`];
+			return `${n} ${n === 1 ? r : i}`;
+		}).join(" · ");
+	}
+	impactScope(e) {
+		let t = e.summary.sources;
+		return t ? t <= 2 ? {
+			label: "Narrow impact",
+			tone: "low"
+		} : t <= 4 ? {
+			label: "Moderate impact",
+			tone: "medium"
+		} : {
+			label: "Broad impact",
+			tone: "high"
+		} : {
+			label: "No direct usage",
+			tone: "none"
+		};
+	}
+	confidenceSummary(e) {
+		return e.references.some((e) => e.confidence === "dynamic" || e.confidence === "unknown") ? {
+			label: "Needs review",
+			tone: "review"
+		} : e.references.some((e) => e.confidence === "template_literal") ? {
+			label: "Mixed confidence",
+			tone: "mixed"
+		} : {
+			label: "High confidence",
+			tone: "good"
+		};
+	}
 	references(e, t = !1) {
 		let n = /* @__PURE__ */ new Map();
 		return e.filter(this.matchesFilter).forEach((e) => n.set(e.source_id, [...n.get(e.source_id) || [], e])), [...n].map(([e, n]) => M`<article class="reference source-row" data-source=${e}>
@@ -2182,7 +2244,7 @@ var nt = {
                 <span class="source-meta"
                   >${J[n[0].source_type] || n[0].source_type}
                   ·
-                  ${t ? $(n) : `${n.length} ${n.length === 1 ? "reference" : "references"}`}</span
+                  ${t ? $(n) : this.referenceRoleSummary(n)}</span
                 >
               </div>
             </div>
@@ -2228,37 +2290,48 @@ var nt = {
         </details>`);
 	}
 	uncertainty(e) {
-		let t = e.uncertain_references.filter(this.matchesFilter), n = (e.other_dashboard_references || []).filter(this.matchesFilter);
-		return !t.length && !n.length ? P : M`<section class="uncertainty" aria-label="References to review">
-      <h2>References to review</h2>
-      <p>
-        These are limits of static analysis, not a count of broken entities.
-        Device IDs and selectors are listed separately from dynamic or
-        unrecognized targets. Repeated locations are grouped; a shared
-        configuration does not prove a dependency.
-      </p>
-      ${t.length ? M`<details class="uncertainty-scope">
+		let t = e.uncertain_references.filter(this.matchesFilter), n = (e.other_dashboard_references || []).filter(this.matchesFilter), r = t.filter((e) => Q(e) !== "device"), i = t.filter((e) => Q(e) === "device");
+		return !r.length && !i.length && !n.length ? P : M`<section class="uncertainty" aria-label="Potential blind spots">
+      <div class="section-heading">
+        <div>
+          <h2>Potential blind spots</h2>
+          <p>
+            These are scanner limits around configurations already linked to
+            this result. They are not additional direct references to the
+            selected entity.
+          </p>
+        </div>
+      </div>
+      ${r.length ? M`<details class="uncertainty-scope">
               <summary>
-                In linked configurations
-                <span class="count">${$(t)}</span>
+                Dynamic or unexpanded in linked configurations
+                <span class="count">${$(r)}</span>
               </summary>
               <p>
-                References in linked automation/script configurations or
-                dashboard cards, including other conditional branches.
+                Expressions or selectors inside linked configurations could not
+                be resolved to a fixed entity target.
               </p>
-              ${this.references(t, !0)}
-            </details>` : M`<p class="muted">
-              No references requiring review in the linked configurations or
-              cards.
-            </p>`}
+              ${this.references(r, !0)}
+            </details>` : P}
+      ${i.length ? M`<details class="uncertainty-scope device-context">
+              <summary>
+                Device references in linked configurations
+                <span class="count">${$(i)}</span>
+              </summary>
+              <p>
+                Device IDs are shown for context. A device identity alone does
+                not establish a dependency on this entity.
+              </p>
+              ${this.references(i, !0)}
+            </details>` : P}
       ${n.length ? M`<details class="uncertainty-scope dashboard-context">
               <summary>
                 Elsewhere in linked dashboards
                 <span class="count">${$(n)}</span>
               </summary>
               <p>
-                Outside cards with known links, or at dashboard level. Kept for
-                context; these expressions are not attributed to the selected
+                Dynamic dashboard expressions outside cards with known links.
+                They are scanner diagnostics, not impact attributed to this
                 entity.
               </p>
               ${this.references(n, !0)}
@@ -2274,34 +2347,44 @@ var nt = {
 			template_literal: "Template literal",
 			review: "Needs review"
 		}, n = e.references.filter(this.matchesFilter).length;
-		return M`<section class="result-filters" aria-label="Result filters">
-      <div role="group" aria-label="Source types" class="filter-row">
-        <span class="filter-label">Sources</span>
-        <button
-          aria-pressed=${!this.sourceFilters.length}
-          @click=${() => this.sourceFilters = []}
+		return M`<details
+      class="result-filters"
+      aria-label="Result filters"
+      .open=${this.filtersActive}
+    >
+      <summary>
+        Filters
+        <span class="count"
+          >${n}/${e.references.length} direct refs</span
         >
-          All sources
-        </button>
-        ${Ye.map((e) => M`<button aria-pressed=${this.sourceFilters.includes(e)} @click=${() => this.sourceFilters = this.sourceFilters.includes(e) ? this.sourceFilters.filter((t) => t !== e) : [...this.sourceFilters, e]}>${J[e]}</button>`)}
+      </summary>
+      <div class="filter-body">
+        <div role="group" aria-label="Source types" class="filter-row">
+          <span class="filter-label">Sources</span>
+          <button
+            aria-pressed=${!this.sourceFilters.length}
+            @click=${() => this.sourceFilters = []}
+          >
+            All sources
+          </button>
+          ${Ye.map((e) => M`<button aria-pressed=${this.sourceFilters.includes(e)} @click=${() => this.sourceFilters = this.sourceFilters.includes(e) ? this.sourceFilters.filter((t) => t !== e) : [...this.sourceFilters, e]}>${J[e]}</button>`)}
+        </div>
+        <div role="group" aria-label="Reference confidence" class="filter-row">
+          <span class="filter-label">Confidence</span>
+          <button
+            aria-pressed=${!this.reviewFilters.length}
+            @click=${() => this.reviewFilters = []}
+          >
+            All confidence
+          </button>
+          ${Object.keys(t).map((e) => M`<button aria-pressed=${this.reviewFilters.includes(e)} @click=${() => this.reviewFilters = this.reviewFilters.includes(e) ? this.reviewFilters.filter((t) => t !== e) : [...this.reviewFilters, e]}>${t[e]}</button>`)}
+        </div>
+        <p class="filter-note" role="status">
+          Filters affect visible cards and graph connections only. Full totals,
+          coverage and exports stay unchanged.
+        </p>
       </div>
-      <div role="group" aria-label="Reference confidence" class="filter-row">
-        <span class="filter-label">Confidence</span>
-        <button
-          aria-pressed=${!this.reviewFilters.length}
-          @click=${() => this.reviewFilters = []}
-        >
-          All confidence
-        </button>
-        ${Object.keys(t).map((e) => M`<button aria-pressed=${this.reviewFilters.includes(e)} @click=${() => this.reviewFilters = this.reviewFilters.includes(e) ? this.reviewFilters.filter((t) => t !== e) : [...this.reviewFilters, e]}>${t[e]}</button>`)}
-      </div>
-      <p class="filter-note" role="status">
-        ${n} of ${e.references.length} direct references visible. Needs
-        review includes unclassified references, device IDs, unexpanded
-        selectors and unresolved expressions. Exports and coverage always
-        include the full analysis.
-      </p>
-    </section>`;
+    </details>`;
 	}
 	selectorDetail(e) {
 		if (!e.selector) return P;
@@ -2317,25 +2400,42 @@ var nt = {
     </p>`;
 	}
 	impact(e) {
-		let t = e.references.filter(this.matchesFilter);
-		return M`<h2>
-        Where this entity is used
+		let t = e.references.filter(this.matchesFilter), n = new Set(t.map((e) => e.source_id)).size;
+		return M`<div class="section-heading">
+        <div>
+          <h2>Direct impact</h2>
+          <p>Configurations with a known reference to this entity.</p>
+        </div>
         <span class="badge"
-          >${new Set(t.map((e) => e.source_id)).size} visible
-          sources</span
+          >${n} visible
+          ${n === 1 ? "source" : "sources"}</span
         >
-      </h2>
-      ${t.length ? M`<div class="source-grid">${this.references(t)}</div>` : M`<div class="empty">
+      </div>
+      ${t.length ? M`<div class="source-grid">${this.references(t)}</div>` : M`<div class="empty compact-empty">
               <div class="symbol">${q()}</div>
               <h3>
                 ${this.filtersActive ? "No matching direct references" : "No direct references found"}
               </h3>
               <p class="muted">
-                ${this.filtersActive ? "Try All sources or All confidence to show more results. Full totals and exports are unchanged." : "Nothing in the inspected sources points to this entity. Check coverage and unresolved references before changing it."}
+                ${this.filtersActive ? "Try All sources or All confidence to show more results. Full totals and exports are unchanged." : "Nothing in the inspected sources points to this entity. Check coverage and blind spots before changing it."}
               </p>
             </div>`}
+      ${e.summary.downstream ? M`<section class="indirect-callout">
+              <div>
+                <strong
+                  >${e.summary.downstream} related downstream
+                  ${e.summary.downstream === 1 ? "node" : "nodes"}</strong
+                >
+                <p>
+                  These are connected through the configurations above. They
+                  provide topology context and are not guaranteed to break if
+                  this entity changes.
+                </p>
+              </div>
+              <button @click=${() => this.tab = "graph"}>View graph →</button>
+            </section>` : P}
       ${this.uncertainty(e)}
-      <details>
+      <details class="confidence-help">
         <summary>How to read confidence</summary>
         <ul>
           <li>
@@ -2363,9 +2463,9 @@ var nt = {
 		e && (e.open = !0, e.querySelector("summary")?.focus(), e.scrollIntoView({ block: "start" }));
 	}
 	completeness(e) {
-		let t = e.graph.limits_reached || [], n = e.coverage.warnings || [];
-		if (!e.graph.truncated && !n.length) return P;
-		let r = t.includes("nodes") || t.includes("edges"), i = [
+		let t = e.graph.limits_reached || [];
+		if (!e.graph.truncated) return P;
+		let n = t.includes("nodes") || t.includes("edges"), r = [
 			1,
 			2,
 			3,
@@ -2377,29 +2477,41 @@ var nt = {
 		return M`<section
       class="notice incomplete"
       role="status"
-      aria-label="Incomplete results"
+      aria-label="Dependency map limited"
     >
-      <h3>Results are incomplete</h3>
-      ${t.includes("depth") ? M`<p>The dependency map reached depth ${e.graph.max_depth}. More dependencies may exist beyond this depth.</p>` : P}
-      ${r ? M`<p>The dependency map reached its ${t.includes("nodes") ? "node" : "edge"} limit. Increasing depth will not remove this cap.</p>` : P}
-      ${e.graph.truncated && !t.length ? M`<p>The dependency map reached a depth or size limit. More dependencies may exist.</p>` : P}
-      ${n.length ? M`<p>Some configuration could not be fully inspected. Review ${n.length === 1 ? "the coverage warning" : `the ${n.length} coverage warnings`} before changing this entity.</p>` : P}
+      <h3>Dependency map limited</h3>
+      ${t.includes("depth") ? M`<p>The dependency map reached depth ${e.graph.max_depth}. More related nodes may exist beyond this depth.</p>` : P}
+      ${n ? M`<p>The dependency map reached its ${t.includes("nodes") ? "node" : "edge"} limit. Increasing depth will not remove this cap.</p>` : P}
+      ${e.graph.truncated && !t.length ? M`<p>The dependency map reached a traversal limit. More related nodes may exist.</p>` : P}
       <p>
-        Counts below describe only what was found, not everything that may
-        depend on this entity.
+        Direct-reference counts remain the references that were found. This
+        warning applies to graph traversal beyond them.
       </p>
       <div class="controls">
-        ${t.includes("depth") && !r && i ? M`<button
+        ${t.includes("depth") && !n && r ? M`<button
                 ?disabled=${this.loading}
                 @click=${() => {
-			this.depth = i, this.run();
+			this.depth = r, this.run();
 		}}
               >
-                Inspect to depth ${i}
+                Inspect to depth ${r}
               </button>` : P}
-        <button @click=${this.showCoverage}>Review coverage</button>
       </div>
     </section>`;
+	}
+	coverageStatus(e) {
+		let t = e.coverage.warnings || [];
+		return t.length ? M`<div class="coverage-inline" role="note">
+      <span>
+        <strong>Static coverage is partial.</strong>
+        ${t.length}
+        ${t.length === 1 ? "source warning" : "source warnings"}
+        reported.
+      </span>
+      <button class="link-button" @click=${this.showCoverage}>
+        Coverage details
+      </button>
+    </div>` : P;
 	}
 	graph(e) {
 		let t = this.filtersActive ? Ze(e, this.matchesFilter) : e.graph.nodes, n = e.graph.edges.filter(this.matchesFilter), r = t.find((e) => e.relationship === "selected"), i = t.filter((e) => e.relationship === "dependent"), a = t.filter((e) => e.relationship === "downstream");
@@ -2514,7 +2626,13 @@ var nt = {
       </div>`;
 	}
 	render() {
-		let e = this.report, t = this.entities.filter((e) => `${e.entity_id} ${e.name}`.toLowerCase().includes(this.query.toLowerCase())).slice(0, 80);
+		let e = this.report, t = e ? this.impactScope(e) : {
+			label: "",
+			tone: "none"
+		}, n = e ? this.confidenceSummary(e) : {
+			label: "",
+			tone: "good"
+		}, r = this.entities.filter((e) => `${e.entity_id} ${e.name}`.toLowerCase().includes(this.query.toLowerCase())).slice(0, 80);
 		return M`<header>
         <button
           class="menu"
@@ -2555,27 +2673,9 @@ var nt = {
               spellcheck="false"
           /></label>
           <datalist id="entities">
-            ${t.map((e) => M`<option value=${e.entity_id}>${e.name}${e.exists ? "" : " · missing"}</option>`)}
+            ${r.map((e) => M`<option value=${e.entity_id}>${e.name}${e.exists ? "" : " · missing"}</option>`)}
           </datalist>
-          <label class="depth"
-            >Depth<select
-              aria-label="Traversal depth"
-              .value=${String(this.depth)}
-              @change=${(e) => {
-			this.depth = Number(e.target.value), this.report && this.run();
-		}}
-            >
-              ${[
-			1,
-			2,
-			3,
-			4,
-			6,
-			8,
-			12
-		].map((e) => M`<option value=${e} ?selected=${e === this.depth}>${e}</option>`)}
-            </select></label
-          >
+
           <button
             class="primary"
             ?disabled=${this.loading || !this.query.trim()}
@@ -2607,6 +2707,34 @@ var nt = {
                   Clear
                 </button>
               </section>` : P}
+        <details class="analysis-options">
+          <summary>Analysis options <span>Depth ${this.depth}</span></summary>
+          <div class="analysis-options-body">
+            <label class="depth"
+              >Traversal depth<select
+                aria-label="Traversal depth"
+                .value=${String(this.depth)}
+                @change=${(e) => {
+			this.depth = Number(e.target.value), this.report && this.run();
+		}}
+              >
+                ${[
+			1,
+			2,
+			3,
+			4,
+			6,
+			8,
+			12
+		].map((e) => M`<option value=${e} ?selected=${e === this.depth}>${e}</option>`)}
+              </select></label
+            >
+            <p class="muted">
+              Controls how far the dependency graph follows linked
+              configurations. Direct-reference scanning is unchanged.
+            </p>
+          </div>
+        </details>
         ${this.loading ? M`<progress aria-label="Inspecting configuration"></progress>` : P}
         ${this.error ? M`<div role="alert" class="notice error">
                 ${this.error}
@@ -2620,34 +2748,48 @@ var nt = {
               </div>` : P}
         ${e ? M`
                 <div class="result-heading">
-                  <h2 tabindex="-1">${this.sourceName(e.entity_id)}</h2>
-                  <code>${e.entity_id}</code>
+                  <div class="result-identity">
+                    <span class="eyebrow">Selected entity</span>
+                    <h2 tabindex="-1">${this.sourceName(e.entity_id)}</h2>
+                    <code>${e.entity_id}</code>
+                  </div>
+                  <div class="result-badges">
+                    <span class="summary-chip impact-${t.tone}"
+                      >${t.label}</span
+                    >
+                    <span class="summary-chip confidence-${n.tone}"
+                      >${n.label}</span
+                    >
+                  </div>
                 </div>
                 ${e.exists ? P : M`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>`}
                 ${this.completeness(e)}
-                <p class="muted totals-label">
-                  Full analysis totals · filters below affect visible results
-                  only
-                </p>
-                <div class="stats">
-                  <div class="stat">
-                    <strong>${e.summary.references}</strong
-                    ><span>Direct references</span>
+                <section class="impact-summary" aria-label="Impact summary">
+                  <div class="impact-primary">
+                    <strong>${e.summary.sources}</strong>
+                    <div>
+                      <b>
+                        ${e.summary.sources === 1 ? "configuration uses" : "configurations use"}
+                        this entity
+                      </b>
+                      <span>
+                        Known references in the inspected Home Assistant
+                        configuration.
+                      </span>
+                    </div>
                   </div>
-                  <div class="stat">
-                    <strong>${e.summary.sources}</strong
-                    ><span>Linked configurations</span>
+                  <div class="impact-metrics">
+                    <div>
+                      <strong>${e.summary.references}</strong>
+                      <span>direct references</span>
+                    </div>
+                    <div>
+                      <strong>${e.summary.downstream}</strong>
+                      <span>related downstream nodes</span>
+                    </div>
                   </div>
-                  <div class="stat">
-                    <strong>${e.summary.downstream}</strong
-                    ><span>Downstream targets</span>
-                  </div>
-                  <div class="stat">
-                    <strong
-                      >${e.summary.template_literal + e.summary.unknown}</strong
-                    ><span>Direct refs to review</span>
-                  </div>
-                </div>
+                </section>
+                ${this.coverageStatus(e)}
                 <div class="columns">
                   <section class="card">
                     <nav role="tablist" aria-label="Analysis views">
@@ -2735,19 +2877,25 @@ var nt = {
                 </div>
                 <details class="card" id="coverage">
                   <summary>
-                    Coverage and limitations · ${e.coverage.sources}
-                    sources inspected
+                    Coverage · ${e.coverage.sources} sources
+                    inspected${(e.coverage.warnings || []).length ? ` · ${(e.coverage.warnings || []).length} ${(e.coverage.warnings || []).length === 1 ? "warning" : "warnings"}` : ""}
                   </summary>
+                  <p class="muted coverage-explainer">
+                    Coverage describes what the scanner could inspect. It is
+                    separate from direct-reference confidence and is not a
+                    safety verdict.
+                  </p>
                   <p class="muted">
                     ${Object.entries(e.coverage.source_types).map(([e, t]) => `${t} ${e}`).join(" · ")}
                   </p>
                   <ul>
                     ${e.warnings.map((e) => M`<li>${e}</li>`)}
                     <li>
+                      <strong>System-wide diagnostics:</strong>
                       ${e.unresolved_total} locations without an entity
                       target across the full snapshot. These include device IDs,
-                      selectors and expressions; they cannot be attributed to
-                      this entity.
+                      selectors and expressions; they are not direct references
+                      to this entity.
                     </li>
                     <li>
                       ${$(e.uncertain_references)} in linked

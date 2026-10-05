@@ -603,7 +603,9 @@ export class BlastRadiusPanel extends LitElement {
     >
       <summary>
         Filters
-        <span class="count">${count}/${report.references.length} direct refs</span>
+        <span class="count"
+          >${count}/${report.references.length} direct refs</span
+        >
       </summary>
       <div class="filter-body">
         <div role="group" aria-label="Source types" class="filter-row">
@@ -657,7 +659,8 @@ export class BlastRadiusPanel extends LitElement {
           <p>Configurations with a known reference to this entity.</p>
         </div>
         <span class="badge"
-          >${sourceCount} visible ${sourceCount === 1 ? "source" : "sources"}</span
+          >${sourceCount} visible
+          ${sourceCount === 1 ? "source" : "sources"}</span
         >
       </div>
       ${
@@ -677,7 +680,10 @@ export class BlastRadiusPanel extends LitElement {
         report.summary.downstream
           ? html`<section class="indirect-callout">
               <div>
-                <strong>${report.summary.downstream} related downstream ${report.summary.downstream === 1 ? "node" : "nodes"}</strong>
+                <strong
+                  >${report.summary.downstream} related downstream
+                  ${report.summary.downstream === 1 ? "node" : "nodes"}</strong
+                >
                 <p>
                   These are connected through the configurations above. They
                   provide topology context and are not guaranteed to break if
@@ -767,7 +773,8 @@ export class BlastRadiusPanel extends LitElement {
       <span>
         <strong>Static coverage is partial.</strong>
         ${warnings.length}
-        ${warnings.length === 1 ? "source warning" : "source warnings"} reported.
+        ${warnings.length === 1 ? "source warning" : "source warnings"}
+        reported.
       </span>
       <button class="link-button" @click=${this.showCoverage}>
         Coverage details
@@ -1004,9 +1011,7 @@ export class BlastRadiusPanel extends LitElement {
             : nothing
         }
         <details class="analysis-options">
-          <summary>
-            Analysis options <span>Depth ${this.depth}</span>
-          </summary>
+          <summary>Analysis options <span>Depth ${this.depth}</span></summary>
           <div class="analysis-options-body">
             <label class="depth"
               >Traversal depth<select
@@ -1174,7 +1179,8 @@ export class BlastRadiusPanel extends LitElement {
                 </div>
                 <details class="card" id="coverage">
                   <summary>
-                    Coverage · ${report.coverage.sources} sources inspected${(report.coverage.warnings || []).length ? ` · ${(report.coverage.warnings || []).length} ${(report.coverage.warnings || []).length === 1 ? "warning" : "warnings"}` : ""}
+                    Coverage · ${report.coverage.sources} sources
+                    inspected${(report.coverage.warnings || []).length ? ` · ${(report.coverage.warnings || []).length} ${(report.coverage.warnings || []).length === 1 ? "warning" : "warnings"}` : ""}
                   </summary>
                   <p class="muted coverage-explainer">
                     Coverage describes what the scanner could inspect. It is
