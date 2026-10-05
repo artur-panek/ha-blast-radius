@@ -5,13 +5,18 @@ const input = (page: Page) =>
 const filters = (page: Page) => page.locator("details.result-filters");
 const chip = (page: Page, name: string) =>
   filters(page).getByRole("button", { name, exact: true });
+async function openFilters(page: Page) {
+  const filterPanel = filters(page);
+  await expect(filterPanel).toBeVisible();
+  await filterPanel.evaluate((element: HTMLDetailsElement) => {
+    element.open = true;
+  });
+}
 async function analyze(page: Page, id = "media_player.speaker") {
   await input(page).fill(id);
   await input(page).press("Enter");
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
-  const filterPanel = filters(page);
-  if (!(await filterPanel.getAttribute("open")))
-    await filterPanel.locator(":scope > summary").click();
+  await openFilters(page);
 }
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
@@ -175,6 +180,8 @@ test("filters do not persist across remounts or HA account changes", async ({
     fresh.hass = hass;
     document.body.append(fresh);
   });
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await openFilters(page);
   await expect(chip(page, "All sources")).toHaveAttribute(
     "aria-pressed",
     "true",
