@@ -83,6 +83,9 @@ for (const mobile of [false, true]) {
           review_summary: undefined,
         };
       }, refs);
+    await page
+      .getByRole("tab", { name: "Uses this entity", exact: true })
+      .click();
     const uncertainty = page.locator(".uncertainty");
     const unresolvedScope = uncertainty
       .locator(".uncertainty-scope")
@@ -98,7 +101,7 @@ for (const mobile of [false, true]) {
       ),
     ).toBeVisible();
 
-    await page.getByRole("button", { name: "View coverage" }).click();
+    await page.getByText("Coverage & diagnostics", { exact: false }).click();
     const coverage = page.locator("#coverage");
     const deviceScope = coverage
       .locator(".uncertainty-scope")
@@ -193,7 +196,7 @@ test("missing and unchecked selectors remain visible with escaped identifiers", 
       })),
     };
   });
-  await page.getByRole("button", { name: "View coverage" }).click();
+  await page.getByText("Coverage & diagnostics", { exact: false }).click();
   const scope = page
     .locator("#coverage .uncertainty-scope")
     .filter({ hasText: "Device and selector context" });
