@@ -38,7 +38,7 @@ test("source chips filter direct usage, graph and technical views without changi
     "script.music_toggle",
   );
   await expect(
-    page.getByText("Reads this entity in a template", { exact: true }),
+    page.getByText("Checks this entity", { exact: true }),
   ).toBeVisible();
   await expect(
     page.getByText("Changes / targets this entity ×2", { exact: true }),
