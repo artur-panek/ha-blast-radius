@@ -28,11 +28,17 @@ test("source chips filter direct usage, graph and technical views without changi
     .locator("blast-radius-panel")
     .evaluate((p: any) => JSON.stringify(p.report));
   await chip(page, "Script").click();
-  await expect(page.locator(".source-grid .source-row")).toHaveCount(1);
+  await expect(page.locator(".source-grid .source-row")).toHaveCount(2);
   await expect(page.locator(".source-grid .source-row")).toHaveAttribute(
     "data-source",
     "script.music_toggle",
   );
+  await expect(
+    page.getByText("Reads this entity in a template", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Changes / targets this entity ×2", { exact: true }),
+  ).toBeVisible();
   await page.getByRole("tab", { name: "Graph", exact: true }).click();
   await expect(page.locator(".graph-node.selected")).toHaveCount(1);
   await expect(
