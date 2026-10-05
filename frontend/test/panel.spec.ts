@@ -40,7 +40,7 @@ test("inspect, traverse, preview rename and removal, export JSON", async ({
     page.getByText("Used by a trigger", { exact: true }).first(),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "References to review", exact: true }),
+    page.getByRole("heading", { name: "Potential blind spots", exact: true }),
   ).toBeVisible();
   await page.getByRole("tab", { name: "Graph", exact: true }).click();
   await expect(
@@ -117,6 +117,7 @@ test("desktop screenshots and depth change", async ({ page }) => {
   await page.getByRole("button", { name: "Toggle theme" }).click();
   await page.getByRole("tab", { name: "Graph", exact: true }).click();
   await screenshotPanel(page, "../docs/panel-dark.png");
+  await page.getByText("Analysis options", { exact: true }).click();
   await page.getByLabel("Traversal depth").selectOption("1");
   await expect(
     page.locator('.tree .graph-node[data-source="media_player.tablet"]'),
@@ -186,16 +187,18 @@ for (const related of [0, 1]) {
     }, related);
     const scope = page
       .locator(".uncertainty-scope")
-      .filter({ hasText: "In linked configurations" });
+      .filter({ hasText: "Unresolved in related configurations" });
     if (related) {
       await expect(scope.locator("summary .count").first()).toHaveText(
         `${related} group · ${related} location`,
       );
       await expect(scope).not.toHaveAttribute("open", "");
     } else await expect(scope).toHaveCount(0);
-    await expect(page.locator(".stats")).not.toContainText("Unresolved");
-    await expect(page.locator(".stats")).not.toContainText("170");
-    await page.getByText("Coverage and limitations", { exact: false }).click();
+    await expect(page.locator(".impact-summary")).not.toContainText(
+      "Unresolved",
+    );
+    await expect(page.locator(".impact-summary")).not.toContainText("170");
+    await page.getByText("Coverage & diagnostics", { exact: false }).click();
     await expect(
       page.getByText(
         "170 locations without an entity target across the full snapshot",
@@ -261,7 +264,7 @@ for (const theme of ["light", "dark", "custom-dark"]) {
       ".badge.dynamic",
       ".badge.unknown",
       ".source-meta",
-      ".stat span",
+      ".impact-metrics span",
       "button.primary",
       '.filter-row button[aria-pressed="true"]',
     ]) {
@@ -278,7 +281,8 @@ for (const theme of ["light", "dark", "custom-dark"]) {
         const style = getComputedStyle(element);
         const background =
           style.backgroundColor === "rgba(0, 0, 0, 0)"
-            ? getComputedStyle(element.closest(".card, .stat")!).backgroundColor
+            ? getComputedStyle(element.closest(".card, .impact-summary")!)
+                .backgroundColor
             : style.backgroundColor;
         return {
           text: rgb(style.color),
@@ -326,15 +330,19 @@ test("a large dashboard stays compact, explains unknowns and retains exact paths
       unresolved_total: 170,
     };
   });
-  const elsewhere = page.locator(".dashboard-context");
+  await expect(page.locator(".impact-summary")).not.toContainText("51");
+  await expect(
+    page.getByText(
+      "Additional scanner diagnostics are available in Coverage.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "View coverage" }).click();
+  const elsewhere = page.locator("#coverage .dashboard-context");
   await expect(elsewhere.locator("summary .count").first()).toHaveText(
     "1 group · 51 locations",
   );
   await expect(elsewhere).not.toHaveAttribute("open", "");
-  await expect(page.locator(".stats")).not.toContainText("51");
-  await expect(
-    page.getByText("These are limits of static analysis", { exact: false }),
-  ).toBeVisible();
   expect((await elsewhere.boundingBox())!.height).toBeLessThan(80);
   await expect(page.getByText("Wall button", { exact: true })).toBeVisible();
   await expect(

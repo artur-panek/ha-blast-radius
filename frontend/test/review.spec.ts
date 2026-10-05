@@ -83,36 +83,56 @@ for (const mobile of [false, true]) {
           review_summary: undefined,
         };
       }, refs);
-    const scope = page.locator(".uncertainty-scope");
-    await expect(scope.locator(":scope > summary")).toContainText(
-      "3 groups · 34 locations",
+    const uncertainty = page.locator(".uncertainty");
+    const unresolvedScope = uncertainty
+      .locator(".uncertainty-scope")
+      .filter({ hasText: "Unresolved in related configurations" });
+    await expect(unresolvedScope.locator(":scope > summary")).toContainText(
+      "1 group · 9 locations",
     );
-    await expect(scope).not.toHaveAttribute("open", "");
-    await scope.locator(":scope > summary").click();
-    await expect(scope.locator(".reason-group")).toHaveCount(3);
-    await expect(scope.locator('[data-resolution="device"]')).toHaveCount(2);
-    await expect(scope.locator('[data-resolution="unresolved"]')).toHaveCount(
-      1,
+    await expect(unresolvedScope).not.toHaveAttribute("open", "");
+    await expect(
+      uncertainty.getByText(
+        "Additional scanner diagnostics are available in Coverage.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: "View coverage" }).click();
+    const coverage = page.locator("#coverage");
+    const deviceScope = coverage
+      .locator(".uncertainty-scope")
+      .filter({ hasText: "Device and selector context" });
+    await expect(deviceScope.locator(":scope > summary")).toContainText(
+      "2 groups · 25 locations",
     );
-    await page.locator(".uncertainty").screenshot({
+    await expect(deviceScope).not.toHaveAttribute("open", "");
+
+    await unresolvedScope.locator(":scope > summary").click();
+    await deviceScope.locator(":scope > summary").click();
+    await expect(
+      uncertainty.locator('[data-resolution="unresolved"]'),
+    ).toHaveCount(1);
+    await expect(coverage.locator('[data-resolution="device"]')).toHaveCount(2);
+    await uncertainty.screenshot({
       path: `/tmp/blast-radius-compact-${mobile ? "mobile" : "desktop"}.png`,
     });
-    for (const summary of await scope.locator(".reason-group > summary").all())
+    for (const summary of await page.locator(".reason-group > summary").all())
       await summary.click();
-    await expect(scope.locator(".unresolved-row")).toHaveCount(34);
-    await expect(scope.locator(".selector-detail")).toHaveCount(2); // Identity once per group.
+    await expect(page.locator(".unresolved-row")).toHaveCount(34);
+    await expect(coverage.locator(".selector-detail")).toHaveCount(2); // Identity once per group.
     await expect(
-      scope.locator('[data-resolution="device"] .badge.dynamic'),
+      coverage.locator('[data-resolution="device"] .badge.dynamic'),
     ).toHaveCount(0);
     await expect(
-      scope
+      coverage
         .getByText("Device identity does not establish an entity dependency", {
           exact: false,
         })
         .first(),
     ).toBeVisible();
     await expect(
-      scope.getByText("actions[0].choose[8].sequence[0].entity_id", {
+      uncertainty.getByText("actions[0].choose[8].sequence[0].entity_id", {
         exact: true,
       }),
     ).toBeVisible();
@@ -175,7 +195,10 @@ test("missing and unchecked selectors remain visible with escaped identifiers", 
       })),
     };
   });
-  const scope = page.locator(".uncertainty-scope").first();
+  await page.getByRole("button", { name: "View coverage" }).click();
+  const scope = page
+    .locator("#coverage .uncertainty-scope")
+    .filter({ hasText: "Device and selector context" });
   await scope.locator(":scope > summary").click();
   await expect(scope.locator(".reason-group")).toHaveCount(3);
   await expect(scope.locator(".registry-status")).toHaveText([

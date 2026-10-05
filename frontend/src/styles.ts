@@ -109,10 +109,30 @@ export const styles = css`
     display: flex;
     align-items: end;
     gap: 12px;
-    margin: 20px 0;
+    margin: 20px 0 8px;
   }
   .search label {
     flex: 1;
+  }
+  .analysis-options {
+    width: fit-content;
+    margin: 0 0 18px;
+    color: var(--br-muted);
+  }
+  .analysis-options > summary {
+    padding: 7px 0;
+    font-size: 13px;
+  }
+  .analysis-options-body {
+    display: flex;
+    align-items: end;
+    gap: 14px;
+    padding: 8px 0 4px;
+  }
+  .analysis-options-body p {
+    margin: 0 0 9px;
+    max-width: 540px;
+    font-size: 13px;
   }
   .recent-searches {
     display: flex;
@@ -254,34 +274,61 @@ export const styles = css`
     vertical-align: 1px;
     background: var(--br-confidence-accent);
   }
-  .stats {
+  .impact-summary {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.28fr);
     gap: 0;
-    margin: 22px 0;
+    margin: 18px 0 22px;
     border: 1px solid var(--br-border);
-    border-radius: 10px;
+    border-radius: 12px;
     background: var(--br-card);
     overflow: hidden;
   }
-  .stat {
+  .impact-verdict {
+    padding: 18px 20px;
     border-right: 1px solid var(--br-border);
-    padding: 14px 20px;
-    background: var(--br-card);
   }
-  .stat:last-child {
-    border-right: 0;
+  .impact-verdict .eyebrow {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--br-muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
-  .stat strong {
+  .impact-verdict > strong {
     display: block;
     font-size: 25px;
-    font-weight: 500;
-    margin-bottom: 5px;
+    font-weight: 600;
   }
-  .stat span {
-    font-size: 14px;
+  .impact-verdict p {
+    margin: 7px 0 0;
     color: var(--br-muted);
+    font-size: 13px;
   }
+  .impact-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .impact-metrics > div {
+    padding: 18px 16px;
+    border-right: 1px solid var(--br-border);
+  }
+  .impact-metrics > div:last-child {
+    border-right: 0;
+  }
+  .impact-metrics strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 23px;
+    font-weight: 500;
+  }
+  .impact-metrics span {
+    color: var(--br-muted);
+    font-size: 13px;
+  }
+
   .columns {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -314,7 +361,7 @@ export const styles = css`
     border-bottom-color: var(--br-accent);
   }
   .reference {
-    padding: 16px;
+    padding: 12px 13px;
     border: 1px solid var(--br-border);
     border-radius: 8px;
     min-width: 0;
@@ -322,7 +369,7 @@ export const styles = css`
   .source-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
+    gap: 8px;
     align-items: start;
   }
   .reference-title {
@@ -367,13 +414,42 @@ export const styles = css`
     border: 1px solid var(--br-border);
     border-left: 3px solid var(--warning-color, #9b6600);
     border-radius: 8px;
-    padding: 16px 18px;
+    padding: 14px 16px;
   }
   .incomplete p {
     margin: 6px 0;
   }
   .incomplete .controls {
-    margin-top: 12px;
+    margin-top: 10px;
+  }
+  .coverage-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 14px 0;
+    padding: 12px 14px;
+    border: 1px solid var(--br-border);
+    border-radius: 9px;
+    background: color-mix(
+      in srgb,
+      var(--br-card) 96%,
+      var(--warning-color, #9b6600)
+    );
+  }
+  .coverage-status strong {
+    font-size: 14px;
+  }
+  .coverage-status p {
+    margin: 3px 0 0;
+    color: var(--br-muted);
+    font-size: 13px;
+  }
+  .coverage-status button {
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 8px 11px;
+    font-size: 13px;
   }
   #coverage {
     scroll-margin-top: 80px;
@@ -482,7 +558,11 @@ export const styles = css`
     font-size: 12px;
   }
   .result-heading {
-    margin: 28px 0 16px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    margin: 28px 0 12px;
   }
   .result-heading h2 {
     margin-bottom: 3px;
@@ -490,6 +570,24 @@ export const styles = css`
   }
   .result-heading code {
     color: var(--br-muted);
+  }
+  .result-badges {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .summary-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 4px 9px;
+    border: 1px solid var(--br-border);
+    border-radius: 999px;
+    background: var(--br-card);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
   }
   .technical {
     margin-top: 8px;
@@ -515,18 +613,74 @@ export const styles = css`
     display: block;
     margin: 8px 0 12px;
   }
+  .section-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 0 12px;
+  }
+  .section-heading h2 {
+    margin: 0;
+  }
+  .section-heading p {
+    margin: 4px 0 0;
+    color: var(--br-muted);
+    font-size: 13px;
+  }
+  .impact-heading {
+    margin-bottom: 14px;
+  }
+  .impact-heading .count {
+    flex: 0 0 auto;
+    margin-top: 1px;
+  }
   .uncertainty {
     border-top: 1px solid var(--br-border);
     margin-top: 18px;
-    padding-top: 24px;
+    padding-top: 20px;
   }
   .uncertainty h2 {
-    margin-bottom: 8px;
+    margin-bottom: 4px;
   }
   .uncertainty p {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--br-muted);
-    margin: 8px 0 14px;
+    margin: 5px 0 12px;
+  }
+  .secondary-context,
+  .dashboard-context {
+    background: color-mix(
+      in srgb,
+      var(--br-card) 97%,
+      var(--primary-text-color, #212121)
+    );
+  }
+  .diagnostics-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    color: var(--br-muted);
+    font-size: 13px;
+  }
+  .diagnostics-link button {
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  .coverage-diagnostics {
+    margin-top: 18px;
+    padding-top: 4px;
+    border-top: 1px solid var(--br-border);
+  }
+  .confidence-help {
+    margin-top: 12px;
   }
   .uncertainty-scope {
     border: 1px solid var(--br-border);
@@ -639,8 +793,8 @@ export const styles = css`
     border-color: var(--br-accent);
   }
   .purpose {
-    margin: 12px 0 0;
-    font-size: 15px;
+    margin: 7px 0 0;
+    font-size: 14px;
   }
   .review-hint {
     display: block;
@@ -787,6 +941,18 @@ export const styles = css`
     .map-columns {
       grid-template-columns: 1fr;
     }
+    .reference {
+      padding: 13px 14px;
+    }
+  }
+  @media (max-width: 760px) {
+    .impact-summary {
+      grid-template-columns: 1fr;
+    }
+    .impact-verdict {
+      border-right: 0;
+      border-bottom: 1px solid var(--br-border);
+    }
   }
   @media (max-width: 500px) {
     header {
@@ -806,14 +972,54 @@ export const styles = css`
     h1 {
       font-size: 23px;
     }
-    .stats {
-      grid-template-columns: repeat(2, 1fr);
+    .impact-summary {
+      grid-template-columns: 1fr;
     }
-    .stat:nth-child(2) {
+    .impact-verdict {
       border-right: 0;
-    }
-    .stat:nth-child(-n + 2) {
       border-bottom: 1px solid var(--br-border);
+    }
+    .impact-metrics {
+      grid-template-columns: 1fr;
+    }
+    .impact-metrics > div {
+      border-right: 0;
+      border-bottom: 1px solid var(--br-border);
+      padding: 12px 16px;
+    }
+    .impact-metrics > div:last-child {
+      border-bottom: 0;
+    }
+    .result-heading {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .result-badges {
+      justify-content: flex-start;
+    }
+    .coverage-status {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .coverage-status button {
+      width: 100%;
+    }
+    .section-heading,
+    .diagnostics-link {
+      align-items: stretch;
+      flex-direction: column;
+    }
+    .diagnostics-link button {
+      width: 100%;
+    }
+    .analysis-options {
+      width: 100%;
+    }
+    .analysis-options-body {
+      align-items: stretch;
+      flex-direction: column;
+      gap: 4px;
     }
     .search {
       flex-wrap: wrap;
