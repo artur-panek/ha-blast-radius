@@ -110,11 +110,11 @@ test("coverage gaps remain visible with zero references, open details and surviv
     .getByRole("combobox", { name: "Entity", exact: true })
     .fill("sensor.unused");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
-  const notice = page.getByRole("status", { name: "Static coverage partial" });
-  await expect(notice).toContainText("Static coverage: partial");
-  await expect(notice).toContainText(
-    "Some Home Assistant configuration cannot be fully inspected statically",
-  );
+  const coverage = page.getByRole("button", {
+    name: "Coverage partial",
+    exact: true,
+  });
+  await expect(coverage).toBeVisible();
   await expect(page.locator("#coverage")).not.toHaveAttribute("open", "");
   await expect(
     page.getByRole("button", { name: /Inspect to depth/ }),
@@ -130,13 +130,13 @@ test("coverage gaps remain visible with zero references, open details and surviv
   await page.screenshot({
     path: "/tmp/ha-blast-radius-incomplete-desktop.png",
   });
-  await page.getByRole("button", { name: "Coverage details" }).click();
+  await coverage.click();
   await expect(page.locator("#coverage")).toHaveAttribute("open", "");
   await expect(page.locator("#coverage > summary")).toBeFocused();
   await expect(page.locator("#coverage")).toContainText("dashboard.broken");
-  await expect(
-    page.getByText("No direct references found", { exact: true }),
-  ).toBeVisible();
+  await expect(page.locator(".impact-summary")).toContainText(
+    "No direct users",
+  );
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export JSON" }).click();
   const stream = await (await downloadPromise).createReadStream();
