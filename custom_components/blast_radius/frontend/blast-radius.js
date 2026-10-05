@@ -696,7 +696,7 @@ var Ee = {
     background: transparent;
   }
   main {
-    max-width: 1380px;
+    max-width: 1180px;
     margin: auto;
     padding: 30px 32px 50px;
   }
@@ -934,15 +934,15 @@ var Ee = {
     border-bottom-color: var(--br-accent);
   }
   .reference {
-    padding: 16px;
+    padding: 13px 15px;
     border: 1px solid var(--br-border);
     border-radius: 8px;
     min-width: 0;
   }
   .source-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: 1fr;
+    gap: 9px;
     align-items: start;
   }
   .reference-title {
@@ -1102,14 +1102,210 @@ var Ee = {
     font-size: 12px;
   }
   .result-heading {
-    margin: 28px 0 16px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    margin: 26px 0 14px;
+  }
+  .result-identity {
+    min-width: 0;
+  }
+  .eyebrow {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--br-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
   .result-heading h2 {
-    margin-bottom: 3px;
-    font-size: 22px;
+    margin: 0 0 2px;
+    font-size: 23px;
+    font-weight: 600;
   }
   .result-heading code {
     color: var(--br-muted);
+  }
+  .result-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    justify-content: flex-end;
+  }
+  .summary-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 4px 9px;
+    border: 1px solid var(--br-border);
+    border-radius: 999px;
+    background: var(--br-card);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .impact-high,
+  .confidence-review {
+    border-color: color-mix(in srgb, var(--warning-color, #9b6600) 60%, var(--br-border));
+  }
+  .impact-medium,
+  .confidence-mixed {
+    border-color: color-mix(in srgb, var(--br-accent) 45%, var(--br-border));
+  }
+  .confidence-good {
+    border-color: color-mix(in srgb, var(--success-color, #288048) 55%, var(--br-border));
+  }
+  .impact-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+    gap: 18px;
+    align-items: stretch;
+    margin: 0 0 12px;
+    padding: 16px 18px;
+    border: 1px solid var(--br-border);
+    border-radius: 10px;
+    background: var(--br-card);
+  }
+  .impact-primary {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+  }
+  .impact-primary > strong {
+    font-size: 34px;
+    font-weight: 500;
+    line-height: 1;
+  }
+  .impact-primary b {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 15px;
+  }
+  .impact-primary span {
+    display: block;
+    color: var(--br-muted);
+    font-size: 12px;
+  }
+  .impact-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-left: 1px solid var(--br-border);
+  }
+  .impact-metrics > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 14px;
+  }
+  .impact-metrics > div + div {
+    border-left: 1px solid var(--br-border);
+  }
+  .impact-metrics strong {
+    font-size: 22px;
+    font-weight: 500;
+  }
+  .impact-metrics span {
+    color: var(--br-muted);
+    font-size: 12px;
+  }
+  .analysis-options {
+    width: fit-content;
+    margin: -10px 0 18px auto;
+    color: var(--br-muted);
+    font-size: 12px;
+  }
+  .analysis-options > summary {
+    padding: 5px 0;
+    font-weight: 500;
+  }
+  .analysis-options > summary span {
+    margin-left: 6px;
+  }
+  .analysis-options-body {
+    width: min(360px, calc(100vw - 48px));
+    padding: 8px 0 4px;
+  }
+  .analysis-options-body .depth {
+    width: 130px;
+  }
+  .analysis-options-body p {
+    margin: 8px 0 0;
+    font-size: 12px;
+  }
+  .coverage-inline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 14px;
+    padding: 8px 11px;
+    border-left: 2px solid var(--warning-color, #9b6600);
+    color: var(--br-muted);
+    background: color-mix(in srgb, var(--br-card) 94%, var(--warning-color, #9b6600));
+    font-size: 12px;
+  }
+  .coverage-inline strong {
+    color: var(--primary-text-color, #212121);
+  }
+  .link-button {
+    min-height: 0;
+    padding: 2px 4px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 12px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .section-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 2px 0 12px;
+  }
+  .section-heading h2 {
+    margin: 0 0 3px;
+  }
+  .section-heading p {
+    margin: 0;
+    color: var(--br-muted);
+    font-size: 13px;
+  }
+  .indirect-callout {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 16px 0 0;
+    padding: 12px 14px;
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--br-card) 97%, var(--primary-text-color, #212121));
+  }
+  .indirect-callout p {
+    max-width: 760px;
+    margin: 3px 0 0;
+    color: var(--br-muted);
+    font-size: 12px;
+  }
+  .indirect-callout button {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+  .compact-empty {
+    padding: 22px 12px;
+  }
+  .confidence-help {
+    margin-top: 12px;
+  }
+  .coverage-explainer {
+    margin-bottom: 6px;
   }
   .technical {
     margin-top: 8px;
@@ -1138,7 +1334,7 @@ var Ee = {
   .uncertainty {
     border-top: 1px solid var(--br-border);
     margin-top: 18px;
-    padding-top: 24px;
+    padding-top: 18px;
   }
   .uncertainty h2 {
     margin-bottom: 8px;
@@ -1243,14 +1439,14 @@ var Ee = {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 44px;
+    min-height: 34px;
     border: 1px solid var(--br-border);
     border-radius: 7px;
-    padding: 7px 12px;
+    padding: 5px 10px;
     background: var(--br-card);
     color: var(--primary-text-color, #212121);
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     white-space: nowrap;
   }
@@ -1259,8 +1455,9 @@ var Ee = {
     border-color: var(--br-accent);
   }
   .purpose {
-    margin: 12px 0 0;
-    font-size: 15px;
+    margin: 6px 0 0 38px;
+    font-size: 13px;
+    color: var(--br-muted);
   }
   .review-hint {
     display: block;
@@ -1342,7 +1539,22 @@ var Ee = {
     margin: 12px 0;
   }
   .result-filters {
-    margin: 14px 0 20px;
+    margin: 0 0 16px;
+    padding: 0;
+  }
+  .result-filters > summary {
+    width: fit-content;
+    padding: 4px 0;
+    color: var(--br-muted);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .filter-body {
+    margin-top: 7px;
+    padding: 10px 12px;
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--br-card) 97%, var(--primary-text-color, #212121));
   }
   .filter-row {
     display: flex;
@@ -1398,6 +1610,14 @@ var Ee = {
     .columns {
       grid-template-columns: 1fr;
     }
+    .impact-summary {
+      grid-template-columns: 1fr;
+    }
+    .impact-metrics {
+      border-left: 0;
+      border-top: 1px solid var(--br-border);
+      padding-top: 12px;
+    }
     main {
       padding: 22px 18px;
     }
@@ -1425,6 +1645,31 @@ var Ee = {
     }
     h1 {
       font-size: 23px;
+    }
+    .result-heading {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .result-badges {
+      justify-content: flex-start;
+    }
+    .impact-summary {
+      padding: 14px;
+    }
+    .impact-primary > strong {
+      font-size: 30px;
+    }
+    .impact-metrics > div {
+      padding: 0 10px;
+    }
+    .coverage-inline,
+    .indirect-callout {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .analysis-options {
+      margin-left: 0;
     }
     .stats {
       grid-template-columns: repeat(2, 1fr);
@@ -1462,6 +1707,9 @@ var Ee = {
     }
     .source-heading {
       gap: 8px;
+    }
+    .purpose {
+      margin-left: 30px;
     }
     .source-icon {
       width: 22px;
