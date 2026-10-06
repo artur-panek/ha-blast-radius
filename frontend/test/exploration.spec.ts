@@ -2,14 +2,19 @@ import { test, expect, type Page } from "@playwright/test";
 
 const input = (page: Page) =>
   page.getByRole("combobox", { name: "Entity", exact: true });
-const filters = (page: Page) =>
-  page.getByRole("region", { name: "Result filters" });
+const filters = (page: Page) => page.locator("details.result-filters");
 const chip = (page: Page, name: string) =>
   filters(page).getByRole("button", { name, exact: true });
+async function openFilters(page: Page) {
+  const resultFilters = filters(page);
+  if ((await resultFilters.getAttribute("open")) === null)
+    await resultFilters.locator(":scope > summary").click();
+}
 async function analyze(page: Page, id = "media_player.speaker") {
   await input(page).fill(id);
   await input(page).press("Enter");
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await openFilters(page);
 }
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
@@ -25,12 +30,18 @@ test("source chips filter impact, graph and raw without changing totals or expor
     .locator("blast-radius-panel")
     .evaluate((p: any) => JSON.stringify(p.report));
   await chip(page, "Script").click();
-  await expect(page.locator(".source-grid .source-row")).toHaveCount(1);
-  await expect(page.locator(".source-grid .source-row")).toHaveAttribute(
-    "data-source",
-    "script.music_toggle",
-  );
-  await page.getByRole("tab", { name: "Graph", exact: true }).click();
+  const scriptRows = page.locator(".impact-lane .source-grid .source-row");
+  expect(await scriptRows.count()).toBeGreaterThanOrEqual(1);
+  expect(
+    new Set(
+      await scriptRows.evaluateAll((rows) =>
+        rows.map((row) => row.getAttribute("data-source")),
+      ),
+    ),
+  ).toEqual(new Set(["script.music_toggle"]));
+  await page
+    .getByRole("tab", { name: "Relationship map", exact: true })
+    .click();
   await expect(page.locator(".graph-node.selected")).toHaveCount(1);
   await expect(
     page.locator('.graph-node.dependent[data-source="dashboard.home"]'),
@@ -88,9 +99,14 @@ for (const kind of ["Automation", "Script", "Dashboard", "Scene", "Group"]) {
           ).size,
         kind.toLowerCase(),
       );
-    await expect(page.locator(".source-grid .source-row")).toHaveCount(
-      expected,
+    const visibleSourceIds = new Set(
+      await page
+        .locator(".impact-lane .source-grid .source-row")
+        .evaluateAll((rows) =>
+          rows.map((row) => row.getAttribute("data-source")).filter(Boolean),
+        ),
     );
+    expect(visibleSourceIds.size).toBe(expected);
     if (!expected)
       await expect(
         page.getByText("No matching direct references", { exact: true }),
@@ -133,7 +149,9 @@ test("keyboard multi-select preserves tab and resets when root changes", async (
   page,
 }) => {
   await analyze(page);
-  await page.getByRole("tab", { name: "Graph", exact: true }).click();
+  await page
+    .getByRole("tab", { name: "Relationship map", exact: true })
+    .click();
   const scene = chip(page, "Scene");
   await scene.focus();
   await scene.press("Space");
@@ -142,7 +160,7 @@ test("keyboard multi-select preserves tab and resets when root changes", async (
   await chip(page, "Automation").press("Enter");
   await expect(scene).toHaveAttribute("aria-pressed", "true");
   await expect(
-    page.getByRole("tab", { name: "Graph", exact: true }),
+    page.getByRole("tab", { name: "Relationship map", exact: true }),
   ).toHaveAttribute("aria-selected", "true");
   await page.getByRole("button", { name: "Refresh snapshot" }).click();
   await expect(scene).toHaveAttribute("aria-pressed", "true");
@@ -152,7 +170,7 @@ test("keyboard multi-select preserves tab and resets when root changes", async (
     "true",
   );
   await expect(
-    page.getByRole("tab", { name: "Graph", exact: true }),
+    page.getByRole("tab", { name: "Relationship map", exact: true }),
   ).toHaveAttribute("aria-selected", "true");
 });
 test("filters do not persist across remounts or HA account changes", async ({
@@ -173,6 +191,7 @@ test("filters do not persist across remounts or HA account changes", async ({
     fresh.hass = hass;
     document.body.append(fresh);
   });
+  await openFilters(page);
   await expect(chip(page, "All sources")).toHaveAttribute(
     "aria-pressed",
     "true",
@@ -202,7 +221,9 @@ test("Analyze this from Used by and Possible targets resets preview and enters R
   await expect(
     page.getByRole("heading", { name: "Rename preview" }),
   ).toBeVisible();
-  await page.getByRole("tab", { name: "Graph", exact: true }).click();
+  await page
+    .getByRole("tab", { name: "Relationship map", exact: true })
+    .click();
   const node = page.locator(
     '.graph-node[data-source="automation.wall_button"]',
   );
@@ -232,7 +253,7 @@ test("Analyze this from Used by and Possible targets resets preview and enters R
     }),
   ).toBeVisible();
   await expect(
-    page.getByRole("tab", { name: "Graph", exact: true }),
+    page.getByRole("tab", { name: "Relationship map", exact: true }),
   ).toHaveAttribute("aria-selected", "true");
   const target = page.locator(
     '.graph-node.downstream[data-source="media_player.speaker"]',
@@ -261,7 +282,9 @@ test("graph navigation removes stale exports and ignores superseded response", a
   page,
 }) => {
   await analyze(page, "binary_sensor.wall_button");
-  await page.getByRole("tab", { name: "Graph", exact: true }).click();
+  await page
+    .getByRole("tab", { name: "Relationship map", exact: true })
+    .click();
   await page.locator("blast-radius-panel").evaluate((p: any) => {
     const original = p.hass.callWS.bind(p.hass);
     p.hass = {
@@ -305,7 +328,9 @@ for (const theme of ["light", "dark"]) {
     await page.setViewportSize({ width: 360, height: 780 });
     if (theme === "dark") await page.locator("#theme").click();
     await analyze(page, "binary_sensor.wall_button");
-    await page.getByRole("tab", { name: "Graph", exact: true }).click();
+    await page
+      .getByRole("tab", { name: "Relationship map", exact: true })
+      .click();
     await chip(page, "Automation").click();
     const dimensions = await page
       .locator("blast-radius-panel")
@@ -322,11 +347,98 @@ for (const theme of ["light", "dark"]) {
     await expect(page.locator(".graph-node.selected")).toHaveCount(1);
     await expect(
       page.getByText(
-        "No matching linked configurations. Try All sources or All confidence.",
+        "No matching dependency paths. Clear filters to restore the full map.",
       ),
     ).toBeVisible();
   });
 }
+test("overview separates incoming controllers from reaction paths and downstream effects", async ({
+  page,
+}) => {
+  await analyze(page, "binary_sensor.wall_button");
+  const summary = page.locator(".impact-summary");
+  await expect(
+    summary
+      .locator(".impact-metrics > div")
+      .filter({ hasText: "sources can change / invoke" }),
+  ).toContainText("0");
+  await expect(
+    summary
+      .locator(".impact-metrics > div")
+      .filter({ hasText: "sources read / react" }),
+  ).toContainText("2");
+  await expect(
+    summary
+      .locator(".impact-metrics > div")
+      .filter({ hasText: "possible downstream nodes" }),
+  ).toContainText("3");
+  await expect(
+    summary
+      .locator(".impact-metrics > div")
+      .filter({ hasText: "display sources" }),
+  ).toContainText("1");
+  await expect(
+    page.getByRole("heading", { name: "What reads or reacts to this entity" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "What may be affected downstream" }),
+  ).toBeVisible();
+  await expect(page.locator(".shared-context")).toHaveCount(0);
+});
+
+test("write-only flows expose co-targets as context rather than downstream effects", async ({
+  page,
+}) => {
+  await analyze(page, "light.desk");
+  const summary = page.locator(".impact-summary");
+  await expect(
+    summary
+      .locator(".impact-metrics > div")
+      .filter({ hasText: "sources can change / invoke" }),
+  ).toContainText("1");
+  await expect(
+    summary
+      .locator(".impact-metrics > div")
+      .filter({ hasText: "possible downstream nodes" }),
+  ).toContainText("0");
+  await expect(page.locator(".summary-context-note")).toContainText(
+    "1 additional node is shared-flow context only",
+  );
+  const context = page.locator(".shared-context");
+  await expect(context).toContainText("Shared-flow context");
+  await expect(context).not.toHaveAttribute("open", "");
+  await expect(
+    page.getByRole("heading", { name: "What may be affected downstream" }),
+  ).toHaveCount(0);
+});
+
+test("selected scripts show their own direct outputs as downstream impact", async ({
+  page,
+}) => {
+  await analyze(page, "script.music_toggle");
+  const summary = page.locator(".impact-summary");
+  await expect(
+    summary
+      .locator(".impact-metrics > div")
+      .filter({ hasText: "sources can change / invoke" }),
+  ).toContainText("1");
+  await expect(
+    summary
+      .locator(".impact-metrics > div")
+      .filter({ hasText: "possible downstream nodes" }),
+  ).toContainText("2");
+  const downstream = page
+    .locator(".downstream-lane")
+    .filter({ hasText: "Direct outputs of this configuration" });
+  await expect(downstream).toBeVisible();
+  await expect(
+    downstream.locator('.flow-target[data-source="media_player.speaker"]'),
+  ).toBeVisible();
+  await expect(
+    downstream.locator('.flow-target[data-source="media_player.tablet"]'),
+  ).toBeVisible();
+});
+
 test("Report issue URL contains no entity or report data", async ({ page }) => {
   await analyze(page);
   await expect(
@@ -391,7 +503,9 @@ test("graph confidence filters keep valid via paths and never substitute unrelat
   await expect(
     page.locator('.source-grid .source-row[data-source="group.synthetic"]'),
   ).toHaveCount(1);
-  await page.getByRole("tab", { name: "Graph", exact: true }).click();
+  await page
+    .getByRole("tab", { name: "Relationship map", exact: true })
+    .click();
   await chip(page, "Template literal").click();
   await expect(page.locator(".graph-node.dependent")).toHaveCount(0);
   await page.locator("blast-radius-panel").evaluate((p: any) => {

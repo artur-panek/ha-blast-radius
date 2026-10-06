@@ -309,7 +309,7 @@ export const styles = css`
   }
   .impact-metrics {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
   .impact-metrics > div {
     padding: 18px 16px;
@@ -327,6 +327,217 @@ export const styles = css`
   .impact-metrics span {
     color: var(--br-muted);
     font-size: 13px;
+  }
+  .summary-context-note {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: -12px 0 22px;
+    padding: 9px 12px;
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    color: var(--br-muted);
+    font-size: 12px;
+    background: color-mix(
+      in srgb,
+      var(--br-card) 97%,
+      var(--primary-text-color, #212121)
+    );
+  }
+  .summary-context-note strong {
+    color: var(--primary-text-color, #212121);
+    font-size: 13px;
+  }
+  .impact-lane {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--br-border);
+  }
+  .impact-lane:first-of-type {
+    margin-top: 10px;
+  }
+  .impact-lane .section-heading {
+    margin-bottom: 10px;
+  }
+  .lane-badge {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+  .incoming-badge {
+    border-color: color-mix(in srgb, var(--br-accent) 55%, var(--br-border));
+  }
+  .reaction-badge,
+  .downstream-badge {
+    border-color: color-mix(
+      in srgb,
+      var(--success-color, #288048) 55%,
+      var(--br-border)
+    );
+  }
+  .role-group {
+    margin-top: 12px;
+  }
+  .role-group + .role-group {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--br-border);
+  }
+  .role-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .role-heading h3 {
+    margin: 0;
+    font-size: 15px;
+  }
+  .role-heading p {
+    margin: 3px 0 0;
+    color: var(--br-muted);
+    font-size: 12px;
+  }
+  .role-count {
+    flex: 0 0 auto;
+    border: 1px solid var(--br-border);
+    border-radius: 999px;
+    padding: 4px 8px;
+    color: var(--br-muted);
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .role-change .role-count,
+  .role-invoke .role-count {
+    border-color: color-mix(in srgb, var(--br-accent) 55%, var(--br-border));
+  }
+  .same-flow-list {
+    display: grid;
+    gap: 8px;
+  }
+  .flow-group {
+    margin: 0;
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    padding: 2px 12px;
+  }
+  .flow-output,
+  .flow-reaction {
+    border-left: 3px solid var(--success-color, #288048);
+  }
+  .flow-mixed {
+    border-left: 3px solid var(--warning-color, #9b6600);
+  }
+  .flow-context {
+    background: color-mix(
+      in srgb,
+      var(--br-card) 98%,
+      var(--primary-text-color, #212121)
+    );
+  }
+  .flow-group > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .flow-group > summary > span:first-child {
+    min-width: 0;
+  }
+  .flow-source {
+    display: block;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .flow-group summary small {
+    display: block;
+    margin-top: 2px;
+    color: var(--br-muted);
+    font-size: 11px;
+    font-weight: 400;
+  }
+  .flow-count {
+    flex: 0 0 auto;
+    color: var(--br-muted);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .flow-targets {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 4px 0 10px;
+  }
+  .flow-target {
+    min-width: 0;
+    border: 1px solid var(--br-border);
+    border-radius: 7px;
+    padding: 9px 10px;
+  }
+  .flow-target .source-name {
+    font-size: 13px;
+  }
+  .flow-target small {
+    display: block;
+    margin-top: 2px;
+    color: var(--br-muted);
+    font-size: 11px;
+  }
+  .shared-context {
+    margin-top: 24px;
+    border: 1px solid var(--br-border);
+    border-radius: 9px;
+    padding: 3px 12px;
+    background: color-mix(
+      in srgb,
+      var(--br-card) 98%,
+      var(--primary-text-color, #212121)
+    );
+  }
+  .shared-context > summary {
+    font-weight: 600;
+  }
+  .shared-context > p {
+    margin: 0 0 12px;
+    font-size: 12px;
+  }
+  .graph-direction {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 12px 0 18px;
+  }
+  .graph-direction span {
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--br-muted);
+    font-size: 12px;
+  }
+  .graph-direction strong {
+    color: var(--primary-text-color, #212121);
+  }
+  .effect-group {
+    border-top-color: color-mix(
+      in srgb,
+      var(--success-color, #288048) 60%,
+      var(--br-border)
+    );
+  }
+  .graph-context {
+    margin-top: 22px;
+    border-top: 1px solid var(--br-border);
+    padding-top: 8px;
+  }
+  .graph-context > summary {
+    font-weight: 600;
+  }
+  .graph-context-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 10px;
   }
 
   .columns {
@@ -876,7 +1087,19 @@ export const styles = css`
     margin: 12px 0;
   }
   .result-filters {
-    margin: 14px 0 20px;
+    margin: 4px 0 20px;
+    border-bottom: 1px solid var(--br-border);
+    padding-bottom: 8px;
+  }
+  .result-filters > summary {
+    width: fit-content;
+    padding: 7px 0;
+    color: var(--br-muted);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .filter-body {
+    padding-top: 6px;
   }
   .filter-row {
     display: flex;
@@ -938,20 +1161,41 @@ export const styles = css`
   }
   @media (max-width: 1000px) {
     .source-grid,
-    .map-columns {
+    .map-columns,
+    .flow-targets,
+    .graph-context-grid {
       grid-template-columns: 1fr;
     }
     .reference {
       padding: 13px 14px;
     }
+    .impact-metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .impact-metrics > div:nth-child(2) {
+      border-right: 0;
+    }
+    .impact-metrics > div:nth-child(-n + 2) {
+      border-bottom: 1px solid var(--br-border);
+    }
   }
   @media (max-width: 760px) {
-    .impact-summary {
+    .impact-summary,
+    .graph-direction {
       grid-template-columns: 1fr;
     }
     .impact-verdict {
       border-right: 0;
       border-bottom: 1px solid var(--br-border);
+    }
+    .role-heading,
+    .flow-group > summary {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .role-count,
+    .flow-count {
+      white-space: normal;
     }
   }
   @media (max-width: 500px) {
