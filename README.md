@@ -7,13 +7,13 @@
 
 **Check dependencies before you make a change.**
 
-By [Artur Panek](https://artur.panek.tech/) · [Project page](https://artur.panek.tech/work/ha-blast-radius/) · [Releases](https://github.com/artur-panek/ha-blast-radius/releases)
+By [Artur Panek](https://artur.panek.tech/) · [Project page](https://artur.panek.tech/work/ha-blast-radius/) · [Static vs runtime note](https://artur.panek.tech/notes/home-assistant-static-vs-runtime/) · [Releases](https://github.com/artur-panek/ha-blast-radius/releases)
 
 Read-only dependency and impact analysis for Home Assistant. Find where an entity
 is referenced, follow structural dependencies, and preview a rename or removal
 before changing your configuration. Every result includes source paths and confidence.
 
-**v0.2.3 · Public alpha · Admin only · MIT**
+**v0.2.4 · Experimental alpha · Admin only · MIT**
 
 Requires Home Assistant **2026.9.4+**; tested against **2026.9.4**. Later releases
 need compatibility testing. This is a static configuration inspector, not a runtime
@@ -45,10 +45,13 @@ The screenshot uses synthetic fixtures, not a real household's configuration.
 - Recursive script calls, action targets, scene membership and exposed group membership.
 - Configured Lovelace dashboards, including YAML, through HA's own loader.
 - Jinja literals found without executing templates; unresolved expressions kept separate.
-- Bounded dependency view with cycle detection and adjustable depth. Visible
-  notices for incomplete results, with deeper inspection when a depth limit is reached.
+- Impact-first dependency view with a factual direct-impact summary, bounded
+  traversal and cycle detection. Real traversal truncation is separated from
+  ordinary static-analysis coverage limits.
 - Clickable sources: inspect loaded automations/scripts in HA's read-only view,
   open scenes in their editor, dashboards in their view, and entities in details.
+- Coverage & diagnostics keeps device/selector context and system-wide dashboard
+  diagnostics separate from the direct Impact view.
 - Return to your last search, depth and tab after opening a source. Reopen any of
   six recent searches from a compact bar in the same browser tab.
 - Rename/removal previews. **Neither operation is ever executed.**
@@ -94,7 +97,7 @@ and select the latest numbered release. Updates do not install or restart HA aut
 ## Usage
 
 1. Select or type an entity ID. Missing old IDs are accepted.
-2. Choose a traversal depth and press **Analyze**.
+2. Press **Analyze**. Traversal depth is available under **Analysis options** when you need to adjust it.
 3. Read **Impact**, **Graph**, or **Raw references**. Click a source name or **Open**
    to inspect it in Home Assistant; **Analyze this** makes a graph node the new root
    without leaving the panel. Expand reference details for exact paths.
@@ -133,12 +136,11 @@ actions on other cards do not become downstream effects of the selected entity.
 Different locations remain separate references; identical references are deduplicated.
 Nodes appear once and the edge list retains alternative paths. Default depth is 6,
 adjustable from 1 to 12. Graphs cap at 500 nodes and 2,000 edges; scans cap at
-50,000 references and 80 nested levels. Depth/size limits and specific snapshot
-coverage gaps produce a **Results are incomplete** notice above the counts.
-The notice offers a deeper search for depth-only limits below 12, and opens the
-coverage details for skipped sources, failed blueprint expansion and scan limits.
-Warnings also appear in Markdown and JSON exports. The static-analysis limitations
-below apply even when no warning is shown.
+50,000 references and 80 nested levels. Traversal depth/size limits produce an explicit incomplete-result notice rather
+than being mixed with normal static-analysis uncertainty. Coverage & diagnostics
+keeps skipped sources, selector/device context, failed blueprint expansion and
+other coverage limits visible without presenting every ordinary limitation as a
+failed analysis. Relevant warnings also appear in Markdown and JSON exports.
 
 ### Confidence model
 
