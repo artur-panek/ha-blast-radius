@@ -16,20 +16,32 @@ test.beforeEach(async ({ page }) => {
   await expect(page.getByText("Start with one entity")).toBeVisible();
 });
 
-test("source chips filter impact, graph and raw without changing totals or exports", async ({
+test("source chips filter direct usage, graph and technical views without changing totals or exports", async ({
   page,
 }) => {
   await analyze(page);
   const before = await page.locator(".impact-summary").innerText();
+  await page
+    .getByRole("tab", { name: "Uses this entity", exact: true })
+    .click();
   const full = await page
     .locator("blast-radius-panel")
     .evaluate((p: any) => JSON.stringify(p.report));
   await chip(page, "Script").click();
-  await expect(page.locator(".source-grid .source-row")).toHaveCount(1);
-  await expect(page.locator(".source-grid .source-row")).toHaveAttribute(
+  await expect(page.locator(".source-grid .source-row")).toHaveCount(2);
+  await expect(
+    page.locator(".source-grid .source-row").first(),
+  ).toHaveAttribute("data-source", "script.music_toggle");
+  await expect(page.locator(".source-grid .source-row").last()).toHaveAttribute(
     "data-source",
     "script.music_toggle",
   );
+  await expect(
+    page.getByText("Checks this entity", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Changes / targets this entity ×2", { exact: true }),
+  ).toBeVisible();
   await page.getByRole("tab", { name: "Graph", exact: true }).click();
   await expect(page.locator(".graph-node.selected")).toHaveCount(1);
   await expect(
@@ -38,7 +50,7 @@ test("source chips filter impact, graph and raw without changing totals or expor
   await expect(
     page.locator('.graph-node.dependent[data-source="script.music_toggle"]'),
   ).toHaveCount(1);
-  await page.getByRole("tab", { name: "Raw references", exact: true }).click();
+  await page.getByRole("tab", { name: "Technical", exact: true }).click();
   expect(await page.locator("tbody tr").count()).toBeGreaterThan(0);
   for (const text of await page
     .locator("tbody tr td:first-child")
@@ -76,24 +88,36 @@ for (const kind of ["Automation", "Script", "Dashboard", "Scene", "Group"]) {
     page,
   }) => {
     await analyze(page);
+    await page
+      .getByRole("tab", { name: "Uses this entity", exact: true })
+      .click();
     await chip(page, kind).click();
-    const expected = await page
-      .locator("blast-radius-panel")
-      .evaluate(
-        (p: any, type) =>
-          new Set(
-            p.report.references
-              .filter((r: any) => r.source_type === type)
-              .map((r: any) => r.source_id),
-          ).size,
-        kind.toLowerCase(),
-      );
+    const expected = await page.locator("blast-radius-panel").evaluate(
+      (p: any, type) =>
+        new Set(
+          p.report.references
+            .filter((r: any) => r.source_type === type)
+            .map((r: any) => {
+              const category =
+                r.role === "write" || r.role === "call"
+                  ? "action"
+                  : r.role === "display" || r.role === "member"
+                    ? "context"
+                    : "observe";
+              return `${r.source_id}:${category}`;
+            }),
+        ).size,
+      kind.toLowerCase(),
+    );
     await expect(page.locator(".source-grid .source-row")).toHaveCount(
       expected,
     );
     if (!expected)
       await expect(
-        page.getByText("No matching direct references", { exact: true }),
+        page.getByText(
+          "No direct references match the current filters. Try All sources or All confidence.",
+          { exact: true },
+        ),
       ).toBeVisible();
     await expect(chip(page, kind)).toHaveAttribute("aria-pressed", "true");
   });
@@ -102,7 +126,7 @@ test("confidence filters distinguish explicit, literal, and review including dyn
   page,
 }) => {
   await analyze(page, "binary_sensor.wall_button");
-  await page.getByRole("tab", { name: "Raw references", exact: true }).click();
+  await page.getByRole("tab", { name: "Technical", exact: true }).click();
   for (const [label, allowed] of [
     ["Explicit", ["explicit"]],
     ["Template literal", ["template_literal"]],
@@ -159,6 +183,9 @@ test("filters do not persist across remounts or HA account changes", async ({
   page,
 }) => {
   await analyze(page);
+  await page
+    .getByRole("tab", { name: "Uses this entity", exact: true })
+    .click();
   await chip(page, "Script").click();
   expect(
     await page.evaluate(() =>
@@ -185,12 +212,15 @@ test("filters do not persist across remounts or HA account changes", async ({
     );
   await expect(page.getByText("Start with one entity")).toBeVisible();
   await analyze(page);
+  await page
+    .getByRole("tab", { name: "Uses this entity", exact: true })
+    .click();
   await expect(chip(page, "All sources")).toHaveAttribute(
     "aria-pressed",
     "true",
   );
 });
-test("Analyze this from Used by and Possible targets resets preview and enters Recent", async ({
+test("Analyze this from graph relationship lanes resets preview and enters Recent", async ({
   page,
 }) => {
   await analyze(page, "binary_sensor.wall_button");
@@ -387,6 +417,9 @@ test("graph confidence filters keep valid via paths and never substitute unrelat
       },
     };
   });
+  await page
+    .getByRole("tab", { name: "Uses this entity", exact: true })
+    .click();
   await chip(page, "Group").click();
   await expect(
     page.locator('.source-grid .source-row[data-source="group.synthetic"]'),
@@ -428,6 +461,9 @@ test("selector presentation separates known identity from unexpanded entity memb
     };
     p.report = { ...p.report, uncertain_references: [ref] };
   });
+  await page
+    .getByRole("tab", { name: "Uses this entity", exact: true })
+    .click();
   await chip(page, "Needs review").click();
   await page.getByRole("button", { name: "View coverage" }).click();
   const selectorScope = page

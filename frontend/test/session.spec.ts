@@ -66,7 +66,7 @@ test("Back recreates the panel with its search, depth, tab and scroll and reques
     page.getByRole("tab", { name: "Graph", exact: true }),
   ).toHaveAttribute("aria-selected", "true");
   await expect(
-    page.getByRole("heading", { name: "Dependency map" }),
+    page.getByRole("heading", { name: "Relationship map" }),
   ).toBeVisible();
   await expect
     .poll(async () =>
@@ -166,10 +166,10 @@ test("reload and reconnect restore a successful search; failed searches do not e
   page,
 }) => {
   await analyze(page, "media_player.speaker");
-  await page.getByRole("tab", { name: "Raw references", exact: true }).click();
+  await page.getByRole("tab", { name: "Technical", exact: true }).click();
   await page.reload();
   await expect(
-    page.getByRole("tab", { name: "Raw references", exact: true }),
+    page.getByRole("tab", { name: "Technical", exact: true }),
   ).toHaveAttribute("aria-selected", "true");
   await expect(search(page)).toHaveValue("media_player.speaker");
   await page.locator("blast-radius-panel").evaluate((panel: any) => {

@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.5 — 2026-10-05
+
+- Redesign the panel around relationship direction so users can distinguish
+  configurations that act on an entity, read or react to it, and only display
+  or contain it.
+- Add a compact Overview that answers what uses the selected entity and what
+  else the same related flows can affect without implying runtime causality.
+- Add dedicated Uses this entity and Related effects views, group co-effects by
+  their originating configuration, and keep chained effects collapsed separately.
+- Rename the graph lanes and connection labels to make incoming use versus
+  same-flow effects explicit; keep the raw reference table under Technical.
+- Move ordinary static-coverage caveats out of the main result flow, retain real
+  traversal-limit warnings, improve mobile tab discoverability, and refresh the
+  synthetic screenshots and browser regressions.
+
 ## 0.2.4 — 2026-10-05
 
 - Redesign the panel around a factual direct-impact summary instead of an

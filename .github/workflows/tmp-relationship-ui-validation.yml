@@ -1,0 +1,46 @@
+name: Temporary relationship UI validation
+
+on:
+  push:
+    branches: [ui/relationship-model-overhaul]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: relationship-ui-validation
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    if: "!contains(github.event.head_commit.message, '[ui-finalize]')"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ui/relationship-model-overhaul
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npx prettier --write 'src/*.ts' '*.ts' '*.json' 'test/*.ts' index.html
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+      - name: Commit validated UI assets
+        working-directory: .
+        run: |
+          git config user.name "Artur Panek"
+          git config user.email "47123591+artur-panek@users.noreply.github.com"
+          git add frontend custom_components/blast_radius/frontend docs/panel-light.png docs/panel-dark.png docs/panel-mobile-dark.png
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+            exit 0
+          fi
+          git commit -m "chore: finalize relationship UI [ui-finalize]"
+          git push origin HEAD:ui/relationship-model-overhaul
