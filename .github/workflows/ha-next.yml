@@ -1,9 +1,6 @@
-name: HA next compatibility
+name: HA next (advisory)
 on:
   pull_request:
-    paths-ignore: ['**.md', 'docs/**', 'LICENSE', '.github/ISSUE_TEMPLATE/**']
-  push:
-    branches: [main]
     paths-ignore: ['**.md', 'docs/**', 'LICENSE', '.github/ISSUE_TEMPLATE/**']
   schedule:
     - cron: '23 6 * * 2'
@@ -15,11 +12,11 @@ concurrency:
   group: ha-next-${{ github.ref }}
   cancel-in-progress: true
 
-# Advisory: separate from the required stable Quality/release dependency chain.
-# Do not use continue-on-error: upstream failures must remain visibly red.
+# Advisory only. Run it before merge, weekly, or manually.
+# Stable Quality runs again on main and remains the release gate.
 jobs:
   ha-next:
-    name: HA next compatibility
+    name: Compatibility against HA next
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
