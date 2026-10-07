@@ -5,23 +5,17 @@
 
 # HA Blast Radius
 
-**Check dependencies before you make a change.**
+**Read-only dependency and impact analysis for Home Assistant.**
 
-By [Artur Panek](https://artur.panek.tech/) · [Project page](https://artur.panek.tech/work/ha-blast-radius/) · [Static vs runtime note](https://artur.panek.tech/notes/home-assistant-static-vs-runtime/) · [Releases](https://github.com/artur-panek/ha-blast-radius/releases)
+[![Release](https://img.shields.io/github/v/release/artur-panek/ha-blast-radius?style=flat-square&label=Release)](https://github.com/artur-panek/ha-blast-radius/releases) [![CI](https://img.shields.io/github/actions/workflow/status/artur-panek/ha-blast-radius/quality.yml?branch=main&style=flat-square&label=CI)](https://github.com/artur-panek/ha-blast-radius/actions/workflows/quality.yml) [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
-Read-only dependency and impact analysis for Home Assistant. Find where an entity
-is referenced, follow structural dependencies, and preview a rename or removal
-before changing your configuration. Every result includes source paths and confidence.
+Find where an entity is referenced, follow structural dependencies, and preview a rename or removal before changing your configuration. Every result includes source paths and confidence.
 
-**v0.2.4 · Experimental alpha · Admin only · MIT**
+[Project page](https://artur.panek.tech/work/ha-blast-radius/) · [Engineering note](https://artur.panek.tech/notes/home-assistant-static-vs-runtime/) · [Releases](https://github.com/artur-panek/ha-blast-radius/releases)
 
-Requires Home Assistant **2026.9.4+**; tested against **2026.9.4**. Later releases
-need compatibility testing. This is a static configuration inspector, not a runtime
-simulator: an empty report does not guarantee that a change is safe.
+> **Experimental alpha.** Administrator-only. Requires Home Assistant **2026.9.4+** and is tested against **2026.9.4**. This is a static configuration inspector, not a runtime simulator; an empty report does not guarantee that a change is safe.
 
-[Install with HACS](#hacs-custom-repository) · [Usage](#usage) ·
-[Known limitations](#known-limitations) ·
-[Report a bug](https://github.com/artur-panek/ha-blast-radius/issues/new?template=bug.yml)
+[Install with HACS](#hacs-custom-repository) · [Usage](#usage) · [Known limitations](#known-limitations) · [Report a bug](https://github.com/artur-panek/ha-blast-radius/issues/new?template=bug.yml)
 
 ```mermaid
 flowchart TD
