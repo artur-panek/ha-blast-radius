@@ -5,11 +5,11 @@
 
 # HA Blast Radius
 
-**Read-only dependency and impact analysis for Home Assistant.**
+**Find Home Assistant entity references before changing your configuration.**
 
 [![Release](https://img.shields.io/github/v/release/artur-panek/ha-blast-radius?style=flat-square&label=Release)](https://github.com/artur-panek/ha-blast-radius/releases) [![CI](https://img.shields.io/github/actions/workflow/status/artur-panek/ha-blast-radius/quality.yml?branch=main&style=flat-square&label=CI)](https://github.com/artur-panek/ha-blast-radius/actions/workflows/quality.yml) [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
-Find where an entity is referenced, follow structural dependencies, and preview a rename or removal before changing your configuration. Every result includes source paths and confidence.
+Find where an entity is used in automations, scripts, scenes and dashboards. Review related references and preview a rename or removal without changing any configuration.
 
 [Project page](https://artur.panek.tech/work/ha-blast-radius/) · [Engineering note](https://artur.panek.tech/notes/home-assistant-static-vs-runtime/) · [Releases](https://github.com/artur-panek/ha-blast-radius/releases)
 
@@ -51,9 +51,7 @@ The screenshot uses synthetic fixtures, not a real household's configuration.
 - Rename/removal previews. **Neither operation is ever executed.**
 - Markdown copy, JSON download, dark mode and mobile layout. No cloud or telemetry.
 
-This goes beyond a flat “Related” list: each reference has a location, role and
-confidence, and previews follow structural dependencies. It cannot tell you which
-conditional branch will run tonight. That would be a different project.
+Each reference keeps its location, role and confidence classification. The preview follows configured dependencies; it cannot tell you which conditional branch will run.
 
 ## Installation
 
