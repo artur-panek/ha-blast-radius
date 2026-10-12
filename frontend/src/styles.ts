@@ -331,36 +331,42 @@ export const styles = css`
   .summary-context-note {
     display: flex;
     align-items: baseline;
-    gap: 6px;
-    margin: -12px 0 22px;
-    padding: 9px 12px;
-    border: 1px solid var(--br-border);
-    border-radius: 8px;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: -10px 2px 18px;
     color: var(--br-muted);
     font-size: 12px;
-    background: color-mix(
-      in srgb,
-      var(--br-card) 97%,
-      var(--primary-text-color, #212121)
-    );
   }
   .summary-context-note strong {
     color: var(--primary-text-color, #212121);
     font-size: 13px;
   }
   .impact-lane {
-    margin-top: 20px;
-    padding-top: 16px;
+    margin-top: 22px;
+    padding-top: 18px;
     border-top: 1px solid var(--br-border);
   }
-  .impact-lane:first-of-type {
-    margin-top: 10px;
+  /* The filter toolbar already separates the first section from the tabs. */
+  #analysis-view > .impact-lane:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
   }
   .impact-lane .section-heading {
     margin-bottom: 10px;
   }
+  .lane-metadata {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
   .lane-badge {
     flex: 0 0 auto;
+    color: var(--br-muted);
+    font-size: 12px;
+    font-weight: 500;
     white-space: nowrap;
   }
   .incoming-badge {
@@ -376,6 +382,9 @@ export const styles = css`
   }
   .role-group {
     margin-top: 12px;
+  }
+  .role-group-compact {
+    margin-top: 10px;
   }
   .role-group + .role-group {
     margin-top: 12px;
@@ -485,7 +494,7 @@ export const styles = css`
     font-size: 11px;
   }
   .shared-context {
-    margin-top: 24px;
+    margin-top: 22px;
     border: 1px solid var(--br-border);
     border-radius: 9px;
     padding: 3px 12px;
@@ -557,7 +566,7 @@ export const styles = css`
     display: flex;
     gap: 6px;
     border-bottom: 1px solid var(--br-border);
-    margin: -8px -8px 20px;
+    margin: -8px -8px 12px;
   }
   nav button {
     border: 0;
@@ -872,8 +881,19 @@ export const styles = css`
   }
   .uncertainty {
     border-top: 1px solid var(--br-border);
-    margin-top: 18px;
-    padding-top: 20px;
+    margin-top: 20px;
+    padding-top: 18px;
+  }
+  /* Bordered disclosures provide their own boundary; never stack another rule. */
+  .shared-context + .uncertainty {
+    border-top: 0;
+    padding-top: 0;
+    margin-top: 22px;
+  }
+  #analysis-view > .uncertainty:first-child {
+    border-top: 0;
+    padding-top: 0;
+    margin-top: 0;
   }
   .uncertainty h2 {
     margin-bottom: 4px;
@@ -1111,16 +1131,16 @@ export const styles = css`
     margin: 12px 0;
   }
   .result-filters {
-    margin: 4px 0 20px;
+    margin: 0 0 16px;
     border-bottom: 1px solid var(--br-border);
-    padding-bottom: 8px;
+    padding-bottom: 6px;
   }
   .result-filters > summary {
     width: fit-content;
-    padding: 7px 0;
+    padding: 10px 0;
     color: var(--br-muted);
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 500;
   }
   .filter-body {
     padding-top: 6px;
@@ -1277,6 +1297,9 @@ export const styles = css`
     .diagnostics-link {
       align-items: stretch;
       flex-direction: column;
+    }
+    .lane-metadata {
+      justify-content: flex-start;
     }
     .diagnostics-link button {
       width: 100%;

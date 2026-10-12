@@ -899,24 +899,37 @@ export class BlastRadiusPanel extends LitElement {
     </p>`;
   }
 
-  private renderDirectRoleGroup(category: string, refs: Reference[]) {
+  private roleCount(category: string, refs: Reference[]) {
     if (!refs.length) return nothing;
     const meta = this.directCategoryMeta(category);
-    const sourceCount = this.uniqueSources(refs);
+    const sources = this.uniqueSources(refs);
+    const unit = refs.length === 1 ? meta.badge.slice(0, -1) : meta.badge;
+    return html`<span class="role-count"
+      >${sources} ${sources === 1 ? "source" : "sources"} ·
+      ${refs.length} ${unit}</span
+    >`;
+  }
+
+  private renderDirectRoleGroup(
+    category: string,
+    refs: Reference[],
+    showHeading = true,
+  ) {
+    if (!refs.length) return nothing;
+    const meta = this.directCategoryMeta(category);
     return html`<section
-      class="role-group role-${category}"
+      class="role-group role-${category} ${showHeading ? "" : "role-group-compact"}"
       aria-label=${meta.title}
     >
-      <div class="role-heading">
-        <div>
-          <h3>${meta.title}</h3>
-          <p>${meta.description}</p>
-        </div>
-        <span class="role-count"
-          >${sourceCount} ${sourceCount === 1 ? "source" : "sources"} ·
-          ${refs.length} ${meta.badge}</span
-        >
-      </div>
+      ${showHeading
+        ? html`<div class="role-heading">
+            <div>
+              <h3>${meta.title}</h3>
+              <p>${meta.description}</p>
+            </div>
+            ${this.roleCount(category, refs)}
+          </div>`
+        : nothing}
       <div class="source-grid">${this.references(refs)}</div>
     </section>`;
   }
@@ -987,10 +1000,14 @@ export class BlastRadiusPanel extends LitElement {
         refs,
       ]),
     );
-    const actionRefs = [
-      ...(categories.get("change") || []),
-      ...(categories.get("invoke") || []),
-    ];
+    const changeRefs = categories.get("change") || [];
+    const invokeRefs = categories.get("invoke") || [];
+    const actionRefs = [...changeRefs, ...invokeRefs];
+    const onlyControl = !changeRefs.length
+      ? "invoke"
+      : !invokeRefs.length
+        ? "change"
+        : null;
     const readRefs = categories.get("read") || [];
     const passive = ["display", "structural", "other"]
       .map((category) => ({
@@ -998,6 +1015,7 @@ export class BlastRadiusPanel extends LitElement {
         refs: categories.get(category) || [],
       }))
       .filter(({ refs }) => refs.length);
+    const onlyPassive = passive.length === 1 ? passive[0] : null;
     const downstreamGroups = this.downstreamGroups(report);
     const effectGroups = downstreamGroups.filter(
       (group) => group.kind !== "context",
@@ -1012,16 +1030,26 @@ export class BlastRadiusPanel extends LitElement {
         ? html`<section class="impact-lane incoming-lane">
             <div class="section-heading">
               <div>
-                <h2>What can change or invoke this entity</h2>
+                <h2>
+                  ${onlyControl === "change"
+                    ? "What can change this entity"
+                    : onlyControl === "invoke"
+                      ? "What can invoke this entity"
+                      : "What can change or invoke this entity"}
+                </h2>
                 <p>
-                  These are incoming control paths. Start here before renaming,
-                  removing or changing the entity.
+                  ${onlyControl
+                    ? this.directCategoryMeta(onlyControl).description
+                    : "These configurations can control or invoke the selected entity. Review their references before making changes."}
                 </p>
               </div>
-              <span class="lane-badge incoming-badge">Incoming</span>
+              <div class="lane-metadata">
+                <span class="lane-badge incoming-badge">Incoming</span>
+                ${onlyControl ? this.roleCount(onlyControl, actionRefs) : nothing}
+              </div>
             </div>
-            ${this.renderDirectRoleGroup("change", categories.get("change") || [])}
-            ${this.renderDirectRoleGroup("invoke", categories.get("invoke") || [])}
+            ${this.renderDirectRoleGroup("change", changeRefs, !onlyControl)}
+            ${this.renderDirectRoleGroup("invoke", invokeRefs, !onlyControl)}
           </section>`
         : nothing
     }
@@ -1036,9 +1064,12 @@ export class BlastRadiusPanel extends LitElement {
                   actions may run when triggers and conditions allow it.
                 </p>
               </div>
-              <span class="lane-badge reaction-badge">Reaction path</span>
+              <div class="lane-metadata">
+                <span class="lane-badge reaction-badge">Reaction path</span>
+                ${this.roleCount("read", readRefs)}
+              </div>
             </div>
-            ${this.renderDirectRoleGroup("read", readRefs)}
+            ${this.renderDirectRoleGroup("read", readRefs, false)}
           </section>`
         : nothing
     }
@@ -1071,15 +1102,27 @@ export class BlastRadiusPanel extends LitElement {
         ? html`<section class="impact-lane passive-lane">
             <div class="section-heading">
               <div>
-                <h2>Other direct uses</h2>
+                <h2>
+                  ${onlyPassive?.category === "display"
+                    ? "Where this entity is displayed"
+                    : onlyPassive
+                      ? this.directCategoryMeta(onlyPassive.category).title
+                      : "Other direct uses"}
+                </h2>
                 <p>
-                  Display and structural references matter for rename/removal,
-                  but do not represent control flow.
+                  ${onlyPassive
+                    ? this.directCategoryMeta(onlyPassive.category).description
+                    : "Display and structural references matter for rename/removal, but do not represent control flow."}
                 </p>
               </div>
+              ${onlyPassive
+                ? html`<div class="lane-metadata">
+                    ${this.roleCount(onlyPassive.category, onlyPassive.refs)}
+                  </div>`
+                : nothing}
             </div>
             ${passive.map(({ category, refs }) =>
-              this.renderDirectRoleGroup(category, refs),
+              this.renderDirectRoleGroup(category, refs, !onlyPassive),
             )}
           </section>`
         : nothing
