@@ -949,10 +949,6 @@ var Ee = {
     font-size: 13px;
   }
   .summary-context-note {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 5px;
     margin: -10px 2px 18px;
     color: var(--br-muted);
     font-size: 12px;
@@ -960,6 +956,7 @@ var Ee = {
   .summary-context-note strong {
     color: var(--primary-text-color, #212121);
     font-size: 13px;
+    margin-right: 3px;
   }
   .impact-lane {
     margin-top: 22px;
@@ -1325,6 +1322,15 @@ var Ee = {
   .preview-form p {
     font-size: 14px;
   }
+  .preview-form .preview-hint {
+    margin: -10px 0 12px;
+    color: var(--br-muted);
+    font-size: 12px;
+  }
+  .preview-form .preview-error {
+    margin: 8px 0 14px;
+    font-size: 13px;
+  }
   .preview {
     margin-top: 20px;
     padding-top: 20px;
@@ -1367,9 +1373,11 @@ var Ee = {
     line-height: 1.6;
   }
   .status {
-    min-height: 20px;
     font-size: 12px;
     color: var(--br-muted);
+  }
+  .status[hidden] {
+    display: none;
   }
   progress {
     width: 100%;
@@ -1514,6 +1522,17 @@ var Ee = {
     border-top: 0;
     padding-top: 0;
     margin-top: 0;
+  }
+  .uncertainty.diagnostics-only {
+    margin-top: 12px;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .uncertainty.diagnostics-only .diagnostics-link {
+    margin-top: 0;
+    padding: 4px 0;
+    border: 0;
+    background: transparent;
   }
   .uncertainty h2 {
     margin-bottom: 4px;
@@ -2248,7 +2267,7 @@ var rt = {
 	unknown: "Unclassified"
 }, it = class extends H {
 	constructor(...e) {
-		super(...e), this.narrow = !1, this.entities = [], this.query = "", this.loading = !1, this.error = "", this.tab = "impact", this.recentSearches = [], this.replacement = "", this.depth = 6, this.status = "", this.copyFallback = !1, this.sourceFilters = [], this.reviewFilters = [], this.analyzedRoot = "", this.initialized = !1, this.requestId = 0, this.saveSession = () => {
+		super(...e), this.narrow = !1, this.entities = [], this.query = "", this.loading = !1, this.error = "", this.tab = "impact", this.recentSearches = [], this.replacement = "", this.depth = 6, this.status = "", this.copyFallback = !1, this.sourceFilters = [], this.reviewFilters = [], this.previewError = "", this.analyzedRoot = "", this.initialized = !1, this.requestId = 0, this.saveSession = () => {
 			Je(this.storageKey, {
 				recent: this.recentSearches,
 				last: this.lastView
@@ -2279,7 +2298,8 @@ var rt = {
 			copyFallback: { state: !0 },
 			recentSearches: { state: !0 },
 			sourceFilters: { state: !0 },
-			reviewFilters: { state: !0 }
+			reviewFilters: { state: !0 },
+			previewError: { state: !0 }
 		};
 	}
 	connectedCallback() {
@@ -2310,7 +2330,7 @@ var rt = {
 		if (this.hass && (!this.initialized || t !== this.storageKey)) {
 			this.initialized = !0, this.storageKey = t;
 			let e = qe(t);
-			this.recentSearches = e.recent, this.lastView = e.last, this.query = e.last?.entityId || "", this.depth = e.last?.depth || 6, this.tab = e.last?.tab || "impact", this.report = void 0, this.sourceFilters = [], this.reviewFilters = [], this.analyzedRoot = "", this.entities = [], this.replacement = "", this.status = "", this.copyFallback = !1, this.loadEntities();
+			this.recentSearches = e.recent, this.lastView = e.last, this.query = e.last?.entityId || "", this.depth = e.last?.depth || 6, this.tab = e.last?.tab || "impact", this.report = void 0, this.sourceFilters = [], this.reviewFilters = [], this.analyzedRoot = "", this.entities = [], this.replacement = "", this.status = "", this.copyFallback = !1, this.previewError = "", this.loadEntities();
 		} else e.has("tab") && this.lastView && this.rememberView();
 	}
 	async loadEntities() {
@@ -2330,7 +2350,7 @@ var rt = {
 		return e && typeof e == "object" && "message" in e ? String(e.message) : "Connection failed. Try again.";
 	}
 	changeQuery(e) {
-		this.query = e.target.value, this.requestId++, this.loading = !1, this.report = void 0, this.error = "", this.status = "", this.copyFallback = !1;
+		this.query = e.target.value, this.requestId++, this.loading = !1, this.report = void 0, this.error = "", this.status = "", this.copyFallback = !1, this.previewError = "";
 	}
 	async run(e, t) {
 		let n = this.query.trim();
@@ -2340,9 +2360,9 @@ var rt = {
 		}
 		n !== this.analyzedRoot && (this.sourceFilters = [], this.reviewFilters = [], this.replacement = ""), this.analyzedRoot = n;
 		let r = ++this.requestId;
-		this.loading = !0, this.error = "", this.status = "", this.copyFallback = !1;
+		this.loading = !0, this.error = "", this.status = "", this.copyFallback = !1, this.previewError = "";
 		try {
-			this.report = void 0;
+			e || (this.report = void 0);
 			let i = {
 				type: e ? "blast_radius/preview" : "blast_radius/analyze",
 				entity_id: n,
@@ -2354,8 +2374,8 @@ var rt = {
 				entityId: a.entity_id,
 				depth: a.graph.max_depth
 			}), this.rememberView(t ?? this.scrollTop));
-		} catch (e) {
-			r === this.requestId && (this.error = this.message(e));
+		} catch (t) {
+			r === this.requestId && (e ? this.previewError = this.message(t) : this.error = this.message(t));
 		} finally {
 			r === this.requestId && (this.loading = !1);
 		}
@@ -2469,7 +2489,7 @@ var rt = {
 	referenceRoleSummary(e) {
 		let t = [...new Set(e.map((e) => e.role))];
 		if (t.length !== 1) return `${e.length} ${e.length === 1 ? "reference" : "references"}`;
-		let n = t[0];
+		let n = t[0] === "write" ? "target" : t[0];
 		return `${e.length} ${n}${e.length === 1 ? "" : "s"}`;
 	}
 	shouldShowPurpose(e) {
@@ -2551,7 +2571,10 @@ var rt = {
 	}
 	downstreamGroups(e, t = !0) {
 		let n = t && this.filtersActive ? Ze(e, this.matchesFilter) : e.graph.nodes, r = new Map(n.map((e) => [e.id, e])), i = /* @__PURE__ */ new Map();
-		for (let t of e.references) i.set(t.source_id, [...i.get(t.source_id) || [], t]);
+		for (let t of e.references) {
+			let e = i.get(t.source_id);
+			e ? e.push(t) : i.set(t.source_id, [t]);
+		}
 		let a = (e) => {
 			let t = i.get(e) || [], n = new Set(t.map((e) => this.referenceCategory(e))), r = n.has("read"), a = n.has("change") || n.has("invoke");
 			return r && a ? "mixed" : r ? "reaction" : "context";
@@ -2630,7 +2653,10 @@ var rt = {
 	}
 	uncertainty(e) {
 		let { direct: t, related: n } = et(e), r = t.filter(this.matchesFilter), i = n.filter(this.matchesFilter), a = e.uncertain_references.filter((e) => Q(e) !== "unresolved"), o = e.other_dashboard_references || [], s = r.length || i.length;
-		return !s && !a.length && !o.length ? P : M`<section class="uncertainty" aria-label="Potential blind spots">
+		return !s && !a.length && !o.length ? P : M`<section
+      class="uncertainty ${s ? "" : "diagnostics-only"}"
+      aria-label="Potential blind spots"
+    >
       ${s ? M`<div class="section-heading">
               <div>
                 <h2>Potential blind spots</h2>
@@ -2743,7 +2769,7 @@ var rt = {
           </button>
           ${Object.keys(t).map((e) => M`<button aria-pressed=${this.reviewFilters.includes(e)} @click=${() => this.reviewFilters = this.reviewFilters.includes(e) ? this.reviewFilters.filter((t) => t !== e) : [...this.reviewFilters, e]}>${t[e]}</button>`)}
         </div>
-        ${this.filtersActive ? M`<p class="filter-note" role="status">${n} of ${e.references.length} direct references visible. Exported reports still include the full analysis.</p>` : P}
+        ${this.filtersActive ? M`<p class="filter-note" role="status">${n} of ${e.references.length} direct references visible. Summary figures and exports still cover the full scan.</p>` : P}
       </div>
     </details>`;
 	}
@@ -3333,7 +3359,9 @@ var rt = {
                       rel="noopener noreferrer"
                       >Report issue ↗</a
                     >
-                    <p class="status" role="status">${this.status}</p>
+                    <p class="status" role="status" ?hidden=${!this.status}>
+                      ${this.status}
+                    </p>
                     ${this.copyFallback ? M`<textarea aria-label="Markdown report" readonly .value=${e.markdown}></textarea>` : P}
                   </section>
                   <details
@@ -3350,11 +3378,16 @@ var rt = {
                       <label
                         >New entity ID<input
                           aria-label="New entity ID"
+                          aria-describedby="rename-hint"
                           .value=${this.replacement}
                           placeholder=${e.entity_id}
                           @input=${(e) => this.replacement = e.target.value}
                           spellcheck="false"
                       /></label>
+                      <p class="preview-hint" id="rename-hint">
+                        Keep the same domain:
+                        <code>${e.entity_id.split(".")[0]}.</code>
+                      </p>
                       <button
                         ?disabled=${this.loading || !this.replacement.trim()}
                         @click=${() => this.run("rename")}
@@ -3366,6 +3399,12 @@ var rt = {
                       >
                         Preview removal
                       </button>
+                      ${this.previewError ? M`<div
+                              class="notice error preview-error"
+                              role="alert"
+                            >
+                              ${this.previewError}
+                            </div>` : P}
                       ${e.preview ? M`<div class="preview" role="status">
                               <h3>
                                 ${e.preview.operation === "rename" ? "Rename preview" : "Removal preview"}

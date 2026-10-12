@@ -726,7 +726,9 @@ test("failed change preview keeps the analysis and shows an error in the form", 
   const selected = page.locator(".result-heading code");
   await page.getByRole("button", { name: "Preview change →" }).click();
   await expect(page.locator(".change-preview")).toHaveAttribute("open", "");
-  await page.getByRole("textbox", { name: "New entity ID" }).fill("switch.other");
+  await page
+    .getByRole("textbox", { name: "New entity ID" })
+    .fill("switch.other");
   await page.getByRole("button", { name: "Preview rename" }).click();
   const feedback = page.locator(".change-preview .preview-error");
   await expect(feedback).toContainText("same domain");
@@ -735,9 +737,13 @@ test("failed change preview keeps the analysis and shows an error in the form", 
   await expect(page.locator(".change-preview")).toHaveAttribute("open", "");
   await expect(page.locator(".preview-hint")).toContainText("light.");
 
-  await page.getByRole("textbox", { name: "New entity ID" }).fill("light.renamed_desk");
+  await page
+    .getByRole("textbox", { name: "New entity ID" })
+    .fill("light.renamed_desk");
   await page.getByRole("button", { name: "Preview rename" }).click();
-  await expect(page.getByRole("heading", { name: "Rename preview" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Rename preview" }),
+  ).toBeVisible();
   await expect(feedback).toHaveCount(0);
   await expect(selected).toHaveText("light.desk");
 });
@@ -754,9 +760,9 @@ test("preview errors remain readable on mobile without losing the result", async
   await expect(page.locator(".preview-error")).toBeVisible();
   await expect(page.locator(".result-heading code")).toHaveText("light.desk");
   expect(
-    await page.locator("blast-radius-panel").evaluate(
-      (panel) => panel.scrollWidth <= panel.clientWidth,
-    ),
+    await page
+      .locator("blast-radius-panel")
+      .evaluate((panel) => panel.scrollWidth <= panel.clientWidth),
   ).toBe(true);
 });
 
@@ -766,7 +772,9 @@ test("shared-flow note wraps as a sentence and idle export status is hidden", as
   await analyze(page, "light.desk");
   const note = page.locator(".summary-context-note");
   await expect(note).toContainText("shared-flow context only");
-  expect(await note.evaluate((el) => getComputedStyle(el).display)).toBe("block");
+  expect(await note.evaluate((el) => getComputedStyle(el).display)).toBe(
+    "block",
+  );
   const status = page.locator(".card .status");
   await expect(status).toBeHidden();
   await page.getByRole("button", { name: "Copy Markdown" }).click();

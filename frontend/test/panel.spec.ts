@@ -604,23 +604,27 @@ test("panel uses the current HA body font and hides technical details initially"
 test("dashboard-only diagnostics have no empty section heading or divider", async ({
   page,
 }) => {
-  await page.getByRole("combobox", { name: "Entity", exact: true }).fill("sensor.unused");
+  await page
+    .getByRole("combobox", { name: "Entity", exact: true })
+    .fill("sensor.unused");
   await page.getByRole("button", { name: "Analyze" }).click();
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
   await page.locator("blast-radius-panel").evaluate((panel: any) => {
     panel.report = {
       ...panel.report,
       uncertain_references: [],
-      other_dashboard_references: [{
-        source_id: "dashboard.home",
-        source_type: "dashboard",
-        target: null,
-        path: "views[1].cards[0].secondary",
-        confidence: "dynamic",
-        role: "display",
-        reason: "External template variable",
-        resolution: "unresolved",
-      }],
+      other_dashboard_references: [
+        {
+          source_id: "dashboard.home",
+          source_type: "dashboard",
+          target: null,
+          path: "views[1].cards[0].secondary",
+          confidence: "dynamic",
+          role: "display",
+          reason: "External template variable",
+          resolution: "unresolved",
+        },
+      ],
     };
   });
   const diagnostics = page.locator(".uncertainty.diagnostics-only");

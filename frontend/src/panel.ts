@@ -1732,11 +1732,16 @@ export class BlastRadiusPanel extends LitElement {
                       >
                         Preview removal
                       </button>
-                      ${this.previewError
-                        ? html`<div class="notice error preview-error" role="alert">
-                            ${this.previewError}
-                          </div>`
-                        : nothing}
+                      ${
+                        this.previewError
+                          ? html`<div
+                              class="notice error preview-error"
+                              role="alert"
+                            >
+                              ${this.previewError}
+                            </div>`
+                          : nothing
+                      }
                       ${
                         report.preview
                           ? html`<div class="preview" role="status">
