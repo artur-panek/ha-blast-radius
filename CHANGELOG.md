@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.7 — 2026-10-13
+
+- Clean up duplicate separators and repeated headings in the dependency Overview.
+  Keep source counts visible while simplifying single-role sections and spacing
+  on desktop and mobile.
+- Preserve the current analysis when a change preview fails. Show validation
+  errors beside the form, explain same-domain renames, and avoid displaying
+  stale results after a failed retry.
+- Make shared-flow context and coverage diagnostics less intrusive, clarify
+  filter totals and source counts, and improve indexing of large reference lists.
+- Keep read-only behavior, dependency analysis, and JSON/Markdown report
+  formats unchanged. Extend browser regression coverage.
+- Simplify GitHub Actions: HA-next stays advisory on pull requests, weekly and
+  manually; Quality remains the release gate without duplicate main runs.
+
+
 ## 0.2.6 — 2026-10-13
 
 - Separate unresolved expressions in configurations that directly reference the
