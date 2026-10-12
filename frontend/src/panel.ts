@@ -70,6 +70,7 @@ export class BlastRadiusPanel extends LitElement {
     recentSearches: { state: true },
     sourceFilters: { state: true },
     reviewFilters: { state: true },
+    previewError: { state: true },
   };
   declare hass: Hass;
   narrow = false;
@@ -86,6 +87,7 @@ export class BlastRadiusPanel extends LitElement {
   copyFallback = false;
   sourceFilters: SourceType[] = [];
   reviewFilters: ReviewFilter[] = [];
+  previewError = "";
   private analyzedRoot = "";
   private initialized = false;
   private requestId = 0;
@@ -179,6 +181,7 @@ export class BlastRadiusPanel extends LitElement {
       this.replacement = "";
       this.status = "";
       this.copyFallback = false;
+      this.previewError = "";
       void this.loadEntities();
     } else if (changed.has("tab") && this.lastView) {
       this.rememberView();
@@ -219,6 +222,7 @@ export class BlastRadiusPanel extends LitElement {
     this.error = "";
     this.status = "";
     this.copyFallback = false;
+    this.previewError = "";
   }
 
   private async run(operation?: "rename" | "delete", restoreScroll?: number) {
@@ -238,8 +242,10 @@ export class BlastRadiusPanel extends LitElement {
     this.error = "";
     this.status = "";
     this.copyFallback = false;
+    this.previewError = "";
     try {
-      this.report = undefined;
+      // A preview failure should not discard the analysis being reviewed.
+      if (!operation) this.report = undefined;
       const message: Record<string, unknown> = {
         type: operation ? "blast_radius/preview" : "blast_radius/analyze",
         entity_id: entityId,
@@ -258,7 +264,10 @@ export class BlastRadiusPanel extends LitElement {
         this.rememberView(restoreScroll ?? this.scrollTop);
       }
     } catch (error) {
-      if (id === this.requestId) this.error = this.message(error);
+      if (id === this.requestId) {
+        if (operation) this.previewError = this.message(error);
+        else this.error = this.message(error);
+      }
     } finally {
       if (id === this.requestId) this.loading = false;
     }
@@ -449,7 +458,7 @@ export class BlastRadiusPanel extends LitElement {
     const roles = [...new Set(refs.map((ref) => ref.role))];
     if (roles.length !== 1)
       return `${refs.length} ${refs.length === 1 ? "reference" : "references"}`;
-    const role = roles[0];
+    const role = roles[0] === "write" ? "target" : roles[0];
     return `${refs.length} ${role}${refs.length === 1 ? "" : "s"}`;
   }
 
@@ -573,10 +582,9 @@ export class BlastRadiusPanel extends LitElement {
     const byId = new Map(nodes.map((node) => [node.id, node]));
     const directRefsBySource = new Map<string, Reference[]>();
     for (const ref of report.references) {
-      directRefsBySource.set(ref.source_id, [
-        ...(directRefsBySource.get(ref.source_id) || []),
-        ref,
-      ]);
+      const refs = directRefsBySource.get(ref.source_id);
+      if (refs) refs.push(ref);
+      else directRefsBySource.set(ref.source_id, [ref]);
     }
 
     const classifySource = (source: string) => {
@@ -732,7 +740,10 @@ export class BlastRadiusPanel extends LitElement {
     const hasUnresolved = unresolvedDirect.length || unresolvedRelated.length;
     if (!hasUnresolved && !relatedContext.length && !elsewhere.length)
       return nothing;
-    return html`<section class="uncertainty" aria-label="Potential blind spots">
+    return html`<section
+      class="uncertainty ${hasUnresolved ? "" : "diagnostics-only"}"
+      aria-label="Potential blind spots"
+    >
       ${
         hasUnresolved
           ? html`<div class="section-heading">
@@ -880,7 +891,7 @@ export class BlastRadiusPanel extends LitElement {
           </button>
           ${(Object.keys(reviewLabels) as ReviewFilter[]).map((kind) => html`<button aria-pressed=${this.reviewFilters.includes(kind)} @click=${() => (this.reviewFilters = this.reviewFilters.includes(kind) ? this.reviewFilters.filter((item) => item !== kind) : [...this.reviewFilters, kind])}>${reviewLabels[kind]}</button>`)}
         </div>
-        ${this.filtersActive ? html`<p class="filter-note" role="status">${count} of ${report.references.length} direct references visible. Exported reports still include the full analysis.</p>` : nothing}
+        ${this.filtersActive ? html`<p class="filter-note" role="status">${count} of ${report.references.length} direct references visible. Summary figures and exports still cover the full scan.</p>` : nothing}
       </div>
     </details>`;
   }
@@ -899,24 +910,39 @@ export class BlastRadiusPanel extends LitElement {
     </p>`;
   }
 
-  private renderDirectRoleGroup(category: string, refs: Reference[]) {
+  private roleCount(category: string, refs: Reference[]) {
     if (!refs.length) return nothing;
     const meta = this.directCategoryMeta(category);
-    const sourceCount = this.uniqueSources(refs);
+    const sources = this.uniqueSources(refs);
+    const unit = refs.length === 1 ? meta.badge.slice(0, -1) : meta.badge;
+    return html`<span class="role-count"
+      >${sources} ${sources === 1 ? "source" : "sources"} · ${refs.length}
+      ${unit}</span
+    >`;
+  }
+
+  private renderDirectRoleGroup(
+    category: string,
+    refs: Reference[],
+    showHeading = true,
+  ) {
+    if (!refs.length) return nothing;
+    const meta = this.directCategoryMeta(category);
     return html`<section
-      class="role-group role-${category}"
+      class="role-group role-${category} ${showHeading ? "" : "role-group-compact"}"
       aria-label=${meta.title}
     >
-      <div class="role-heading">
-        <div>
-          <h3>${meta.title}</h3>
-          <p>${meta.description}</p>
-        </div>
-        <span class="role-count"
-          >${sourceCount} ${sourceCount === 1 ? "source" : "sources"} ·
-          ${refs.length} ${meta.badge}</span
-        >
-      </div>
+      ${
+        showHeading
+          ? html`<div class="role-heading">
+              <div>
+                <h3>${meta.title}</h3>
+                <p>${meta.description}</p>
+              </div>
+              ${this.roleCount(category, refs)}
+            </div>`
+          : nothing
+      }
       <div class="source-grid">${this.references(refs)}</div>
     </section>`;
   }
@@ -987,10 +1013,14 @@ export class BlastRadiusPanel extends LitElement {
         refs,
       ]),
     );
-    const actionRefs = [
-      ...(categories.get("change") || []),
-      ...(categories.get("invoke") || []),
-    ];
+    const changeRefs = categories.get("change") || [];
+    const invokeRefs = categories.get("invoke") || [];
+    const actionRefs = [...changeRefs, ...invokeRefs];
+    const onlyControl = !changeRefs.length
+      ? "invoke"
+      : !invokeRefs.length
+        ? "change"
+        : null;
     const readRefs = categories.get("read") || [];
     const passive = ["display", "structural", "other"]
       .map((category) => ({
@@ -998,6 +1028,7 @@ export class BlastRadiusPanel extends LitElement {
         refs: categories.get(category) || [],
       }))
       .filter(({ refs }) => refs.length);
+    const onlyPassive = passive.length === 1 ? passive[0] : null;
     const downstreamGroups = this.downstreamGroups(report);
     const effectGroups = downstreamGroups.filter(
       (group) => group.kind !== "context",
@@ -1012,16 +1043,30 @@ export class BlastRadiusPanel extends LitElement {
         ? html`<section class="impact-lane incoming-lane">
             <div class="section-heading">
               <div>
-                <h2>What can change or invoke this entity</h2>
+                <h2>
+                  ${
+                    onlyControl === "change"
+                      ? "What can change this entity"
+                      : onlyControl === "invoke"
+                        ? "What can invoke this entity"
+                        : "What can change or invoke this entity"
+                  }
+                </h2>
                 <p>
-                  These are incoming control paths. Start here before renaming,
-                  removing or changing the entity.
+                  ${
+                    onlyControl
+                      ? this.directCategoryMeta(onlyControl).description
+                      : "These configurations can control or invoke the selected entity. Review their references before making changes."
+                  }
                 </p>
               </div>
-              <span class="lane-badge incoming-badge">Incoming</span>
+              <div class="lane-metadata">
+                <span class="lane-badge incoming-badge">Incoming</span>
+                ${onlyControl ? this.roleCount(onlyControl, actionRefs) : nothing}
+              </div>
             </div>
-            ${this.renderDirectRoleGroup("change", categories.get("change") || [])}
-            ${this.renderDirectRoleGroup("invoke", categories.get("invoke") || [])}
+            ${this.renderDirectRoleGroup("change", changeRefs, !onlyControl)}
+            ${this.renderDirectRoleGroup("invoke", invokeRefs, !onlyControl)}
           </section>`
         : nothing
     }
@@ -1036,9 +1081,12 @@ export class BlastRadiusPanel extends LitElement {
                   actions may run when triggers and conditions allow it.
                 </p>
               </div>
-              <span class="lane-badge reaction-badge">Reaction path</span>
+              <div class="lane-metadata">
+                <span class="lane-badge reaction-badge">Reaction path</span>
+                ${this.roleCount("read", readRefs)}
+              </div>
             </div>
-            ${this.renderDirectRoleGroup("read", readRefs)}
+            ${this.renderDirectRoleGroup("read", readRefs, false)}
           </section>`
         : nothing
     }
@@ -1071,15 +1119,34 @@ export class BlastRadiusPanel extends LitElement {
         ? html`<section class="impact-lane passive-lane">
             <div class="section-heading">
               <div>
-                <h2>Other direct uses</h2>
+                <h2>
+                  ${
+                    onlyPassive?.category === "display"
+                      ? "Where this entity is displayed"
+                      : onlyPassive
+                        ? this.directCategoryMeta(onlyPassive.category).title
+                        : "Other direct uses"
+                  }
+                </h2>
                 <p>
-                  Display and structural references matter for rename/removal,
-                  but do not represent control flow.
+                  ${
+                    onlyPassive
+                      ? this.directCategoryMeta(onlyPassive.category)
+                          .description
+                      : "Display and structural references matter for rename/removal, but do not represent control flow."
+                  }
                 </p>
               </div>
+              ${
+                onlyPassive
+                  ? html`<div class="lane-metadata">
+                      ${this.roleCount(onlyPassive.category, onlyPassive.refs)}
+                    </div>`
+                  : nothing
+              }
             </div>
             ${passive.map(({ category, refs }) =>
-              this.renderDirectRoleGroup(category, refs),
+              this.renderDirectRoleGroup(category, refs, !onlyPassive),
             )}
           </section>`
         : nothing
@@ -1625,7 +1692,9 @@ export class BlastRadiusPanel extends LitElement {
                       rel="noopener noreferrer"
                       >Report issue ↗</a
                     >
-                    <p class="status" role="status">${this.status}</p>
+                    <p class="status" role="status" ?hidden=${!this.status}>
+                      ${this.status}
+                    </p>
                     ${this.copyFallback ? html`<textarea aria-label="Markdown report" readonly .value=${report.markdown}></textarea>` : nothing}
                   </section>
                   <details
@@ -1642,11 +1711,16 @@ export class BlastRadiusPanel extends LitElement {
                       <label
                         >New entity ID<input
                           aria-label="New entity ID"
+                          aria-describedby="rename-hint"
                           .value=${this.replacement}
                           placeholder=${report.entity_id}
                           @input=${(e: Event) => (this.replacement = (e.target as HTMLInputElement).value)}
                           spellcheck="false"
                       /></label>
+                      <p class="preview-hint" id="rename-hint">
+                        Keep the same domain:
+                        <code>${report.entity_id.split(".")[0]}.</code>
+                      </p>
                       <button
                         ?disabled=${this.loading || !this.replacement.trim()}
                         @click=${() => this.run("rename")}
@@ -1659,7 +1733,17 @@ export class BlastRadiusPanel extends LitElement {
                         Preview removal
                       </button>
                       ${
-                        report.preview
+                        this.previewError
+                          ? html`<div
+                              class="notice error preview-error"
+                              role="alert"
+                            >
+                              ${this.previewError}
+                            </div>`
+                          : nothing
+                      }
+                      ${
+                        report.preview && !this.previewError && !this.loading
                           ? html`<div class="preview" role="status">
                               <h3>
                                 ${report.preview.operation === "rename" ? "Rename preview" : "Removal preview"}
