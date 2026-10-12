@@ -70,6 +70,7 @@ export class BlastRadiusPanel extends LitElement {
     recentSearches: { state: true },
     sourceFilters: { state: true },
     reviewFilters: { state: true },
+    previewError: { state: true },
   };
   declare hass: Hass;
   narrow = false;
@@ -86,6 +87,7 @@ export class BlastRadiusPanel extends LitElement {
   copyFallback = false;
   sourceFilters: SourceType[] = [];
   reviewFilters: ReviewFilter[] = [];
+  previewError = "";
   private analyzedRoot = "";
   private initialized = false;
   private requestId = 0;
@@ -179,6 +181,7 @@ export class BlastRadiusPanel extends LitElement {
       this.replacement = "";
       this.status = "";
       this.copyFallback = false;
+      this.previewError = "";
       void this.loadEntities();
     } else if (changed.has("tab") && this.lastView) {
       this.rememberView();
@@ -219,6 +222,7 @@ export class BlastRadiusPanel extends LitElement {
     this.error = "";
     this.status = "";
     this.copyFallback = false;
+    this.previewError = "";
   }
 
   private async run(operation?: "rename" | "delete", restoreScroll?: number) {
@@ -238,8 +242,10 @@ export class BlastRadiusPanel extends LitElement {
     this.error = "";
     this.status = "";
     this.copyFallback = false;
+    this.previewError = "";
     try {
-      this.report = undefined;
+      // A preview failure should not discard the analysis being reviewed.
+      if (!operation) this.report = undefined;
       const message: Record<string, unknown> = {
         type: operation ? "blast_radius/preview" : "blast_radius/analyze",
         entity_id: entityId,
@@ -258,7 +264,10 @@ export class BlastRadiusPanel extends LitElement {
         this.rememberView(restoreScroll ?? this.scrollTop);
       }
     } catch (error) {
-      if (id === this.requestId) this.error = this.message(error);
+      if (id === this.requestId) {
+        if (operation) this.previewError = this.message(error);
+        else this.error = this.message(error);
+      }
     } finally {
       if (id === this.requestId) this.loading = false;
     }
@@ -449,7 +458,7 @@ export class BlastRadiusPanel extends LitElement {
     const roles = [...new Set(refs.map((ref) => ref.role))];
     if (roles.length !== 1)
       return `${refs.length} ${refs.length === 1 ? "reference" : "references"}`;
-    const role = roles[0];
+    const role = roles[0] === "write" ? "target" : roles[0];
     return `${refs.length} ${role}${refs.length === 1 ? "" : "s"}`;
   }
 
@@ -573,10 +582,9 @@ export class BlastRadiusPanel extends LitElement {
     const byId = new Map(nodes.map((node) => [node.id, node]));
     const directRefsBySource = new Map<string, Reference[]>();
     for (const ref of report.references) {
-      directRefsBySource.set(ref.source_id, [
-        ...(directRefsBySource.get(ref.source_id) || []),
-        ref,
-      ]);
+      const refs = directRefsBySource.get(ref.source_id);
+      if (refs) refs.push(ref);
+      else directRefsBySource.set(ref.source_id, [ref]);
     }
 
     const classifySource = (source: string) => {
@@ -732,7 +740,10 @@ export class BlastRadiusPanel extends LitElement {
     const hasUnresolved = unresolvedDirect.length || unresolvedRelated.length;
     if (!hasUnresolved && !relatedContext.length && !elsewhere.length)
       return nothing;
-    return html`<section class="uncertainty" aria-label="Potential blind spots">
+    return html`<section
+      class="uncertainty ${hasUnresolved ? "" : "diagnostics-only"}"
+      aria-label="Potential blind spots"
+    >
       ${
         hasUnresolved
           ? html`<div class="section-heading">
@@ -880,7 +891,7 @@ export class BlastRadiusPanel extends LitElement {
           </button>
           ${(Object.keys(reviewLabels) as ReviewFilter[]).map((kind) => html`<button aria-pressed=${this.reviewFilters.includes(kind)} @click=${() => (this.reviewFilters = this.reviewFilters.includes(kind) ? this.reviewFilters.filter((item) => item !== kind) : [...this.reviewFilters, kind])}>${reviewLabels[kind]}</button>`)}
         </div>
-        ${this.filtersActive ? html`<p class="filter-note" role="status">${count} of ${report.references.length} direct references visible. Exported reports still include the full analysis.</p>` : nothing}
+        ${this.filtersActive ? html`<p class="filter-note" role="status">${count} of ${report.references.length} direct references visible. Summary figures and exports still cover the full scan.</p>` : nothing}
       </div>
     </details>`;
   }
@@ -1681,7 +1692,9 @@ export class BlastRadiusPanel extends LitElement {
                       rel="noopener noreferrer"
                       >Report issue ↗</a
                     >
-                    <p class="status" role="status">${this.status}</p>
+                    <p class="status" role="status" ?hidden=${!this.status}>
+                      ${this.status}
+                    </p>
                     ${this.copyFallback ? html`<textarea aria-label="Markdown report" readonly .value=${report.markdown}></textarea>` : nothing}
                   </section>
                   <details
@@ -1698,11 +1711,16 @@ export class BlastRadiusPanel extends LitElement {
                       <label
                         >New entity ID<input
                           aria-label="New entity ID"
+                          aria-describedby="rename-hint"
                           .value=${this.replacement}
                           placeholder=${report.entity_id}
                           @input=${(e: Event) => (this.replacement = (e.target as HTMLInputElement).value)}
                           spellcheck="false"
                       /></label>
+                      <p class="preview-hint" id="rename-hint">
+                        Keep the same domain:
+                        <code>${report.entity_id.split(".")[0]}.</code>
+                      </p>
                       <button
                         ?disabled=${this.loading || !this.replacement.trim()}
                         @click=${() => this.run("rename")}
@@ -1714,6 +1732,11 @@ export class BlastRadiusPanel extends LitElement {
                       >
                         Preview removal
                       </button>
+                      ${this.previewError
+                        ? html`<div class="notice error preview-error" role="alert">
+                            ${this.previewError}
+                          </div>`
+                        : nothing}
                       ${
                         report.preview
                           ? html`<div class="preview" role="status">

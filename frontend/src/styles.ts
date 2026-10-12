@@ -329,10 +329,6 @@ export const styles = css`
     font-size: 13px;
   }
   .summary-context-note {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 5px;
     margin: -10px 2px 18px;
     color: var(--br-muted);
     font-size: 12px;
@@ -340,6 +336,7 @@ export const styles = css`
   .summary-context-note strong {
     color: var(--primary-text-color, #212121);
     font-size: 13px;
+    margin-right: 3px;
   }
   .impact-lane {
     margin-top: 22px;
@@ -705,6 +702,15 @@ export const styles = css`
   .preview-form p {
     font-size: 14px;
   }
+  .preview-form .preview-hint {
+    margin: -10px 0 12px;
+    color: var(--br-muted);
+    font-size: 12px;
+  }
+  .preview-form .preview-error {
+    margin: 8px 0 14px;
+    font-size: 13px;
+  }
   .preview {
     margin-top: 20px;
     padding-top: 20px;
@@ -747,9 +753,11 @@ export const styles = css`
     line-height: 1.6;
   }
   .status {
-    min-height: 20px;
     font-size: 12px;
     color: var(--br-muted);
+  }
+  .status[hidden] {
+    display: none;
   }
   progress {
     width: 100%;
@@ -894,6 +902,17 @@ export const styles = css`
     border-top: 0;
     padding-top: 0;
     margin-top: 0;
+  }
+  .uncertainty.diagnostics-only {
+    margin-top: 12px;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .uncertainty.diagnostics-only .diagnostics-link {
+    margin-top: 0;
+    padding: 4px 0;
+    border: 0;
+    background: transparent;
   }
   .uncertainty h2 {
     margin-bottom: 4px;
