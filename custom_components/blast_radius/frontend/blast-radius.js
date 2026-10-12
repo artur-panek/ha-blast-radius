@@ -1422,8 +1422,16 @@ var Ee = {
   }
   .coverage-pill {
     color: var(--primary-text-color, #212121);
-    background: color-mix(in srgb, var(--br-card) 94%, var(--warning-color, #9b6600));
-    border-color: color-mix(in srgb, var(--br-border) 65%, var(--warning-color, #9b6600));
+    background: color-mix(
+      in srgb,
+      var(--br-card) 94%,
+      var(--warning-color, #9b6600)
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--br-border) 65%,
+      var(--warning-color, #9b6600)
+    );
     cursor: pointer;
   }
   .preview-shortcut {
@@ -2601,44 +2609,46 @@ var rt = {
 		let { direct: t, related: n } = et(e), r = t.filter(this.matchesFilter), i = n.filter(this.matchesFilter), a = e.uncertain_references.filter((e) => Q(e) !== "unresolved"), o = e.other_dashboard_references || [], s = r.length || i.length;
 		return !s && !a.length && !o.length ? P : M`<section class="uncertainty" aria-label="Potential blind spots">
       ${s ? M`<div class="section-heading">
-            <div>
-              <h2>Potential blind spots</h2>
-              <p>
-                These expressions could not be resolved statically. They are
-                not confirmed references to the selected entity.
-              </p>
-            </div>
-          </div>` : P}
+              <div>
+                <h2>Potential blind spots</h2>
+                <p>
+                  These expressions could not be resolved statically. They are
+                  not confirmed references to the selected entity.
+                </p>
+              </div>
+            </div>` : P}
       ${r.length ? M`<details class="uncertainty-scope direct-context">
-            <summary>
-              Unresolved in direct sources
-              <span class="count">${$(r)}</span>
-            </summary>
-            <p>
-              These configurations directly reference the selected entity, or
-              are the selected configuration itself. Their other dynamic
-              expressions have unknown targets.
-            </p>
-            ${this.references(r, !0)}
-          </details>` : P}
-      ${i.length ? M`<details class="uncertainty-scope wider-context secondary-context">
-            <summary>
-              Unresolved in wider graph context
-              <span class="count">${$(i)}</span>
-            </summary>
-            <p>
-              These expressions belong to configurations reached through the
-              dependency graph. They are not known to reference or react to the
-              selected entity.
-            </p>
-            ${this.references(i, !0)}
-          </details>` : P}
+              <summary>
+                Unresolved in direct sources
+                <span class="count">${$(r)}</span>
+              </summary>
+              <p>
+                These configurations directly reference the selected entity, or
+                are the selected configuration itself. Their other dynamic
+                expressions have unknown targets.
+              </p>
+              ${this.references(r, !0)}
+            </details>` : P}
+      ${i.length ? M`<details
+              class="uncertainty-scope wider-context secondary-context"
+            >
+              <summary>
+                Unresolved in wider graph context
+                <span class="count">${$(i)}</span>
+              </summary>
+              <p>
+                These expressions belong to configurations reached through the
+                dependency graph. They are not known to reference or react to
+                the selected entity.
+              </p>
+              ${this.references(i, !0)}
+            </details>` : P}
       ${a.length || o.length ? M`<div class="diagnostics-link">
-            <span>
-              Additional scanner diagnostics are available in Coverage.
-            </span>
-            <button @click=${this.showCoverage}>View coverage</button>
-          </div>` : P}
+              <span>
+                Additional scanner diagnostics are available in Coverage.
+              </span>
+              <button @click=${this.showCoverage}>View coverage</button>
+            </div>` : P}
     </section>`;
 	}
 	coverageDiagnostics(e) {
@@ -2971,7 +2981,10 @@ var rt = {
               Nodes reachable from the selected configuration itself or through
               configurations that read it. Conditions are not executed.
             </p>
-            ${c.length ? c.map((e) => this.graphNode(e)) : M`<p>No downstream path identified in the inspected configuration.</p>`}
+            ${c.length ? c.map((e) => this.graphNode(e)) : M`<p>
+                    No downstream path identified in the inspected
+                    configuration.
+                  </p>`}
           </section>
         </div>
       </div>
@@ -3196,13 +3209,13 @@ var rt = {
                       >${this.directConfidence(e)}</span
                     >
                     ${e.coverage.warnings?.length ? M`<button
-                          class="summary-pill coverage-pill"
-                          title="Some configuration could not be fully inspected"
-                          aria-label="Coverage partial — view diagnostics"
-                          @click=${this.showCoverage}
-                        >
-                          Coverage partial ↗
-                        </button>` : P}
+                            class="summary-pill coverage-pill"
+                            title="Some configuration could not be fully inspected"
+                            aria-label="Coverage partial — view diagnostics"
+                            @click=${this.showCoverage}
+                          >
+                            Coverage partial ↗
+                          </button>` : P}
                     <button
                       class="preview-shortcut"
                       @click=${this.showChangePreview}
@@ -3353,8 +3366,8 @@ var rt = {
                       linked flows (including direct sources);
                       ${$(e.other_dashboard_references || [])}
                       in system-wide dashboard context. Groups summarize
-                      repeated reasons and selector identities, not a count
-                      of affected entities.
+                      repeated reasons and selector identities, not a count of
+                      affected entities.
                     </li>
                     ${e.review_summary?.snapshot.locations === e.unresolved_total ? M`<li>Full snapshot: ${e.review_summary.snapshot.device_locations} device-reference locations · ${e.review_summary.snapshot.selector_locations} unexpanded-selector locations · ${e.review_summary.snapshot.unresolved_locations} dynamic or unrecognized locations.</li>` : P}
                     <li>

@@ -733,53 +733,63 @@ export class BlastRadiusPanel extends LitElement {
     if (!hasUnresolved && !relatedContext.length && !elsewhere.length)
       return nothing;
     return html`<section class="uncertainty" aria-label="Potential blind spots">
-      ${hasUnresolved
-        ? html`<div class="section-heading">
-            <div>
-              <h2>Potential blind spots</h2>
+      ${
+        hasUnresolved
+          ? html`<div class="section-heading">
+              <div>
+                <h2>Potential blind spots</h2>
+                <p>
+                  These expressions could not be resolved statically. They are
+                  not confirmed references to the selected entity.
+                </p>
+              </div>
+            </div>`
+          : nothing
+      }
+      ${
+        unresolvedDirect.length
+          ? html`<details class="uncertainty-scope direct-context">
+              <summary>
+                Unresolved in direct sources
+                <span class="count">${reviewCounts(unresolvedDirect)}</span>
+              </summary>
               <p>
-                These expressions could not be resolved statically. They are
-                not confirmed references to the selected entity.
+                These configurations directly reference the selected entity, or
+                are the selected configuration itself. Their other dynamic
+                expressions have unknown targets.
               </p>
-            </div>
-          </div>`
-        : nothing}
-      ${unresolvedDirect.length
-        ? html`<details class="uncertainty-scope direct-context">
-            <summary>
-              Unresolved in direct sources
-              <span class="count">${reviewCounts(unresolvedDirect)}</span>
-            </summary>
-            <p>
-              These configurations directly reference the selected entity, or
-              are the selected configuration itself. Their other dynamic
-              expressions have unknown targets.
-            </p>
-            ${this.references(unresolvedDirect, true)}
-          </details>`
-        : nothing}
-      ${unresolvedRelated.length
-        ? html`<details class="uncertainty-scope wider-context secondary-context">
-            <summary>
-              Unresolved in wider graph context
-              <span class="count">${reviewCounts(unresolvedRelated)}</span>
-            </summary>
-            <p>
-              These expressions belong to configurations reached through the
-              dependency graph. They are not known to reference or react to the
-              selected entity.
-            </p>
-            ${this.references(unresolvedRelated, true)}
-          </details>`
-        : nothing}
-      ${relatedContext.length || elsewhere.length
-        ? html`<div class="diagnostics-link">
-            <span>
-              Additional scanner diagnostics are available in Coverage.
-            </span>
-            <button @click=${this.showCoverage}>View coverage</button>
-          </div>`
-        : nothing}
+              ${this.references(unresolvedDirect, true)}
+            </details>`
+          : nothing
+      }
+      ${
+        unresolvedRelated.length
+          ? html`<details
+              class="uncertainty-scope wider-context secondary-context"
+            >
+              <summary>
+                Unresolved in wider graph context
+                <span class="count">${reviewCounts(unresolvedRelated)}</span>
+              </summary>
+              <p>
+                These expressions belong to configurations reached through the
+                dependency graph. They are not known to reference or react to
+                the selected entity.
+              </p>
+              ${this.references(unresolvedRelated, true)}
+            </details>`
+          : nothing
+      }
+      ${
+        relatedContext.length || elsewhere.length
+          ? html`<div class="diagnostics-link">
+              <span>
+                Additional scanner diagnostics are available in Coverage.
+              </span>
+              <button @click=${this.showCoverage}>View coverage</button>
+            </div>`
+          : nothing
+      }
     </section>`;
   }
 
@@ -1262,7 +1272,10 @@ export class BlastRadiusPanel extends LitElement {
             ${
               effects.length
                 ? effects.map((node) => this.graphNode(node))
-                : html`<p>No downstream path identified in the inspected configuration.</p>`
+                : html`<p>
+                    No downstream path identified in the inspected
+                    configuration.
+                  </p>`
             }
           </section>
         </div>
@@ -1514,16 +1527,18 @@ export class BlastRadiusPanel extends LitElement {
                       title="Confidence applies only to detected direct references"
                       >${this.directConfidence(report)}</span
                     >
-                    ${report.coverage.warnings?.length
-                      ? html`<button
-                          class="summary-pill coverage-pill"
-                          title="Some configuration could not be fully inspected"
-                          aria-label="Coverage partial — view diagnostics"
-                          @click=${this.showCoverage}
-                        >
-                          Coverage partial ↗
-                        </button>`
-                      : nothing}
+                    ${
+                      report.coverage.warnings?.length
+                        ? html`<button
+                            class="summary-pill coverage-pill"
+                            title="Some configuration could not be fully inspected"
+                            aria-label="Coverage partial — view diagnostics"
+                            @click=${this.showCoverage}
+                          >
+                            Coverage partial ↗
+                          </button>`
+                        : nothing
+                    }
                     <button
                       class="preview-shortcut"
                       @click=${this.showChangePreview}
@@ -1688,8 +1703,8 @@ export class BlastRadiusPanel extends LitElement {
                       linked flows (including direct sources);
                       ${reviewCounts(report.other_dashboard_references || [])}
                       in system-wide dashboard context. Groups summarize
-                      repeated reasons and selector identities, not a count
-                      of affected entities.
+                      repeated reasons and selector identities, not a count of
+                      affected entities.
                     </li>
                     ${report.review_summary?.snapshot.locations === report.unresolved_total ? html`<li>Full snapshot: ${report.review_summary.snapshot.device_locations} device-reference locations · ${report.review_summary.snapshot.selector_locations} unexpanded-selector locations · ${report.review_summary.snapshot.unresolved_locations} dynamic or unrecognized locations.</li>` : nothing}
                     <li>

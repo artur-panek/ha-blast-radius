@@ -802,8 +802,16 @@ export const styles = css`
   }
   .coverage-pill {
     color: var(--primary-text-color, #212121);
-    background: color-mix(in srgb, var(--br-card) 94%, var(--warning-color, #9b6600));
-    border-color: color-mix(in srgb, var(--br-border) 65%, var(--warning-color, #9b6600));
+    background: color-mix(
+      in srgb,
+      var(--br-card) 94%,
+      var(--warning-color, #9b6600)
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--br-border) 65%,
+      var(--warning-color, #9b6600)
+    );
     cursor: pointer;
   }
   .preview-shortcut {

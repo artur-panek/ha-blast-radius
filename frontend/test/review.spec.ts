@@ -268,8 +268,16 @@ test("overview separates direct unknowns, wider context and scan coverage", asyn
     panel.report = {
       ...panel.report,
       uncertain_references: [
-        { ...base, source_id: "automation.indicator", path: "actions[1].data.value" },
-        { ...base, source_id: "script.music_toggle", path: "sequence[0].value_template" },
+        {
+          ...base,
+          source_id: "automation.indicator",
+          path: "actions[1].data.value",
+        },
+        {
+          ...base,
+          source_id: "script.music_toggle",
+          path: "sequence[0].value_template",
+        },
       ],
       other_dashboard_references: [],
       coverage: {
