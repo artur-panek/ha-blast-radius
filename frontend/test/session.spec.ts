@@ -21,7 +21,9 @@ test("Back recreates the panel with its search, depth, tab and scroll and reques
 }) => {
   await analyze(page, "binary_sensor.wall_button");
   await page.getByLabel("Traversal depth").selectOption("12");
-  await page.getByRole("tab", { name: "Graph", exact: true }).click();
+  await page
+    .getByRole("tab", { name: "Relationship map", exact: true })
+    .click();
   await page.evaluate(() => {
     const panel = document.querySelector("blast-radius-panel") as any;
     const original = panel.hass.callWS.bind(panel.hass);
@@ -63,10 +65,10 @@ test("Back recreates the panel with its search, depth, tab and scroll and reques
   await expect(search(page)).toHaveValue("binary_sensor.wall_button");
   await expect(page.getByLabel("Traversal depth")).toHaveValue("12");
   await expect(
-    page.getByRole("tab", { name: "Graph", exact: true }),
+    page.getByRole("tab", { name: "Relationship map", exact: true }),
   ).toHaveAttribute("aria-selected", "true");
   await expect(
-    page.getByRole("heading", { name: "Dependency map" }),
+    page.getByRole("heading", { name: "Relationship map" }),
   ).toBeVisible();
   await expect
     .poll(async () =>

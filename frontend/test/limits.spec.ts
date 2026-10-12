@@ -26,7 +26,9 @@ test("depth warnings precede counts and a deeper fresh analysis finds more targe
         ),
     ),
   ).toBe(true);
-  await page.getByRole("tab", { name: "Graph", exact: true }).click();
+  await page
+    .getByRole("tab", { name: "Relationship map", exact: true })
+    .click();
   await expect(page.locator('[data-source="script.music_toggle"]')).toHaveCount(
     0,
   );
@@ -110,12 +112,14 @@ test("coverage gaps remain visible with zero references, open details and surviv
     .getByRole("combobox", { name: "Entity", exact: true })
     .fill("sensor.unused");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
-  const notice = page.getByRole("status", { name: "Static coverage partial" });
-  await expect(notice).toContainText("Static coverage: partial");
-  await expect(notice).toContainText(
-    "Some Home Assistant configuration cannot be fully inspected statically",
-  );
+  await expect(
+    page.getByRole("status", { name: "Static coverage partial" }),
+  ).toHaveCount(0);
   await expect(page.locator("#coverage")).not.toHaveAttribute("open", "");
+  await expect(page.locator("#coverage > summary")).toContainText(
+    "Coverage & diagnostics",
+  );
+  await expect(page.locator("#coverage > summary")).toContainText("partial");
   await expect(
     page.getByRole("button", { name: /Inspect to depth/ }),
   ).toHaveCount(0);
@@ -130,7 +134,7 @@ test("coverage gaps remain visible with zero references, open details and surviv
   await page.screenshot({
     path: "/tmp/ha-blast-radius-incomplete-desktop.png",
   });
-  await page.getByRole("button", { name: "Coverage details" }).click();
+  await page.locator("#coverage > summary").click();
   await expect(page.locator("#coverage")).toHaveAttribute("open", "");
   await expect(page.locator("#coverage > summary")).toBeFocused();
   await expect(page.locator("#coverage")).toContainText("dashboard.broken");

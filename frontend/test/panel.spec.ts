@@ -42,7 +42,9 @@ test("inspect, traverse, preview rename and removal, export JSON", async ({
   await expect(
     page.getByRole("heading", { name: "Potential blind spots", exact: true }),
   ).toBeVisible();
-  await page.getByRole("tab", { name: "Graph", exact: true }).click();
+  await page
+    .getByRole("tab", { name: "Relationship map", exact: true })
+    .click();
   await expect(
     page.locator('.tree .graph-node[data-source="media_player.tablet"]'),
   ).toBeVisible();
@@ -115,7 +117,9 @@ test("desktop screenshots and depth change", async ({ page }) => {
   ).toBeVisible();
   await screenshotPanel(page, "../docs/panel-light.png");
   await page.getByRole("button", { name: "Toggle theme" }).click();
-  await page.getByRole("tab", { name: "Graph", exact: true }).click();
+  await page
+    .getByRole("tab", { name: "Relationship map", exact: true })
+    .click();
   await screenshotPanel(page, "../docs/panel-dark.png");
   await page.getByText("Analysis options", { exact: true }).click();
   await page.getByLabel("Traversal depth").selectOption("1");
@@ -254,6 +258,7 @@ for (const theme of ["light", "dark", "custom-dark"]) {
     });
     await page.locator(".uncertainty-scope > summary").first().click();
     await page.locator(".reason-group > summary").first().click();
+    await page.locator("details.result-filters > summary").click();
     for (const summary of await page
       .locator(".source-grid .technical > summary")
       .all())
@@ -344,7 +349,12 @@ test("a large dashboard stays compact, explains unknowns and retains exact paths
   );
   await expect(elsewhere).not.toHaveAttribute("open", "");
   expect((await elsewhere.boundingBox())!.height).toBeLessThan(80);
-  await expect(page.getByText("Wall button", { exact: true })).toBeVisible();
+  await expect(
+    page
+      .locator(".impact-lane")
+      .getByText("Wall button", { exact: true })
+      .first(),
+  ).toBeVisible();
   await expect(
     page.getByText("triggers[0].entity_id", { exact: true }),
   ).not.toBeVisible();
@@ -384,11 +394,11 @@ test("analysis tabs support keyboard navigation and readable configuration locat
     .getByRole("combobox", { name: "Entity", exact: true })
     .fill("binary_sensor.wall_button");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
-  const impact = page.getByRole("tab", { name: "Impact", exact: true });
+  const impact = page.getByRole("tab", { name: "Overview", exact: true });
   await impact.focus();
   await impact.press("ArrowRight");
   await expect(
-    page.getByRole("tab", { name: "Graph", exact: true }),
+    page.getByRole("tab", { name: "Relationship map", exact: true }),
   ).toBeFocused();
   await expect(page.getByRole("tabpanel")).toHaveAttribute(
     "aria-labelledby",
@@ -440,7 +450,9 @@ test("source links open loaded configurations and notify the Home Assistant rout
     "href",
     "/config/automation/show/automation.wall_button",
   );
-  await page.getByRole("tab", { name: "Graph", exact: true }).click();
+  await page
+    .getByRole("tab", { name: "Relationship map", exact: true })
+    .click();
   await expect(
     page.locator('.graph-node[data-source="script.music_toggle"] .open-source'),
   ).toHaveAttribute("href", "/config/script/show/script.music_toggle");
@@ -486,7 +498,9 @@ test("scenes open their editor and ordinary entities open the native more-info d
   await expect(
     page.locator('.source-grid [data-source="scene.evening"] .open-source'),
   ).toHaveAttribute("href", "/config/scene/edit/evening_01");
-  await page.getByRole("tab", { name: "Graph", exact: true }).click();
+  await page
+    .getByRole("tab", { name: "Relationship map", exact: true })
+    .click();
   await page.evaluate(() => {
     (window as any).moreInfo = [];
     window.addEventListener("hass-more-info", (event) =>
@@ -523,7 +537,9 @@ test("missing entities and unsafe navigation destinations do not get open contro
   const search = page.getByRole("combobox", { name: "Entity", exact: true });
   await search.fill("light.removed");
   await search.press("Enter");
-  await page.getByRole("tab", { name: "Graph", exact: true }).click();
+  await page
+    .getByRole("tab", { name: "Relationship map", exact: true })
+    .click();
   await expect(
     page.locator('.graph-node[data-source="light.removed"] .open-source'),
   ).toHaveCount(0);

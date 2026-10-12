@@ -929,7 +929,7 @@ var Ee = {
   }
   .impact-metrics {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
   .impact-metrics > div {
     padding: 18px 16px;
@@ -947,6 +947,217 @@ var Ee = {
   .impact-metrics span {
     color: var(--br-muted);
     font-size: 13px;
+  }
+  .summary-context-note {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: -12px 0 22px;
+    padding: 9px 12px;
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    color: var(--br-muted);
+    font-size: 12px;
+    background: color-mix(
+      in srgb,
+      var(--br-card) 97%,
+      var(--primary-text-color, #212121)
+    );
+  }
+  .summary-context-note strong {
+    color: var(--primary-text-color, #212121);
+    font-size: 13px;
+  }
+  .impact-lane {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--br-border);
+  }
+  .impact-lane:first-of-type {
+    margin-top: 10px;
+  }
+  .impact-lane .section-heading {
+    margin-bottom: 10px;
+  }
+  .lane-badge {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+  .incoming-badge {
+    border-color: color-mix(in srgb, var(--br-accent) 55%, var(--br-border));
+  }
+  .reaction-badge,
+  .downstream-badge {
+    border-color: color-mix(
+      in srgb,
+      var(--success-color, #288048) 55%,
+      var(--br-border)
+    );
+  }
+  .role-group {
+    margin-top: 12px;
+  }
+  .role-group + .role-group {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--br-border);
+  }
+  .role-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .role-heading h3 {
+    margin: 0;
+    font-size: 15px;
+  }
+  .role-heading p {
+    margin: 3px 0 0;
+    color: var(--br-muted);
+    font-size: 12px;
+  }
+  .role-count {
+    flex: 0 0 auto;
+    border: 1px solid var(--br-border);
+    border-radius: 999px;
+    padding: 4px 8px;
+    color: var(--br-muted);
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .role-change .role-count,
+  .role-invoke .role-count {
+    border-color: color-mix(in srgb, var(--br-accent) 55%, var(--br-border));
+  }
+  .same-flow-list {
+    display: grid;
+    gap: 8px;
+  }
+  .flow-group {
+    margin: 0;
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    padding: 2px 12px;
+  }
+  .flow-output,
+  .flow-reaction {
+    border-left: 3px solid var(--success-color, #288048);
+  }
+  .flow-mixed {
+    border-left: 3px solid var(--warning-color, #9b6600);
+  }
+  .flow-context {
+    background: color-mix(
+      in srgb,
+      var(--br-card) 98%,
+      var(--primary-text-color, #212121)
+    );
+  }
+  .flow-group > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .flow-group > summary > span:first-child {
+    min-width: 0;
+  }
+  .flow-source {
+    display: block;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .flow-group summary small {
+    display: block;
+    margin-top: 2px;
+    color: var(--br-muted);
+    font-size: 11px;
+    font-weight: 400;
+  }
+  .flow-count {
+    flex: 0 0 auto;
+    color: var(--br-muted);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .flow-targets {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 4px 0 10px;
+  }
+  .flow-target {
+    min-width: 0;
+    border: 1px solid var(--br-border);
+    border-radius: 7px;
+    padding: 9px 10px;
+  }
+  .flow-target .source-name {
+    font-size: 13px;
+  }
+  .flow-target small {
+    display: block;
+    margin-top: 2px;
+    color: var(--br-muted);
+    font-size: 11px;
+  }
+  .shared-context {
+    margin-top: 24px;
+    border: 1px solid var(--br-border);
+    border-radius: 9px;
+    padding: 3px 12px;
+    background: color-mix(
+      in srgb,
+      var(--br-card) 98%,
+      var(--primary-text-color, #212121)
+    );
+  }
+  .shared-context > summary {
+    font-weight: 600;
+  }
+  .shared-context > p {
+    margin: 0 0 12px;
+    font-size: 12px;
+  }
+  .graph-direction {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 12px 0 18px;
+  }
+  .graph-direction span {
+    border: 1px solid var(--br-border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--br-muted);
+    font-size: 12px;
+  }
+  .graph-direction strong {
+    color: var(--primary-text-color, #212121);
+  }
+  .effect-group {
+    border-top-color: color-mix(
+      in srgb,
+      var(--success-color, #288048) 60%,
+      var(--br-border)
+    );
+  }
+  .graph-context {
+    margin-top: 22px;
+    border-top: 1px solid var(--br-border);
+    padding-top: 8px;
+  }
+  .graph-context > summary {
+    font-weight: 600;
+  }
+  .graph-context-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 10px;
   }
 
   .columns {
@@ -1496,7 +1707,19 @@ var Ee = {
     margin: 12px 0;
   }
   .result-filters {
-    margin: 14px 0 20px;
+    margin: 4px 0 20px;
+    border-bottom: 1px solid var(--br-border);
+    padding-bottom: 8px;
+  }
+  .result-filters > summary {
+    width: fit-content;
+    padding: 7px 0;
+    color: var(--br-muted);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .filter-body {
+    padding-top: 6px;
   }
   .filter-row {
     display: flex;
@@ -1558,20 +1781,41 @@ var Ee = {
   }
   @media (max-width: 1000px) {
     .source-grid,
-    .map-columns {
+    .map-columns,
+    .flow-targets,
+    .graph-context-grid {
       grid-template-columns: 1fr;
     }
     .reference {
       padding: 13px 14px;
     }
+    .impact-metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .impact-metrics > div:nth-child(2) {
+      border-right: 0;
+    }
+    .impact-metrics > div:nth-child(-n + 2) {
+      border-bottom: 1px solid var(--br-border);
+    }
   }
   @media (max-width: 760px) {
-    .impact-summary {
+    .impact-summary,
+    .graph-direction {
       grid-template-columns: 1fr;
     }
     .impact-verdict {
       border-right: 0;
       border-bottom: 1px solid var(--br-border);
+    }
+    .role-heading,
+    .flow-group > summary {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .role-count,
+    .flow-count {
+      white-space: normal;
     }
   }
   @media (max-width: 500px) {
@@ -2177,7 +2421,130 @@ var nt = {
 		].includes(t[0]);
 	}
 	directConfidence(e) {
-		return e.references.some((e) => e.confidence === "unknown") ? "Needs review" : e.references.some((e) => e.confidence !== "explicit") ? "Mixed confidence" : e.references.length ? "High confidence" : "No direct matches";
+		if (!e.references.length) return "No direct matches";
+		let t = e.references.filter((e) => e.confidence !== "explicit").length;
+		return t ? `${t} of ${e.references.length} direct refs non-explicit` : "All direct refs explicit";
+	}
+	referenceCategory(e) {
+		return e.role === "write" ? "change" : e.role === "call" ? "invoke" : e.role === "display" || e.source_type === "dashboard" ? "display" : e.role === "member" ? "structural" : e.role === "read" || /^(triggers?|wait_for_trigger)(\[|\.)/.test(e.path) ? "read" : "other";
+	}
+	directCategoryMeta(e) {
+		let t = {
+			change: {
+				title: "Can change this entity",
+				description: "Actions in these configurations target the selected entity.",
+				badge: "changes"
+			},
+			invoke: {
+				title: "Can invoke this entity",
+				description: "These configurations call the selected script or actionable entity.",
+				badge: "calls"
+			},
+			read: {
+				title: "Reacts to or reads this entity",
+				description: "Triggers, conditions or reads use this entity as input without directly changing it.",
+				badge: "reads"
+			},
+			structural: {
+				title: "Includes it structurally",
+				description: "Groups or structural configuration include this entity without treating it as an action target.",
+				badge: "memberships"
+			},
+			display: {
+				title: "Displays it",
+				description: "Dashboards or presentation config show the selected entity.",
+				badge: "displays"
+			},
+			other: {
+				title: "Other direct references",
+				description: "Direct references that do not fit a known action, read or display role.",
+				badge: "references"
+			}
+		};
+		return t[e] || t.other;
+	}
+	directCategories(e) {
+		return [
+			"change",
+			"invoke",
+			"read",
+			"display",
+			"structural",
+			"other"
+		].map((t) => ({
+			category: t,
+			refs: e.references.filter(this.matchesFilter).filter((e) => this.referenceCategory(e) === t)
+		})).filter(({ refs: e }) => e.length);
+	}
+	uniqueSources(e) {
+		return new Set(e.map((e) => e.source_id)).size;
+	}
+	directStats(e) {
+		let t = e.references, n = (...e) => t.filter((t) => e.includes(this.referenceCategory(t)));
+		return {
+			action: this.uniqueSources(n("change", "invoke")),
+			change: this.uniqueSources(n("change")),
+			invoke: this.uniqueSources(n("invoke")),
+			observe: this.uniqueSources(n("read", "display")),
+			read: this.uniqueSources(n("read")),
+			display: this.uniqueSources(n("display"))
+		};
+	}
+	downstreamGroups(e, t = !0) {
+		let n = t && this.filtersActive ? Ze(e, this.matchesFilter) : e.graph.nodes, r = new Map(n.map((e) => [e.id, e])), i = /* @__PURE__ */ new Map();
+		for (let t of e.references) i.set(t.source_id, [...i.get(t.source_id) || [], t]);
+		let a = (e) => {
+			let t = i.get(e) || [], n = new Set(t.map((e) => this.referenceCategory(e))), r = n.has("read"), a = n.has("change") || n.has("invoke");
+			return r && a ? "mixed" : r ? "reaction" : "context";
+		}, o = (t) => {
+			let n = t, i = /* @__PURE__ */ new Set();
+			for (; n?.via && !i.has(n.id);) {
+				i.add(n.id);
+				let t = r.get(n.via);
+				if (!t) return;
+				if (t.id === e.entity_id) return {
+					origin: e.entity_id,
+					kind: "output"
+				};
+				if (t.relationship === "dependent" && t.via === e.entity_id) return {
+					origin: t.id,
+					kind: a(t.id)
+				};
+				n = t;
+			}
+		}, s = /* @__PURE__ */ new Map();
+		for (let e of n.filter((e) => e.relationship === "downstream")) {
+			let t = o(e);
+			if (!t) continue;
+			let n = `${t.kind}:${t.origin}`, r = s.get(n) || {
+				...t,
+				items: []
+			};
+			r.items.push(e), s.set(n, r);
+		}
+		return [...s.values()].sort((e, t) => {
+			let n = {
+				output: 0,
+				reaction: 1,
+				mixed: 2,
+				context: 3
+			};
+			return n[e.kind] - n[t.kind] || t.items.length - e.items.length;
+		});
+	}
+	downstreamStats(e) {
+		let t = this.downstreamGroups(e, !1), n = (...e) => new Set(t.filter((t) => e.includes(t.kind)).flatMap((e) => e.items.map((e) => e.id))).size;
+		return {
+			possible: n("output", "reaction", "mixed"),
+			context: n("context"),
+			mixed: n("mixed")
+		};
+	}
+	impactNarrative(e) {
+		let t = this.directStats(e), n = this.downstreamStats(e);
+		if (!e.references.length) return "No direct references were found in the inspected configuration.";
+		let r = [];
+		return t.action && r.push(`${t.action} ${t.action === 1 ? "source can" : "sources can"} change or invoke it`), t.read && r.push(`${t.read} ${t.read === 1 ? "source reads or reacts to it" : "sources read or react to it"}`), t.display && r.push(`${t.display} ${t.display === 1 ? "source displays it" : "sources display it"}`), n.possible && r.push(`${n.possible} possible downstream ${n.possible === 1 ? "node is" : "nodes are"} reachable`), `${r.join("; ")}.`;
 	}
 	unresolvedGroups(e) {
 		return $e(e).map(({ reference: e, paths: t }) => M` <details
@@ -2268,32 +2635,40 @@ var nt = {
 			template_literal: "Template literal",
 			review: "Needs review"
 		}, n = e.references.filter(this.matchesFilter).length;
-		return M`<section class="result-filters" aria-label="Result filters">
-      <div role="group" aria-label="Source types" class="filter-row">
-        <span class="filter-label">Sources</span>
-        <button
-          aria-pressed=${!this.sourceFilters.length}
-          @click=${() => this.sourceFilters = []}
-        >
-          All sources
-        </button>
-        ${Ye.map((e) => M`<button aria-pressed=${this.sourceFilters.includes(e)} @click=${() => this.sourceFilters = this.sourceFilters.includes(e) ? this.sourceFilters.filter((t) => t !== e) : [...this.sourceFilters, e]}>${J[e]}</button>`)}
+		return M`<details
+      class="result-filters"
+      role="region"
+      aria-label="Result filters"
+      .open=${this.filtersActive || this.tab !== "impact"}
+    >
+      <summary>
+        Filter results
+        ${this.filtersActive ? M`<span class="count">${n} visible</span>` : P}
+      </summary>
+      <div class="filter-body">
+        <div role="group" aria-label="Source types" class="filter-row">
+          <span class="filter-label">Sources</span>
+          <button
+            aria-pressed=${!this.sourceFilters.length}
+            @click=${() => this.sourceFilters = []}
+          >
+            All sources
+          </button>
+          ${Ye.map((e) => M`<button aria-pressed=${this.sourceFilters.includes(e)} @click=${() => this.sourceFilters = this.sourceFilters.includes(e) ? this.sourceFilters.filter((t) => t !== e) : [...this.sourceFilters, e]}>${J[e]}</button>`)}
+        </div>
+        <div role="group" aria-label="Reference confidence" class="filter-row">
+          <span class="filter-label">Confidence</span>
+          <button
+            aria-pressed=${!this.reviewFilters.length}
+            @click=${() => this.reviewFilters = []}
+          >
+            All confidence
+          </button>
+          ${Object.keys(t).map((e) => M`<button aria-pressed=${this.reviewFilters.includes(e)} @click=${() => this.reviewFilters = this.reviewFilters.includes(e) ? this.reviewFilters.filter((t) => t !== e) : [...this.reviewFilters, e]}>${t[e]}</button>`)}
+        </div>
+        ${this.filtersActive ? M`<p class="filter-note" role="status">${n} of ${e.references.length} direct references visible. Exported reports still include the full analysis.</p>` : P}
       </div>
-      <div role="group" aria-label="Reference confidence" class="filter-row">
-        <span class="filter-label">Confidence</span>
-        <button
-          aria-pressed=${!this.reviewFilters.length}
-          @click=${() => this.reviewFilters = []}
-        >
-          All confidence
-        </button>
-        ${Object.keys(t).map((e) => M`<button aria-pressed=${this.reviewFilters.includes(e)} @click=${() => this.reviewFilters = this.reviewFilters.includes(e) ? this.reviewFilters.filter((t) => t !== e) : [...this.reviewFilters, e]}>${t[e]}</button>`)}
-      </div>
-      ${this.filtersActive ? M`<p class="filter-note" role="status">
-              ${n} of ${e.references.length} direct references visible.
-              Exported reports still include the full analysis.
-            </p>` : P}
-    </section>`;
+    </details>`;
 	}
 	selectorDetail(e) {
 		if (!e.selector) return P;
@@ -2308,27 +2683,158 @@ var nt = {
       ${Q(e) === "device" ? "Device identity does not establish an entity dependency or prove an action will run." : "Entity membership and runtime eligibility are not expanded."}
     </p>`;
 	}
-	impact(e) {
-		let t = e.references.filter(this.matchesFilter), n = new Set(t.map((e) => e.source_id)).size;
-		return M`<div class="section-heading impact-heading">
+	renderDirectRoleGroup(e, t) {
+		if (!t.length) return P;
+		let n = this.directCategoryMeta(e), r = this.uniqueSources(t);
+		return M`<section
+      class="role-group role-${e}"
+      aria-label=${n.title}
+    >
+      <div class="role-heading">
         <div>
-          <h2>Direct impact</h2>
-          <p>Configurations with direct references to this entity.</p>
+          <h3>${n.title}</h3>
+          <p>${n.description}</p>
         </div>
-        <span class="count"
-          >${n} visible ${n === 1 ? "source" : "sources"}</span
+        <span class="role-count"
+          >${r} ${r === 1 ? "source" : "sources"} ·
+          ${t.length} ${n.badge}</span
         >
       </div>
-      ${t.length ? M`<div class="source-grid">${this.references(t)}</div>` : M`<div class="empty">
-              <div class="symbol">${q()}</div>
-              <h3>
-                ${this.filtersActive ? "No matching direct references" : "No direct references found"}
-              </h3>
-              <p class="muted">
-                ${this.filtersActive ? "Try All sources or All confidence to show more results. Full totals and exports are unchanged." : "Nothing in the inspected sources points to this entity. Check coverage before changing it."}
-              </p>
-            </div>`}
-      ${this.uncertainty(e)}`;
+      <div class="source-grid">${this.references(t)}</div>
+    </section>`;
+	}
+	downstreamGroupTitle(e) {
+		return e.kind === "output" ? {
+			title: "Direct outputs of this configuration",
+			description: "Targets reached directly from the selected script, automation or scene."
+		} : e.kind === "reaction" ? {
+			title: `${this.sourceName(e.origin)} can react downstream`,
+			description: "This configuration reads the selected entity and can reach these nodes when its flow runs."
+		} : e.kind === "mixed" ? {
+			title: `${this.sourceName(e.origin)} is a mixed read/write flow`,
+			description: "This configuration both reads and changes the selected entity. Downstream nodes may depend on branch conditions; inspect the connection before assuming causality."
+		} : {
+			title: `Co-targets in ${this.sourceName(e.origin)}`,
+			description: "These nodes share a controller or flow with the selected entity. They are not downstream effects of the selected entity."
+		};
+	}
+	renderDownstreamGroup(e, t = !1) {
+		let n = this.downstreamGroupTitle(e);
+		return M`<details class="flow-group flow-${e.kind}" .open=${t}>
+      <summary>
+        <span>
+          <strong class="flow-source">${n.title}</strong>
+          <small>${n.description}</small>
+        </span>
+        <span class="flow-count"
+          >${e.items.length}
+          ${e.items.length === 1 ? "node" : "nodes"}</span
+        >
+      </summary>
+      <div class="flow-targets">
+        ${e.items.map((e) => M`<div class="flow-target" data-source=${e.id}>
+              <span>${this.sourceControl(e.id)}</span>
+              <small
+                >${e.depth} ${e.depth === 1 ? "step" : "steps"} away · via
+                ${e.via ? this.sourceName(e.via) : "selected entity"}</small
+              >
+            </div>`)}
+      </div>
+    </details>`;
+	}
+	impact(e) {
+		let t = new Map(this.directCategories(e).map(({ category: e, refs: t }) => [e, t])), n = [...t.get("change") || [], ...t.get("invoke") || []], r = t.get("read") || [], i = [
+			"display",
+			"structural",
+			"other"
+		].map((e) => ({
+			category: e,
+			refs: t.get(e) || []
+		})).filter(({ refs: e }) => e.length), a = this.downstreamGroups(e), o = a.filter((e) => e.kind !== "context"), s = a.filter((e) => e.kind === "context"), c = this.downstreamStats(e);
+		return M`${n.length ? M`<section class="impact-lane incoming-lane">
+            <div class="section-heading">
+              <div>
+                <h2>What can change or invoke this entity</h2>
+                <p>
+                  These are incoming control paths. Start here before renaming,
+                  removing or changing the entity.
+                </p>
+              </div>
+              <span class="lane-badge incoming-badge">Incoming</span>
+            </div>
+            ${this.renderDirectRoleGroup("change", t.get("change") || [])}
+            ${this.renderDirectRoleGroup("invoke", t.get("invoke") || [])}
+          </section>` : P}
+    ${r.length ? M`<section class="impact-lane reaction-lane">
+            <div class="section-heading">
+              <div>
+                <h2>What reads or reacts to this entity</h2>
+                <p>
+                  These configurations use the selected entity as input. Their
+                  actions may run when triggers and conditions allow it.
+                </p>
+              </div>
+              <span class="lane-badge reaction-badge">Reaction path</span>
+            </div>
+            ${this.renderDirectRoleGroup("read", r)}
+          </section>` : P}
+    ${o.length ? M`<section class="impact-lane downstream-lane">
+            <div class="section-heading">
+              <div>
+                <h2>What may be affected downstream</h2>
+                <p>
+                  Targets reached from the selected configuration itself or from
+                  configurations that read it. This is the closest thing to an
+                  outgoing blast radius, but conditions are not executed.
+                </p>
+              </div>
+              <span class="lane-badge downstream-badge"
+                >${c.possible} possible</span
+              >
+            </div>
+            <div class="same-flow-list">
+              ${o.map((e) => this.renderDownstreamGroup(e, o.length === 1))}
+            </div>
+          </section>` : P}
+    ${i.length ? M`<section class="impact-lane passive-lane">
+            <div class="section-heading">
+              <div>
+                <h2>Other direct uses</h2>
+                <p>
+                  Display and structural references matter for rename/removal,
+                  but do not represent control flow.
+                </p>
+              </div>
+            </div>
+            ${i.map(({ category: e, refs: t }) => this.renderDirectRoleGroup(e, t))}
+          </section>` : P}
+    ${s.length ? M`<details class="shared-context">
+            <summary>
+              Shared-flow context
+              <span class="count"
+                >${c.context}
+                ${c.context === 1 ? "node" : "nodes"}</span
+              >
+            </summary>
+            <p class="muted">
+              These are co-targets in configurations that control the selected
+              entity. They help explain the surrounding flow, but they are not
+              things this entity causes to change.
+            </p>
+            <div class="same-flow-list">
+              ${s.map((e) => this.renderDownstreamGroup(e))}
+            </div>
+          </details>` : P}
+    ${!n.length && !r.length && !i.length && !o.length ? M`<div class="empty">
+            <div class="symbol">${q()}</div>
+            <h3>
+              ${this.filtersActive ? "No matching direct references" : "No direct references found"}
+            </h3>
+            <p class="muted">
+              ${this.filtersActive ? "Clear the filters to show the complete dependency view." : "Nothing in the inspected sources points directly to this entity. Check Coverage & diagnostics before changing it."}
+            </p>
+          </div>` : P}
+    ${this.uncertainty(e)}`;
 	}
 	showCoverage() {
 		let e = this.renderRoot.querySelector("#coverage");
@@ -2381,40 +2887,74 @@ var nt = {
     </section>` : P;
 	}
 	graph(e) {
-		let t = this.filtersActive ? Ze(e, this.matchesFilter) : e.graph.nodes, n = e.graph.edges.filter(this.matchesFilter), r = t.find((e) => e.relationship === "selected"), i = t.filter((e) => e.relationship === "dependent"), a = t.filter((e) => e.relationship === "downstream");
-		return M`<h2>Dependency map</h2>
-      <p class="muted">
-        Read from the selected entity to its linked configurations and their
-        targets. Conditions are not evaluated; these links do not prove an
-        action will run.
-      </p>
+		let t = this.filtersActive ? Ze(e, this.matchesFilter) : e.graph.nodes, n = e.graph.edges.filter(this.matchesFilter), r = t.find((e) => e.relationship === "selected"), i = t.filter((e) => e.relationship === "dependent"), a = this.downstreamGroups(e), o = new Set(a.filter((e) => e.kind !== "context").flatMap((e) => e.items.map((e) => e.id))), s = new Set(a.filter((e) => e.kind === "context").flatMap((e) => e.items.map((e) => e.id))), c = t.filter((e) => e.relationship === "downstream" && o.has(e.id)), l = t.filter((e) => e.relationship === "downstream" && s.has(e.id));
+		return M`<div class="section-heading">
+        <div>
+          <h2>Relationship map</h2>
+          <p>
+            Separate dependency paths from real or possible downstream paths.
+            Shared-flow co-targets are kept apart so they cannot be mistaken for
+            effects of the selected entity.
+          </p>
+        </div>
+      </div>
       ${this.filtersActive ? M`<p class="filter-note">Showing ${t.length - 1} of ${e.graph.nodes.length - 1} linked nodes. Paths may pass through hidden configurations; filtering does not recalculate the graph.</p>` : P}
+      <div class="graph-direction">
+        <span
+          ><strong>Incoming / dependent:</strong> configurations that directly
+          reference this entity or lead to one that does</span
+        >
+        <span
+          ><strong>Possible downstream:</strong> outputs of the selected
+          configuration or targets reached through readers/reactors</span
+        >
+      </div>
       <div class="tree dependency-map">
         <div class="map-selected">
           <span class="map-label">Selected entity</span
           >${this.graphNode(r)}
         </div>
         <div class="map-columns">
-          <section class="map-group">
-            <h3>Used by <span class="count">${i.length}</span></h3>
-            <p class="muted">
-              Configurations that reference the selected entity, directly or
-              through another configuration.
-            </p>
-            ${i.length ? i.map((e) => this.graphNode(e)) : M`<p>${this.filtersActive ? "No matching linked configurations. Try All sources or All confidence." : "No linked configurations found."}</p>`}
-          </section>
-          <section class="map-group">
+          <section class="map-group incoming-group">
             <h3>
-              Possible targets <span class="count">${a.length}</span>
+              Dependency paths
+              <span class="count">${i.length}</span>
             </h3>
             <p class="muted">
-              Action and membership targets reached through those
-              configurations.
+              Direct references plus chained callers or dependents that can lead
+              to them.
             </p>
-            ${a.length ? a.map((e) => this.graphNode(e)) : M`<p>${this.filtersActive ? "No matching possible targets. Try All sources or All confidence." : "No downstream targets found."}</p>`}
+            ${i.length ? i.map((e) => this.graphNode(e)) : M`<p>
+                    ${this.filtersActive ? "No matching dependency paths. Clear filters to restore the full map." : "No dependency paths found."}
+                  </p>`}
+          </section>
+          <section class="map-group effect-group">
+            <h3>
+              Possible downstream
+              <span class="count">${c.length}</span>
+            </h3>
+            <p class="muted">
+              Nodes reachable from the selected configuration itself or through
+              configurations that read it. Conditions are not executed.
+            </p>
+            ${c.length ? c.map((e) => this.graphNode(e)) : M`<p>No downstream reaction or output path found.</p>`}
           </section>
         </div>
       </div>
+      ${l.length ? M`<details class="graph-context">
+              <summary>
+                Shared-flow context
+                <span class="count">${l.length}</span>
+              </summary>
+              <p class="muted">
+                These nodes are co-targets in configurations that control the
+                selected entity. They are shown for context and are not outputs
+                of the selected entity.
+              </p>
+              <div class="graph-context-grid">
+                ${l.map((e) => this.graphNode(e))}
+              </div>
+            </details>` : P}
       ${e.graph.cycles.length ? M`<div class="notice">Cycles detected. Nodes are shown once.${e.graph.cycles.map((e) => M`<p><code>${e.join(" → ")}</code></p>`)}</div>` : P}
       <details>
         <summary>
@@ -2445,7 +2985,7 @@ var nt = {
           ${/^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/.test(e.id) ? M`<button class="analyze-node" aria-label=${`Analyze this: ${e.id}`} @click=${() => this.analyzeNode(e.id)}>Analyze this</button>` : P}
         </div>
       </div>
-      ${e.via ? M`<p class="via">${e.relationship === "dependent" ? "References" : "Target of"} ${this.sourceControl(e.via)}</p>` : P}
+      ${e.via ? M`<p class="via">${e.relationship === "dependent" ? "Dependency path through" : "Reached through"} ${this.sourceControl(e.via)}</p>` : P}
       <details class="technical">
         <summary>${e.path ? "Connection details" : "Entity ID"}</summary>
         <code class="source-id">${e.id}</code>
@@ -2622,26 +3162,38 @@ var nt = {
                 ${e.graph.truncated ? this.completeness(e) : P}
                 <section class="impact-summary" aria-label="Impact summary">
                   <div class="impact-verdict">
-                    <span class="eyebrow">Direct impact</span>
+                    <span class="eyebrow">At a glance</span>
                     <strong>
-                      ${e.summary.sources ? `${e.summary.sources} ${e.summary.sources === 1 ? "configuration" : "configurations"}` : "No direct references"}
+                      ${e.summary.sources ? `${e.summary.sources} direct ${e.summary.sources === 1 ? "source" : "sources"}` : "No direct usage found"}
                     </strong>
-                    <p>
-                      ${e.summary.references ? `${e.summary.references} direct ${e.summary.references === 1 ? "reference" : "references"} found. Review these before renaming or removing this entity.` : "Nothing in the inspected sources points directly to this entity."}
-                    </p>
+                    <p>${this.impactNarrative(e)}</p>
                   </div>
-                  <div class="impact-metrics">
+                  <div class="impact-metrics semantic-metrics">
                     <div>
-                      <strong>${e.summary.references}</strong>
-                      <span>direct references</span>
+                      <strong>${this.directStats(e).action}</strong>
+                      <span>sources can change / invoke</span>
                     </div>
                     <div>
-                      <strong>${e.summary.downstream}</strong>
-                      <span>related graph nodes</span>
+                      <strong>${this.directStats(e).read}</strong>
+                      <span>sources read / react</span>
+                    </div>
+                    <div>
+                      <strong>${this.downstreamStats(e).possible}</strong>
+                      <span>possible downstream nodes</span>
+                    </div>
+                    <div>
+                      <strong>${this.directStats(e).display}</strong>
+                      <span>display sources</span>
                     </div>
                   </div>
                 </section>
-                ${e.graph.truncated ? P : this.completeness(e)}
+                ${this.downstreamStats(e).context ? M`<div class="summary-context-note">
+                        <strong>${this.downstreamStats(e).context}</strong>
+                        ${this.downstreamStats(e).context === 1 ? "additional node is" : "additional nodes are"}
+                        shared-flow context only — useful for understanding the
+                        surrounding controller, not an outgoing effect of the
+                        selected entity.
+                      </div>` : P}
                 <div class="columns">
                   <section class="card">
                     <nav role="tablist" aria-label="Analysis views">
@@ -2649,7 +3201,7 @@ var nt = {
 			"impact",
 			"graph",
 			"raw"
-		].map((e) => M`<button role="tab" id=${`tab-${e}`} aria-controls="analysis-view" aria-selected=${this.tab === e} tabindex=${this.tab === e ? 0 : -1} @keydown=${this.tabKeydown} @click=${() => this.tab = e}>${e === "impact" ? "Impact" : e === "graph" ? "Graph" : "Raw references"}</button>`)}
+		].map((e) => M`<button role="tab" id=${`tab-${e}`} aria-controls="analysis-view" aria-selected=${this.tab === e} tabindex=${this.tab === e ? 0 : -1} @keydown=${this.tabKeydown} @click=${() => this.tab = e}>${e === "impact" ? "Overview" : e === "graph" ? "Relationship map" : "Raw references"}</button>`)}
                     </nav>
                     ${this.filters(e)}
                     <div
@@ -2730,7 +3282,7 @@ var nt = {
                 <details class="card" id="coverage">
                   <summary>
                     Coverage & diagnostics · ${e.coverage.sources} sources
-                    inspected
+                    inspected${e.coverage.warnings?.length ? " · partial" : ""}
                   </summary>
                   <p class="muted">
                     ${Object.entries(e.coverage.source_types).map(([e, t]) => `${t} ${e}`).join(" · ")}
