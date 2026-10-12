@@ -556,3 +556,44 @@ test("selector presentation separates known identity from unexpanded entity memb
     "Entity membership and runtime eligibility are not expanded.",
   );
 });
+
+test("structural-only and own-output summaries", async ({ page }) => {
+  await analyze(page, "sensor.unused");
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    const ref = {
+      source_id: "group.synthetic",
+      source_type: "group",
+      target: "sensor.unused",
+      path: "entities[0]",
+      confidence: "explicit",
+      role: "member",
+      reason: "",
+    };
+    panel.report = {
+      ...panel.report,
+      references: [ref],
+      summary: { ...panel.report.summary, sources: 1, references: 1 },
+    };
+  });
+  await expect(page.locator(".impact-verdict p")).toHaveText(
+    "Direct references are structural or unclassified.",
+  );
+  await expect(
+    page.getByRole("heading", { name: "Includes it structurally" }),
+  ).toBeVisible();
+
+  await analyze(page, "script.music_toggle");
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    panel.report = {
+      ...panel.report,
+      references: [],
+      summary: { ...panel.report.summary, sources: 0, references: 0 },
+    };
+  });
+  await expect(page.locator(".impact-verdict p")).toContainText(
+    "possible downstream",
+  );
+  await expect(page.locator(".impact-verdict p")).not.toContainText(
+    "No direct references",
+  );
+});

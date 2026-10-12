@@ -664,7 +664,7 @@ export class BlastRadiusPanel extends LitElement {
   private impactNarrative(report: Report) {
     const stats = this.directStats(report);
     const downstream = this.downstreamStats(report);
-    if (!report.references.length)
+    if (!report.references.length && !downstream.possible)
       return "No direct references were found in the inspected configuration.";
 
     const parts: string[] = [];
@@ -684,7 +684,9 @@ export class BlastRadiusPanel extends LitElement {
       parts.push(
         `${downstream.possible} possible downstream ${downstream.possible === 1 ? "node is" : "nodes are"} reachable`,
       );
-    return `${parts.join("; ")}.`;
+    return parts.length
+      ? `${parts.join("; ")}.`
+      : "Direct references are structural or unclassified.";
   }
 
   private unresolvedGroups(refs: Reference[]) {
@@ -1513,7 +1515,7 @@ export class BlastRadiusPanel extends LitElement {
                       ${
                         report.summary.sources
                           ? `${report.summary.sources} direct ${report.summary.sources === 1 ? "source" : "sources"}`
-                          : "No direct usage found"
+                          : "No incoming sources found"
                       }
                     </strong>
                     <p>${this.impactNarrative(report)}</p>

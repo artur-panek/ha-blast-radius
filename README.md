@@ -39,13 +39,14 @@ The screenshot uses synthetic fixtures, not a real household's configuration.
 - Recursive script calls, action targets, scene membership and exposed group membership.
 - Configured Lovelace dashboards, including YAML, through HA's own loader.
 - Jinja literals found without executing templates; unresolved expressions kept separate.
-- Impact-first dependency view with a factual direct-impact summary, bounded
-  traversal and cycle detection. Real traversal truncation is separated from
-  ordinary static-analysis coverage limits.
+- An overview that separates incoming controls, readers/reactors, display-only uses
+  and possible downstream outputs. Shared-flow co-targets are context, not effects.
+- Bounded traversal and cycle detection. Graph truncation is reported separately
+  from normal static-analysis coverage limits.
 - Clickable sources: inspect loaded automations/scripts in HA's read-only view,
   open scenes in their editor, dashboards in their view, and entities in details.
 - Coverage & diagnostics keeps device/selector context and system-wide dashboard
-  diagnostics separate from the direct Impact view.
+  diagnostics separate from the main Overview.
 - Return to your last search, depth and tab after opening a source. Reopen any of
   six recent searches from a compact bar in the same browser tab.
 - Rename/removal previews. **Neither operation is ever executed.**
@@ -90,9 +91,10 @@ and select the latest numbered release. Updates do not install or restart HA aut
 
 1. Select or type an entity ID. Missing old IDs are accepted.
 2. Press **Analyze**. Traversal depth is available under **Analysis options** when you need to adjust it.
-3. Read **Impact**, **Graph**, or **Raw references**. Click a source name or **Open**
-   to inspect it in Home Assistant; **Analyze this** makes a graph node the new root
-   without leaving the panel. Expand reference details for exact paths.
+3. Start with **Overview** to see which configurations control, read or display
+   the entity. Possible downstream effects are separate from **Shared-flow context**,
+   which does not establish causality. Use **Relationship map** and **Raw references**
+   for exact paths. **Analyze this** changes the root; **Open** inspects a source in HA.
 4. Expand **Preview a change**. Enter a same-domain replacement for **Preview rename**,
    or choose **Preview removal**. Expand coverage before drawing conclusions.
 5. Copy/export the report. Make actual changes yourself in Home Assistant.
@@ -124,6 +126,12 @@ follows their action targets, script calls and membership. It does not jump
 upstream again from discovered action targets and invent runtime trigger chains.
 Dashboards remain visible as dependent configurations, but traversal stops there:
 actions on other cards do not become downstream effects of the selected entity.
+
+The Overview distinguishes incoming write/call paths from configurations that read
+or react to the entity, and from passive display or structural references. Targets
+that merely share a write-only flow are shown as context rather than downstream
+impact. Mixed read/write flows and reaction paths remain possibilities, not proof
+that an action will execute.
 
 Different locations remain separate references; identical references are deduplicated.
 Nodes appear once and the edge list retains alternative paths. Default depth is 6,

@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.5 — 2026-10-12
+
+- Separate incoming controllers and callers, readers/reactors, passive display or
+  membership references, and possible downstream paths in the Overview.
+- Keep shared-flow co-targets out of downstream impact counts and behind a
+  separate disclosure. Label mixed read/write flows and conditional reachability
+  without asserting runtime causality.
+- Show direct outputs for selected scripts, automations and scenes, and split the
+  Relationship map into dependency paths, possible outputs and shared context.
+- Handle structural-only results and selected configurations with outputs but no
+  incoming references without misleading empty summaries.
+- Retain the read-only analyzer, report schema and JSON/Markdown exports;
+  refresh the distributed panel, screenshots and browser regression coverage.
+
 ## 0.2.4 — 2026-10-05
 
 - Redesign the panel around a factual direct-impact summary instead of an

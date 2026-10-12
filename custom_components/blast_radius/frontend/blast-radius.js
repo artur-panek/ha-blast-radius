@@ -2136,7 +2136,7 @@ function Ze(e, t) {
 }
 //#endregion
 //#region package.json
-var Qe = "0.2.4";
+var Qe = "0.2.5";
 //#endregion
 //#region src/review.ts
 function Q(e) {
@@ -2542,9 +2542,9 @@ var nt = {
 	}
 	impactNarrative(e) {
 		let t = this.directStats(e), n = this.downstreamStats(e);
-		if (!e.references.length) return "No direct references were found in the inspected configuration.";
+		if (!e.references.length && !n.possible) return "No direct references were found in the inspected configuration.";
 		let r = [];
-		return t.action && r.push(`${t.action} ${t.action === 1 ? "source can" : "sources can"} change or invoke it`), t.read && r.push(`${t.read} ${t.read === 1 ? "source reads or reacts to it" : "sources read or react to it"}`), t.display && r.push(`${t.display} ${t.display === 1 ? "source displays it" : "sources display it"}`), n.possible && r.push(`${n.possible} possible downstream ${n.possible === 1 ? "node is" : "nodes are"} reachable`), `${r.join("; ")}.`;
+		return t.action && r.push(`${t.action} ${t.action === 1 ? "source can" : "sources can"} change or invoke it`), t.read && r.push(`${t.read} ${t.read === 1 ? "source reads or reacts to it" : "sources read or react to it"}`), t.display && r.push(`${t.display} ${t.display === 1 ? "source displays it" : "sources display it"}`), n.possible && r.push(`${n.possible} possible downstream ${n.possible === 1 ? "node is" : "nodes are"} reachable`), r.length ? `${r.join("; ")}.` : "Direct references are structural or unclassified.";
 	}
 	unresolvedGroups(e) {
 		return $e(e).map(({ reference: e, paths: t }) => M` <details
@@ -3164,7 +3164,7 @@ var nt = {
                   <div class="impact-verdict">
                     <span class="eyebrow">At a glance</span>
                     <strong>
-                      ${e.summary.sources ? `${e.summary.sources} direct ${e.summary.sources === 1 ? "source" : "sources"}` : "No direct usage found"}
+                      ${e.summary.sources ? `${e.summary.sources} direct ${e.summary.sources === 1 ? "source" : "sources"}` : "No incoming sources found"}
                     </strong>
                     <p>${this.impactNarrative(e)}</p>
                   </div>
