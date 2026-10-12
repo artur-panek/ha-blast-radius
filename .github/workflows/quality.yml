@@ -74,7 +74,7 @@ jobs:
           comment: false
 
   release:
-    name: Publish version for HACS
+    name: Publish release if version is new
     needs: [python, frontend, hassfest, hacs]
     if: >-
       github.repository == 'artur-panek/ha-blast-radius' &&
@@ -91,7 +91,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Publish an unreleased manifest version
+      - name: Publish manifest version if not already released
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/publish_release.py

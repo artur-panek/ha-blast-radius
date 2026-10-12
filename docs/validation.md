@@ -465,8 +465,13 @@ The official hassfest run used the `script.hassfest` module from HA Core tag
 
 ## HA-next policy
 
-The separate **HA next compatibility** workflow is advisory and runs on pull requests,
-main updates and weekly. It uses a reproducible HA/pytest-fixture/frontend pairing
-from `requirements/ha-next.txt`; it runs the full suite without `continue-on-error`.
-Failures remain visible in a separate workflow. Stable HA 2026.9.4 in Quality is
-still required by the release job. See [promotion process](releasing.md#maintaining-ha-compatibility).
+The separate **HA next (advisory)** workflow runs on pull requests, weekly, and on
+manual dispatch. It no longer runs again after every push to `main`; stable Quality
+already reruns after merge and remains the release gate. This keeps the Actions view
+from showing a duplicate compatibility run for the same merged change.
+
+HA-next uses a reproducible HA/pytest-fixture/frontend pairing from
+`requirements/ha-next.txt` and runs the full suite without `continue-on-error`.
+Failures remain visible in a separate advisory workflow. Stable HA 2026.9.4 in
+Quality is still required by the release job. See
+[promotion process](releasing.md#maintaining-ha-compatibility).
