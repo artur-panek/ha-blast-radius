@@ -746,6 +746,13 @@ test("failed change preview keeps the analysis and shows an error in the form", 
   ).toBeVisible();
   await expect(feedback).toHaveCount(0);
   await expect(selected).toHaveText("light.desk");
+
+  // A later failed attempt must not present the preceding preview as current.
+  await page.getByRole("textbox", { name: "New entity ID" }).fill("switch.other");
+  await page.getByRole("button", { name: "Preview rename" }).click();
+  await expect(feedback).toContainText("same domain");
+  await expect(page.getByRole("heading", { name: "Rename preview" })).toHaveCount(0);
+  await expect(selected).toHaveText("light.desk");
 });
 
 test("preview errors remain readable on mobile without losing the result", async ({

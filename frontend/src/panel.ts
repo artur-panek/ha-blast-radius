@@ -1743,7 +1743,7 @@ export class BlastRadiusPanel extends LitElement {
                           : nothing
                       }
                       ${
-                        report.preview
+                        report.preview && !this.previewError && !this.loading
                           ? html`<div class="preview" role="status">
                               <h3>
                                 ${report.preview.operation === "rename" ? "Rename preview" : "Removal preview"}
