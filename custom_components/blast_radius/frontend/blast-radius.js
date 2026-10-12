@@ -969,8 +969,8 @@ var Ee = {
     font-size: 13px;
   }
   .impact-lane {
-    margin-top: 24px;
-    padding-top: 20px;
+    margin-top: 20px;
+    padding-top: 16px;
     border-top: 1px solid var(--br-border);
   }
   .impact-lane:first-of-type {
@@ -998,8 +998,8 @@ var Ee = {
     margin-top: 12px;
   }
   .role-group + .role-group {
-    margin-top: 16px;
-    padding-top: 14px;
+    margin-top: 12px;
+    padding-top: 12px;
     border-top: 1px dashed var(--br-border);
   }
   .role-heading {
@@ -1007,7 +1007,7 @@ var Ee = {
     justify-content: space-between;
     gap: 16px;
     align-items: flex-start;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   .role-heading h3 {
     margin: 0;
@@ -1192,7 +1192,7 @@ var Ee = {
     border-bottom-color: var(--br-accent);
   }
   .reference {
-    padding: 12px 13px;
+    padding: 10px 12px;
     border: 1px solid var(--br-border);
     border-radius: 8px;
     min-width: 0;
@@ -1200,7 +1200,7 @@ var Ee = {
   .source-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    gap: 7px;
     align-items: start;
   }
   .reference-title {
@@ -1215,7 +1215,7 @@ var Ee = {
   }
   .reference-title h3 {
     margin: 0;
-    font-size: 17px;
+    font-size: 16px;
   }
   .path {
     display: flex;
@@ -1393,7 +1393,7 @@ var Ee = {
     align-items: flex-end;
     justify-content: space-between;
     gap: 18px;
-    margin: 28px 0 12px;
+    margin: 24px 0 12px;
   }
   .result-heading h2 {
     margin-bottom: 3px;
@@ -1420,12 +1420,36 @@ var Ee = {
     font-weight: 600;
     white-space: nowrap;
   }
+  .coverage-pill {
+    color: var(--primary-text-color, #212121);
+    background: color-mix(
+      in srgb,
+      var(--br-card) 94%,
+      var(--warning-color, #9b6600)
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--br-border) 65%,
+      var(--warning-color, #9b6600)
+    );
+    cursor: pointer;
+  }
+  .preview-shortcut {
+    min-height: 32px;
+    padding: 5px 9px;
+    border-color: transparent;
+    background: transparent;
+    font-size: 12px;
+  }
+  .preview-shortcut:hover {
+    border-color: var(--br-border);
+  }
   .technical {
-    margin-top: 8px;
+    margin-top: 6px;
     color: var(--br-muted);
   }
   .technical > summary {
-    font-size: 14px;
+    font-size: 13px;
   }
   .technical-row {
     display: grid;
@@ -1567,20 +1591,20 @@ var Ee = {
   .source-heading {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     min-width: 0;
   }
   .source-heading > div {
     min-width: 0;
   }
   .source-icon {
-    width: 26px;
-    height: 26px;
-    flex: 0 0 26px;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
     color: var(--br-muted);
   }
   .source-meta {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--br-muted);
   }
   .source-name {
@@ -1608,10 +1632,10 @@ var Ee = {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 44px;
+    min-height: 36px;
     border: 1px solid var(--br-border);
     border-radius: 7px;
-    padding: 7px 12px;
+    padding: 6px 11px;
     background: var(--br-card);
     color: var(--primary-text-color, #212121);
     text-decoration: none;
@@ -1787,7 +1811,7 @@ var Ee = {
       grid-template-columns: 1fr;
     }
     .reference {
-      padding: 13px 14px;
+      padding: 12px 13px;
     }
     .impact-metrics {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1928,7 +1952,12 @@ var Ee = {
     }
     a.open-source,
     button.open-source {
+      min-height: 44px;
       padding: 6px 8px;
+    }
+    .coverage-pill,
+    .preview-shortcut {
+      min-height: 40px;
     }
     .foot {
       flex-direction: column;
@@ -2164,9 +2193,17 @@ function $e(e) {
 	return [...t.values()];
 }
 function et(e) {
-	return Q(e) === "device" ? "Device reference" : Q(e) === "selector" ? "Entity set not expanded" : e.reason || "Dynamic or unrecognized target";
+	let t = /* @__PURE__ */ new Set([e.entity_id, ...e.references.map((e) => e.source_id)]), n = [], r = [];
+	for (let i of e.uncertain_references) Q(i) === "unresolved" && (t.has(i.source_id) ? n : r).push(i);
+	return {
+		direct: n,
+		related: r
+	};
 }
 function tt(e) {
+	return Q(e) === "device" ? "Device reference" : Q(e) === "selector" ? "Entity set not expanded" : e.reason || "Dynamic or unrecognized target";
+}
+function nt(e) {
 	return {
 		read: "Read or trigger",
 		write: "Action",
@@ -2181,12 +2218,12 @@ function $(e) {
 }
 //#endregion
 //#region src/panel.ts
-var nt = {
+var rt = {
 	explicit: "Explicit",
 	template_literal: "Template literal",
 	dynamic: "Dynamic",
 	unknown: "Unclassified"
-}, rt = class extends H {
+}, it = class extends H {
 	constructor(...e) {
 		super(...e), this.narrow = !1, this.entities = [], this.query = "", this.loading = !1, this.error = "", this.tab = "impact", this.recentSearches = [], this.replacement = "", this.depth = 6, this.status = "", this.copyFallback = !1, this.sourceFilters = [], this.reviewFilters = [], this.analyzedRoot = "", this.initialized = !1, this.requestId = 0, this.saveSession = () => {
 			Je(this.storageKey, {
@@ -2316,7 +2353,7 @@ var nt = {
 		r.href = n, r.download = `blast-radius-${t.entity_id}.json`, r.click(), setTimeout(() => URL.revokeObjectURL(n), 1e3), this.status = "JSON report downloaded.";
 	}
 	badge(e) {
-		return M`<span class="badge ${e}">${nt[e]}</span>`;
+		return M`<span class="badge ${e}">${rt[e]}</span>`;
 	}
 	tabKeydown(e) {
 		let t = [
@@ -2421,9 +2458,8 @@ var nt = {
 		].includes(t[0]);
 	}
 	directConfidence(e) {
-		if (!e.references.length) return "No direct matches";
-		let t = e.references.filter((e) => e.confidence !== "explicit").length;
-		return t ? `${t} of ${e.references.length} direct refs non-explicit` : "All direct refs explicit";
+		let t = e.references.length;
+		return t ? `${e.references.filter((e) => e.confidence === "explicit").length}/${t} direct refs explicit` : "0 direct refs";
 	}
 	referenceCategory(e) {
 		return e.role === "write" ? "change" : e.role === "call" ? "invoke" : e.role === "display" || e.source_type === "dashboard" ? "display" : e.role === "member" ? "structural" : e.role === "read" || /^(triggers?|wait_for_trigger)(\[|\.)/.test(e.path) ? "read" : "other";
@@ -2552,7 +2588,7 @@ var nt = {
           data-resolution=${Q(e)}
         >
           <summary>
-            ${et(e)} · ${tt(e)}
+            ${tt(e)} · ${nt(e)}
             <span class="count"
               >${t.length}
               ${t.length === 1 ? "location" : "locations"}</span
@@ -2570,26 +2606,44 @@ var nt = {
         </details>`);
 	}
 	uncertainty(e) {
-		let t = e.uncertain_references.filter(this.matchesFilter).filter((e) => Q(e) === "unresolved"), n = e.uncertain_references.filter((e) => Q(e) !== "unresolved"), r = e.other_dashboard_references || [];
-		return !t.length && !n.length && !r.length ? P : M`<section class="uncertainty" aria-label="Potential blind spots">
-      ${t.length ? M`<div class="section-heading">
-                <div>
-                  <h2>Potential blind spots</h2>
-                  <p>
-                    These unresolved expressions are inside configurations that
-                    also reference this entity. They are not confirmed
-                    dependencies.
-                  </p>
-                </div>
+		let { direct: t, related: n } = et(e), r = t.filter(this.matchesFilter), i = n.filter(this.matchesFilter), a = e.uncertain_references.filter((e) => Q(e) !== "unresolved"), o = e.other_dashboard_references || [], s = r.length || i.length;
+		return !s && !a.length && !o.length ? P : M`<section class="uncertainty" aria-label="Potential blind spots">
+      ${s ? M`<div class="section-heading">
+              <div>
+                <h2>Potential blind spots</h2>
+                <p>
+                  These expressions could not be resolved statically. They are
+                  not confirmed references to the selected entity.
+                </p>
               </div>
-              <details class="uncertainty-scope">
-                <summary>
-                  Unresolved in related configurations
-                  <span class="count">${$(t)}</span>
-                </summary>
-                ${this.references(t, !0)}
-              </details>` : P}
-      ${n.length || r.length ? M`<div class="diagnostics-link">
+            </div>` : P}
+      ${r.length ? M`<details class="uncertainty-scope direct-context">
+              <summary>
+                Unresolved in direct sources
+                <span class="count">${$(r)}</span>
+              </summary>
+              <p>
+                These configurations directly reference the selected entity, or
+                are the selected configuration itself. Their other dynamic
+                expressions have unknown targets.
+              </p>
+              ${this.references(r, !0)}
+            </details>` : P}
+      ${i.length ? M`<details
+              class="uncertainty-scope wider-context secondary-context"
+            >
+              <summary>
+                Unresolved in wider graph context
+                <span class="count">${$(i)}</span>
+              </summary>
+              <p>
+                These expressions belong to configurations reached through the
+                dependency graph. They are not known to reference or react to
+                the selected entity.
+              </p>
+              ${this.references(i, !0)}
+            </details>` : P}
+      ${a.length || o.length ? M`<div class="diagnostics-link">
               <span>
                 Additional scanner diagnostics are available in Coverage.
               </span>
@@ -2840,8 +2894,12 @@ var nt = {
 		let e = this.renderRoot.querySelector("#coverage");
 		e && (e.open = !0, e.querySelector("summary")?.focus(), e.scrollIntoView({ block: "start" }));
 	}
+	showChangePreview() {
+		let e = this.renderRoot.querySelector(".change-preview");
+		e && (e.open = !0, e.querySelector("summary")?.focus(), e.scrollIntoView({ block: "start" }));
+	}
 	completeness(e) {
-		let t = e.graph.limits_reached || [], n = e.coverage.warnings || [], r = t.includes("nodes") || t.includes("edges"), i = [
+		let t = e.graph.limits_reached || [], n = t.includes("nodes") || t.includes("edges"), r = [
 			1,
 			2,
 			3,
@@ -2857,34 +2915,20 @@ var nt = {
       >
         <h3>Analysis limits reached</h3>
         ${t.includes("depth") ? M`<p>The dependency map reached depth ${e.graph.max_depth}. More related nodes may exist beyond this depth.</p>` : P}
-        ${r ? M`<p>The dependency map reached its ${t.includes("nodes") ? "node" : "edge"} limit. Increasing depth will not remove this cap.</p>` : P}
+        ${n ? M`<p>The dependency map reached its ${t.includes("nodes") ? "node" : "edge"} limit. Increasing depth will not remove this cap.</p>` : P}
         ${t.length ? P : M`<p>The dependency map reached a depth or size limit. More related nodes may exist.</p>`}
         <div class="controls">
-          ${t.includes("depth") && !r && i ? M`<button
+          ${t.includes("depth") && !n && r ? M`<button
                   ?disabled=${this.loading}
                   @click=${() => {
-			this.depth = i, this.run();
+			this.depth = r, this.run();
 		}}
                 >
-                  Inspect to depth ${i}
+                  Inspect to depth ${r}
                 </button>` : P}
           <button @click=${this.showCoverage}>Coverage details</button>
         </div>
-      </section>` : n.length ? M`<section
-      class="coverage-status"
-      role="status"
-      aria-label="Static coverage partial"
-    >
-      <div>
-        <strong>Static coverage: partial</strong>
-        <p>
-          ${this.directConfidence(e) === "High confidence" ? "Direct matches are high confidence. " : ""}
-          Some Home Assistant configuration cannot be fully inspected
-          statically.
-        </p>
-      </div>
-      <button @click=${this.showCoverage}>Coverage details</button>
-    </section>` : P;
+      </section>` : P;
 	}
 	graph(e) {
 		let t = this.filtersActive ? Ze(e, this.matchesFilter) : e.graph.nodes, n = e.graph.edges.filter(this.matchesFilter), r = t.find((e) => e.relationship === "selected"), i = t.filter((e) => e.relationship === "dependent"), a = this.downstreamGroups(e), o = new Set(a.filter((e) => e.kind !== "context").flatMap((e) => e.items.map((e) => e.id))), s = new Set(a.filter((e) => e.kind === "context").flatMap((e) => e.items.map((e) => e.id))), c = t.filter((e) => e.relationship === "downstream" && o.has(e.id)), l = t.filter((e) => e.relationship === "downstream" && s.has(e.id));
@@ -2937,7 +2981,10 @@ var nt = {
               Nodes reachable from the selected configuration itself or through
               configurations that read it. Conditions are not executed.
             </p>
-            ${c.length ? c.map((e) => this.graphNode(e)) : M`<p>No downstream reaction or output path found.</p>`}
+            ${c.length ? c.map((e) => this.graphNode(e)) : M`<p>
+                    No downstream path identified in the inspected
+                    configuration.
+                  </p>`}
           </section>
         </div>
       </div>
@@ -3025,7 +3072,7 @@ var nt = {
                   </td>
                   <td>${e.role}</td>
                   <td>
-                    ${e.selector ? M`<span class="badge">${et(e)}</span>` : this.badge(e.confidence)}${e.reason ? M`<p>${X(e.reason)}</p>` : P}${this.selectorDetail(e)}
+                    ${e.selector ? M`<span class="badge">${tt(e)}</span>` : this.badge(e.confidence)}${e.reason ? M`<p>${X(e.reason)}</p>` : P}${this.selectorDetail(e)}
                   </td>
                 </tr>`)}
           </tbody>
@@ -3152,10 +3199,29 @@ var nt = {
                     <h2 tabindex="-1">${this.sourceName(e.entity_id)}</h2>
                     <code>${e.entity_id}</code>
                   </div>
-                  <div class="result-badges" aria-label="Analysis summary">
-                    <span class="summary-pill"
+                  <div
+                    class="result-badges"
+                    aria-label="Analysis and coverage status"
+                  >
+                    <span
+                      class="summary-pill"
+                      title="Confidence applies only to detected direct references"
                       >${this.directConfidence(e)}</span
                     >
+                    ${e.coverage.warnings?.length ? M`<button
+                            class="summary-pill coverage-pill"
+                            title="Some configuration could not be fully inspected"
+                            aria-label="Coverage partial — view diagnostics"
+                            @click=${this.showCoverage}
+                          >
+                            Coverage partial ↗
+                          </button>` : P}
+                    <button
+                      class="preview-shortcut"
+                      @click=${this.showChangePreview}
+                    >
+                      Preview change →
+                    </button>
                   </div>
                 </div>
                 ${e.exists ? P : M`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>`}
@@ -3179,7 +3245,7 @@ var nt = {
                     </div>
                     <div>
                       <strong>${this.downstreamStats(e).possible}</strong>
-                      <span>possible downstream nodes</span>
+                      <span>downstream nodes identified</span>
                     </div>
                     <div>
                       <strong>${this.directStats(e).display}</strong>
@@ -3296,12 +3362,12 @@ var nt = {
                       this entity.
                     </li>
                     <li>
-                      ${$(e.uncertain_references)} in linked
-                      configurations or cards;
+                      ${$(e.uncertain_references)} in inspected
+                      linked flows (including direct sources);
                       ${$(e.other_dashboard_references || [])}
-                      elsewhere in linked dashboards. Groups summarize repeated
-                      reasons and selector identities, not a count of affected
-                      entities.
+                      in system-wide dashboard context. Groups summarize
+                      repeated reasons and selector identities, not a count of
+                      affected entities.
                     </li>
                     ${e.review_summary?.snapshot.locations === e.unresolved_total ? M`<li>Full snapshot: ${e.review_summary.snapshot.device_locations} device-reference locations · ${e.review_summary.snapshot.selector_locations} unexpanded-selector locations · ${e.review_summary.snapshot.unresolved_locations} dynamic or unrecognized locations.</li>` : P}
                     <li>
@@ -3356,6 +3422,6 @@ var nt = {
       </main>`;
 	}
 };
-customElements.get("blast-radius-panel") || customElements.define("blast-radius-panel", rt);
+customElements.get("blast-radius-panel") || customElements.define("blast-radius-panel", it);
 //#endregion
-export { rt as BlastRadiusPanel };
+export { it as BlastRadiusPanel };

@@ -1,4 +1,4 @@
-import type { Reference } from "./types";
+import type { Reference, Report } from "./types";
 
 export interface ReviewGroup {
   reference: Reference;
@@ -34,6 +34,25 @@ export function groupReviewReferences(refs: Reference[]): ReviewGroup[] {
     else groups.set(key, { reference: ref, paths: [ref.path] });
   }
   return [...groups.values()];
+}
+
+// Only a source that directly references the selected entity (or the selected
+// configuration itself) is a direct review location. Traversed sources remain
+// useful context, but must not imply a reference to the selected entity.
+export function scopeUnresolvedReferences(
+  report: Pick<Report, "entity_id" | "references" | "uncertain_references">,
+) {
+  const directSources = new Set([
+    report.entity_id,
+    ...report.references.map((ref) => ref.source_id),
+  ]);
+  const direct: Reference[] = [];
+  const related: Reference[] = [];
+  for (const ref of report.uncertain_references) {
+    if (reviewResolution(ref) !== "unresolved") continue;
+    (directSources.has(ref.source_id) ? direct : related).push(ref);
+  }
+  return { direct, related };
 }
 
 export function reviewLabel(ref: Reference): string {

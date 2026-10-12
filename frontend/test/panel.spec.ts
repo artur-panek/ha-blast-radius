@@ -191,7 +191,7 @@ for (const related of [0, 1]) {
     }, related);
     const scope = page
       .locator(".uncertainty-scope")
-      .filter({ hasText: "Unresolved in related configurations" });
+      .filter({ hasText: "Unresolved in direct sources" });
     if (related) {
       await expect(scope.locator("summary .count").first()).toHaveText(
         `${related} group · ${related} location`,
