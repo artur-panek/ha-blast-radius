@@ -597,3 +597,105 @@ test("structural-only and own-output summaries", async ({ page }) => {
     "No direct references",
   );
 });
+
+test("one divider below filters and one heading for a single relationship type", async ({
+  page,
+}) => {
+  await analyze(page, "light.desk");
+  const filters = page.locator(".result-filters");
+  const incoming = page.locator("#analysis-view > .incoming-lane");
+  await expect(
+    page.getByRole("heading", {
+      name: "What can change this entity",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(incoming.locator(".role-heading")).toHaveCount(0);
+  await expect(incoming.locator(".lane-metadata .role-count")).toContainText(
+    "1 source · 1 change",
+  );
+  expect(await filters.evaluate((el) => getComputedStyle(el).borderBottomWidth)).toBe("1px");
+  expect(await incoming.evaluate((el) => getComputedStyle(el).borderTopWidth)).toBe("0px");
+
+  await analyze(page, "binary_sensor.wall_button");
+  const reaction = page.locator("#analysis-view > .reaction-lane");
+  const display = page.locator("#analysis-view > .passive-lane");
+  await expect(reaction.locator(".role-heading")).toHaveCount(0);
+  await expect(display.locator(".role-heading")).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", {
+      name: "Where this entity is displayed",
+      exact: true,
+    }),
+  ).toBeVisible();
+  expect(await reaction.evaluate((el) => getComputedStyle(el).borderTopWidth)).toBe("0px");
+  expect(await display.evaluate((el) => getComputedStyle(el).borderTopWidth)).toBe("1px");
+
+  await analyze(page, "script.music_toggle");
+  await expect(
+    page.getByRole("heading", { name: "What can invoke this entity", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".incoming-lane .role-heading")).toHaveCount(0);
+
+  // A mixed action lane still requires distinct role headings and source counts.
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    const ref = panel.report.references[0];
+    panel.report = {
+      ...panel.report,
+      references: [
+        ref,
+        {
+          ...ref,
+          source_id: "automation.indicator",
+          source_type: "automation",
+          role: "write",
+          path: "actions[0].target.entity_id",
+        },
+      ],
+    };
+  });
+  await expect(
+    page.getByRole("heading", {
+      name: "What can change or invoke this entity",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(page.locator(".incoming-lane .role-heading")).toHaveCount(2);
+});
+
+for (const viewport of [
+  { width: 1360, height: 940 },
+  { width: 390, height: 844 },
+]) {
+  test(`shared context has no extra divider before blind spots (${viewport.width}px)`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(viewport);
+    if (viewport.width < 500) await page.locator("#theme").click();
+    await analyze(page, "light.desk");
+    await page.locator("blast-radius-panel").evaluate((panel: any) => {
+      panel.report = {
+        ...panel.report,
+        uncertain_references: [
+          {
+            source_id: "scene.evening",
+            source_type: "scene",
+            target: null,
+            path: "entities.light.desk.template",
+            role: "read",
+            confidence: "dynamic",
+            reason: "External template variable",
+            resolution: "unresolved",
+          },
+        ],
+      };
+    });
+    const disclosure = page.locator(".shared-context");
+    const uncertainty = page.locator(".shared-context + .uncertainty");
+    await expect(disclosure).toBeVisible();
+    await expect(uncertainty).toBeVisible();
+    expect(await uncertainty.evaluate((el) => getComputedStyle(el).borderTopWidth)).toBe("0px");
+    await expect(page.locator(".uncertainty-scope.direct-context")).toBeVisible();
+    expect(await page.locator("blast-radius-panel").evaluate((panel) => panel.scrollWidth <= panel.clientWidth)).toBe(true);
+  });
+}

@@ -1,0 +1,36 @@
+name: Build panel layout branch
+on:
+  push:
+    branches: [ui/panel-separator-polish]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npx prettier --write 'src/*.ts' '*.ts' '*.json' 'test/*.ts' index.html
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+      - name: Commit formatted source and generated asset
+        run: |
+          if git diff --quiet -- frontend/src/ frontend/test/ custom_components/blast_radius/frontend/; then
+            echo 'Already synchronized.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add frontend/src/ frontend/test/ custom_components/blast_radius/frontend/
+          git commit -m 'build: sync panel layout bundle'
+          git push origin HEAD:ui/panel-separator-polish
