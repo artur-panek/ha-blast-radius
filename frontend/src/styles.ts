@@ -349,8 +349,8 @@ export const styles = css`
     font-size: 13px;
   }
   .impact-lane {
-    margin-top: 24px;
-    padding-top: 20px;
+    margin-top: 20px;
+    padding-top: 16px;
     border-top: 1px solid var(--br-border);
   }
   .impact-lane:first-of-type {
@@ -378,8 +378,8 @@ export const styles = css`
     margin-top: 12px;
   }
   .role-group + .role-group {
-    margin-top: 16px;
-    padding-top: 14px;
+    margin-top: 12px;
+    padding-top: 12px;
     border-top: 1px dashed var(--br-border);
   }
   .role-heading {
@@ -387,7 +387,7 @@ export const styles = css`
     justify-content: space-between;
     gap: 16px;
     align-items: flex-start;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   .role-heading h3 {
     margin: 0;
@@ -572,7 +572,7 @@ export const styles = css`
     border-bottom-color: var(--br-accent);
   }
   .reference {
-    padding: 12px 13px;
+    padding: 10px 12px;
     border: 1px solid var(--br-border);
     border-radius: 8px;
     min-width: 0;
@@ -580,7 +580,7 @@ export const styles = css`
   .source-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    gap: 7px;
     align-items: start;
   }
   .reference-title {
@@ -595,7 +595,7 @@ export const styles = css`
   }
   .reference-title h3 {
     margin: 0;
-    font-size: 17px;
+    font-size: 16px;
   }
   .path {
     display: flex;
@@ -773,7 +773,7 @@ export const styles = css`
     align-items: flex-end;
     justify-content: space-between;
     gap: 18px;
-    margin: 28px 0 12px;
+    margin: 24px 0 12px;
   }
   .result-heading h2 {
     margin-bottom: 3px;
@@ -800,12 +800,28 @@ export const styles = css`
     font-weight: 600;
     white-space: nowrap;
   }
+  .coverage-pill {
+    color: var(--primary-text-color, #212121);
+    background: color-mix(in srgb, var(--br-card) 94%, var(--warning-color, #9b6600));
+    border-color: color-mix(in srgb, var(--br-border) 65%, var(--warning-color, #9b6600));
+    cursor: pointer;
+  }
+  .preview-shortcut {
+    min-height: 32px;
+    padding: 5px 9px;
+    border-color: transparent;
+    background: transparent;
+    font-size: 12px;
+  }
+  .preview-shortcut:hover {
+    border-color: var(--br-border);
+  }
   .technical {
-    margin-top: 8px;
+    margin-top: 6px;
     color: var(--br-muted);
   }
   .technical > summary {
-    font-size: 14px;
+    font-size: 13px;
   }
   .technical-row {
     display: grid;
@@ -947,20 +963,20 @@ export const styles = css`
   .source-heading {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     min-width: 0;
   }
   .source-heading > div {
     min-width: 0;
   }
   .source-icon {
-    width: 26px;
-    height: 26px;
-    flex: 0 0 26px;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
     color: var(--br-muted);
   }
   .source-meta {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--br-muted);
   }
   .source-name {
@@ -988,10 +1004,10 @@ export const styles = css`
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 44px;
+    min-height: 36px;
     border: 1px solid var(--br-border);
     border-radius: 7px;
-    padding: 7px 12px;
+    padding: 6px 11px;
     background: var(--br-card);
     color: var(--primary-text-color, #212121);
     text-decoration: none;
@@ -1167,7 +1183,7 @@ export const styles = css`
       grid-template-columns: 1fr;
     }
     .reference {
-      padding: 13px 14px;
+      padding: 12px 13px;
     }
     .impact-metrics {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1308,7 +1324,12 @@ export const styles = css`
     }
     a.open-source,
     button.open-source {
+      min-height: 44px;
       padding: 6px 8px;
+    }
+    .coverage-pill,
+    .preview-shortcut {
+      min-height: 40px;
     }
     .foot {
       flex-direction: column;

@@ -115,6 +115,11 @@ test("coverage gaps remain visible with zero references, open details and surviv
   await expect(
     page.getByRole("status", { name: "Static coverage partial" }),
   ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", {
+      name: "Coverage partial — view diagnostics",
+    }),
+  ).toBeVisible();
   await expect(page.locator("#coverage")).not.toHaveAttribute("open", "");
   await expect(page.locator("#coverage > summary")).toContainText(
     "Coverage & diagnostics",
