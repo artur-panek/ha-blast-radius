@@ -39,8 +39,9 @@ The screenshot uses synthetic fixtures, not a real household's configuration.
 - Recursive script calls, action targets, scene membership and exposed group membership.
 - Configured Lovelace dashboards, including YAML, through HA's own loader.
 - Jinja literals found without executing templates; unresolved expressions kept separate.
-- An overview that separates incoming controls, readers/reactors, display-only uses
-  and possible downstream outputs. Shared-flow co-targets are context, not effects.
+- A compact overview separates incoming controls, readers/reactors,
+  display-only uses and possible downstream outputs. Shared-flow co-targets are
+  context, not effects.
 - Bounded traversal and cycle detection. Graph truncation is reported separately
   from normal static-analysis coverage limits.
 - Clickable sources: inspect loaded automations/scripts in HA's read-only view,
@@ -51,7 +52,8 @@ The screenshot uses synthetic fixtures, not a real household's configuration.
   dashboard context without claiming these are confirmed dependencies.
 - Return to your last search, depth and tab after opening a source. Reopen any of
   six recent searches from a compact bar in the same browser tab.
-- Rename/removal previews. **Neither operation is ever executed.**
+- Rename/removal previews retain the analysis if a preview fails and show
+  validation errors beside the form. **Neither operation is ever executed.**
 - Markdown copy, JSON download, dark mode and mobile layout. No cloud or telemetry.
 
 Each reference keeps its location, role and confidence classification. The preview follows configured dependencies; it cannot tell you which conditional branch will run.
