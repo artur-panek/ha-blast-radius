@@ -45,8 +45,10 @@ The screenshot uses synthetic fixtures, not a real household's configuration.
   from normal static-analysis coverage limits.
 - Clickable sources: inspect loaded automations/scripts in HA's read-only view,
   open scenes in their editor, dashboards in their view, and entities in details.
-- Coverage & diagnostics keeps device/selector context and system-wide dashboard
-  diagnostics separate from the main Overview.
+- Show partial scan coverage separately from direct-reference confidence.
+  Distinguish unresolved expressions in direct sources from those in wider graph
+  context. Coverage & diagnostics retains device/selector and system-wide
+  dashboard context without claiming these are confirmed dependencies.
 - Return to your last search, depth and tab after opening a source. Reopen any of
   six recent searches from a compact bar in the same browser tab.
 - Rename/removal previews. **Neither operation is ever executed.**
@@ -95,8 +97,10 @@ and select the latest numbered release. Updates do not install or restart HA aut
    the entity. Possible downstream effects are separate from **Shared-flow context**,
    which does not establish causality. Use **Relationship map** and **Raw references**
    for exact paths. **Analyze this** changes the root; **Open** inspects a source in HA.
-4. Expand **Preview a change**. Enter a same-domain replacement for **Preview rename**,
-   or choose **Preview removal**. Expand coverage before drawing conclusions.
+4. Use **Preview change** by the result heading to open the read-only
+   **Preview a change** section. Enter a same-domain replacement for
+   **Preview rename**, or choose **Preview removal**. Check **Coverage partial**
+   and diagnostics before drawing conclusions.
 5. Copy/export the report. Make actual changes yourself in Home Assistant.
 
 Use the source chips (Automation, Script, Dashboard, Scene, Group) and confidence
