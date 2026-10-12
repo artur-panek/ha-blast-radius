@@ -3405,7 +3405,7 @@ var rt = {
                             >
                               ${this.previewError}
                             </div>` : P}
-                      ${e.preview ? M`<div class="preview" role="status">
+                      ${e.preview && !this.previewError && !this.loading ? M`<div class="preview" role="status">
                               <h3>
                                 ${e.preview.operation === "rename" ? "Rename preview" : "Removal preview"}
                               </h3>
