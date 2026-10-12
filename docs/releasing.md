@@ -72,10 +72,13 @@ submission is performed by this workflow.
 
 `pyproject.toml` pins stable HA, its matching pytest fixture package and frontend.
 Quality's Python 3.14 job remains required by publication; Python 3.12 tests the
-standalone engine. `.github/workflows/ha-next.yml` runs the same full Python suite
-on PRs, main and weekly, using `requirements/ha-next.txt` in a separate environment.
-The next lane is advisory and is not a dependency of publication. Failures remain
-red with their logs and exact HA version; no `continue-on-error` hides them.
+standalone engine. `.github/workflows/ha-next.yml` runs the full Python suite
+on pull requests, its weekly schedule, and manual dispatch, using
+`requirements/ha-next.txt` in a separate environment. It does not run again
+after each merge to `main`; the stable Quality workflow handles the post-merge
+release gate. HA-next remains advisory, not a dependency of publication.
+Failures remain red with their logs and exact HA version; no
+`continue-on-error` hides them.
 
 Before each release, inspect official HA GitHub releases and update the next pairing
 to the latest appropriate official prerelease, including the matching fixture package
