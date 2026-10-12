@@ -263,6 +263,7 @@ test("overview separates direct unknowns, wider context and scan coverage", asyn
     .getByRole("combobox", { name: "Entity", exact: true })
     .fill("binary_sensor.wall_button");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
   await page.locator("blast-radius-panel").evaluate((panel: any) => {
     const base = panel.report.uncertain_references[0];
     panel.report = {

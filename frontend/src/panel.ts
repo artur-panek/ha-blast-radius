@@ -462,7 +462,7 @@ export class BlastRadiusPanel extends LitElement {
 
   private directConfidence(report: Report) {
     const count = report.references.length;
-    if (!count) return "No direct references found";
+    if (!count) return "0 direct refs";
     const explicit = report.references.filter(
       (ref) => ref.confidence === "explicit",
     ).length;

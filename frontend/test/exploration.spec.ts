@@ -370,7 +370,7 @@ test("overview separates incoming controllers from reaction paths and downstream
   await expect(
     summary
       .locator(".impact-metrics > div")
-      .filter({ hasText: "possible downstream nodes" }),
+      .filter({ hasText: "downstream nodes identified" }),
   ).toContainText("3");
   await expect(
     summary
@@ -399,7 +399,7 @@ test("write-only flows expose co-targets as context rather than downstream effec
   await expect(
     summary
       .locator(".impact-metrics > div")
-      .filter({ hasText: "possible downstream nodes" }),
+      .filter({ hasText: "downstream nodes identified" }),
   ).toContainText("0");
   await expect(page.locator(".summary-context-note")).toContainText(
     "1 additional node is shared-flow context only",
@@ -425,7 +425,7 @@ test("selected scripts show their own direct outputs as downstream impact", asyn
   await expect(
     summary
       .locator(".impact-metrics > div")
-      .filter({ hasText: "possible downstream nodes" }),
+      .filter({ hasText: "downstream nodes identified" }),
   ).toContainText("2");
   const downstream = page
     .locator(".downstream-lane")

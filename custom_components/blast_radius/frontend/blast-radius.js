@@ -2459,7 +2459,7 @@ var rt = {
 	}
 	directConfidence(e) {
 		let t = e.references.length;
-		return t ? `${e.references.filter((e) => e.confidence === "explicit").length}/${t} direct refs explicit` : "No direct references found";
+		return t ? `${e.references.filter((e) => e.confidence === "explicit").length}/${t} direct refs explicit` : "0 direct refs";
 	}
 	referenceCategory(e) {
 		return e.role === "write" ? "change" : e.role === "call" ? "invoke" : e.role === "display" || e.source_type === "dashboard" ? "display" : e.role === "member" ? "structural" : e.role === "read" || /^(triggers?|wait_for_trigger)(\[|\.)/.test(e.path) ? "read" : "other";
