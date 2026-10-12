@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.6 — 2026-10-13
+
+- Separate unresolved expressions in configurations that directly reference the
+  selected entity from expressions found farther out in the dependency graph.
+  Neither group is treated as a confirmed reference to the selected entity.
+- Show partial scan coverage alongside direct-reference confidence, with a
+  shortcut to diagnostics. Clarify empty and downstream-zero states.
+- Put the read-only rename/removal preview within reach of the result heading,
+  and reduce spacing in source cards without hiding reference details.
+- Update browser regressions for the new layout and keep the analysis engine,
+  report schema, and JSON/Markdown exports unchanged.
+
+
 ## 0.2.5 — 2026-10-12
 
 - Separate incoming controllers and callers, readers/reactors, passive display or
