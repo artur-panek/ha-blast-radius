@@ -951,36 +951,42 @@ var Ee = {
   .summary-context-note {
     display: flex;
     align-items: baseline;
-    gap: 6px;
-    margin: -12px 0 22px;
-    padding: 9px 12px;
-    border: 1px solid var(--br-border);
-    border-radius: 8px;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: -10px 2px 18px;
     color: var(--br-muted);
     font-size: 12px;
-    background: color-mix(
-      in srgb,
-      var(--br-card) 97%,
-      var(--primary-text-color, #212121)
-    );
   }
   .summary-context-note strong {
     color: var(--primary-text-color, #212121);
     font-size: 13px;
   }
   .impact-lane {
-    margin-top: 20px;
-    padding-top: 16px;
+    margin-top: 22px;
+    padding-top: 18px;
     border-top: 1px solid var(--br-border);
   }
-  .impact-lane:first-of-type {
-    margin-top: 10px;
+  /* The filter toolbar already separates the first section from the tabs. */
+  #analysis-view > .impact-lane:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
   }
   .impact-lane .section-heading {
     margin-bottom: 10px;
   }
+  .lane-metadata {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
   .lane-badge {
     flex: 0 0 auto;
+    color: var(--br-muted);
+    font-size: 12px;
+    font-weight: 500;
     white-space: nowrap;
   }
   .incoming-badge {
@@ -996,6 +1002,9 @@ var Ee = {
   }
   .role-group {
     margin-top: 12px;
+  }
+  .role-group-compact {
+    margin-top: 10px;
   }
   .role-group + .role-group {
     margin-top: 12px;
@@ -1105,7 +1114,7 @@ var Ee = {
     font-size: 11px;
   }
   .shared-context {
-    margin-top: 24px;
+    margin-top: 22px;
     border: 1px solid var(--br-border);
     border-radius: 9px;
     padding: 3px 12px;
@@ -1177,7 +1186,7 @@ var Ee = {
     display: flex;
     gap: 6px;
     border-bottom: 1px solid var(--br-border);
-    margin: -8px -8px 20px;
+    margin: -8px -8px 12px;
   }
   nav button {
     border: 0;
@@ -1492,8 +1501,19 @@ var Ee = {
   }
   .uncertainty {
     border-top: 1px solid var(--br-border);
-    margin-top: 18px;
-    padding-top: 20px;
+    margin-top: 20px;
+    padding-top: 18px;
+  }
+  /* Bordered disclosures provide their own boundary; never stack another rule. */
+  .shared-context + .uncertainty {
+    border-top: 0;
+    padding-top: 0;
+    margin-top: 22px;
+  }
+  #analysis-view > .uncertainty:first-child {
+    border-top: 0;
+    padding-top: 0;
+    margin-top: 0;
   }
   .uncertainty h2 {
     margin-bottom: 4px;
@@ -1731,16 +1751,16 @@ var Ee = {
     margin: 12px 0;
   }
   .result-filters {
-    margin: 4px 0 20px;
+    margin: 0 0 16px;
     border-bottom: 1px solid var(--br-border);
-    padding-bottom: 8px;
+    padding-bottom: 6px;
   }
   .result-filters > summary {
     width: fit-content;
-    padding: 7px 0;
+    padding: 10px 0;
     color: var(--br-muted);
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 500;
   }
   .filter-body {
     padding-top: 6px;
@@ -1897,6 +1917,9 @@ var Ee = {
     .diagnostics-link {
       align-items: stretch;
       flex-direction: column;
+    }
+    .lane-metadata {
+      justify-content: flex-start;
     }
     .diagnostics-link button {
       width: 100%;
@@ -2737,23 +2760,28 @@ var rt = {
       ${Q(e) === "device" ? "Device identity does not establish an entity dependency or prove an action will run." : "Entity membership and runtime eligibility are not expanded."}
     </p>`;
 	}
-	renderDirectRoleGroup(e, t) {
+	roleCount(e, t) {
 		if (!t.length) return P;
-		let n = this.directCategoryMeta(e), r = this.uniqueSources(t);
+		let n = this.directCategoryMeta(e), r = this.uniqueSources(t), i = t.length === 1 ? n.badge.slice(0, -1) : n.badge;
+		return M`<span class="role-count"
+      >${r} ${r === 1 ? "source" : "sources"} · ${t.length}
+      ${i}</span
+    >`;
+	}
+	renderDirectRoleGroup(e, t, n = !0) {
+		if (!t.length) return P;
+		let r = this.directCategoryMeta(e);
 		return M`<section
-      class="role-group role-${e}"
-      aria-label=${n.title}
+      class="role-group role-${e} ${n ? "" : "role-group-compact"}"
+      aria-label=${r.title}
     >
-      <div class="role-heading">
-        <div>
-          <h3>${n.title}</h3>
-          <p>${n.description}</p>
-        </div>
-        <span class="role-count"
-          >${r} ${r === 1 ? "source" : "sources"} ·
-          ${t.length} ${n.badge}</span
-        >
-      </div>
+      ${n ? M`<div class="role-heading">
+              <div>
+                <h3>${r.title}</h3>
+                <p>${r.description}</p>
+              </div>
+              ${this.roleCount(e, t)}
+            </div>` : P}
       <div class="source-grid">${this.references(t)}</div>
     </section>`;
 	}
@@ -2797,29 +2825,33 @@ var rt = {
     </details>`;
 	}
 	impact(e) {
-		let t = new Map(this.directCategories(e).map(({ category: e, refs: t }) => [e, t])), n = [...t.get("change") || [], ...t.get("invoke") || []], r = t.get("read") || [], i = [
+		let t = new Map(this.directCategories(e).map(({ category: e, refs: t }) => [e, t])), n = t.get("change") || [], r = t.get("invoke") || [], i = [...n, ...r], a = n.length ? r.length ? null : "change" : "invoke", o = t.get("read") || [], s = [
 			"display",
 			"structural",
 			"other"
 		].map((e) => ({
 			category: e,
 			refs: t.get(e) || []
-		})).filter(({ refs: e }) => e.length), a = this.downstreamGroups(e), o = a.filter((e) => e.kind !== "context"), s = a.filter((e) => e.kind === "context"), c = this.downstreamStats(e);
-		return M`${n.length ? M`<section class="impact-lane incoming-lane">
+		})).filter(({ refs: e }) => e.length), c = s.length === 1 ? s[0] : null, l = this.downstreamGroups(e), u = l.filter((e) => e.kind !== "context"), d = l.filter((e) => e.kind === "context"), f = this.downstreamStats(e);
+		return M`${i.length ? M`<section class="impact-lane incoming-lane">
             <div class="section-heading">
               <div>
-                <h2>What can change or invoke this entity</h2>
+                <h2>
+                  ${a === "change" ? "What can change this entity" : a === "invoke" ? "What can invoke this entity" : "What can change or invoke this entity"}
+                </h2>
                 <p>
-                  These are incoming control paths. Start here before renaming,
-                  removing or changing the entity.
+                  ${a ? this.directCategoryMeta(a).description : "These configurations can control or invoke the selected entity. Review their references before making changes."}
                 </p>
               </div>
-              <span class="lane-badge incoming-badge">Incoming</span>
+              <div class="lane-metadata">
+                <span class="lane-badge incoming-badge">Incoming</span>
+                ${a ? this.roleCount(a, i) : P}
+              </div>
             </div>
-            ${this.renderDirectRoleGroup("change", t.get("change") || [])}
-            ${this.renderDirectRoleGroup("invoke", t.get("invoke") || [])}
+            ${this.renderDirectRoleGroup("change", n, !a)}
+            ${this.renderDirectRoleGroup("invoke", r, !a)}
           </section>` : P}
-    ${r.length ? M`<section class="impact-lane reaction-lane">
+    ${o.length ? M`<section class="impact-lane reaction-lane">
             <div class="section-heading">
               <div>
                 <h2>What reads or reacts to this entity</h2>
@@ -2828,11 +2860,14 @@ var rt = {
                   actions may run when triggers and conditions allow it.
                 </p>
               </div>
-              <span class="lane-badge reaction-badge">Reaction path</span>
+              <div class="lane-metadata">
+                <span class="lane-badge reaction-badge">Reaction path</span>
+                ${this.roleCount("read", o)}
+              </div>
             </div>
-            ${this.renderDirectRoleGroup("read", r)}
+            ${this.renderDirectRoleGroup("read", o, !1)}
           </section>` : P}
-    ${o.length ? M`<section class="impact-lane downstream-lane">
+    ${u.length ? M`<section class="impact-lane downstream-lane">
             <div class="section-heading">
               <div>
                 <h2>What may be affected downstream</h2>
@@ -2843,31 +2878,35 @@ var rt = {
                 </p>
               </div>
               <span class="lane-badge downstream-badge"
-                >${c.possible} possible</span
+                >${f.possible} possible</span
               >
             </div>
             <div class="same-flow-list">
-              ${o.map((e) => this.renderDownstreamGroup(e, o.length === 1))}
+              ${u.map((e) => this.renderDownstreamGroup(e, u.length === 1))}
             </div>
           </section>` : P}
-    ${i.length ? M`<section class="impact-lane passive-lane">
+    ${s.length ? M`<section class="impact-lane passive-lane">
             <div class="section-heading">
               <div>
-                <h2>Other direct uses</h2>
+                <h2>
+                  ${c?.category === "display" ? "Where this entity is displayed" : c ? this.directCategoryMeta(c.category).title : "Other direct uses"}
+                </h2>
                 <p>
-                  Display and structural references matter for rename/removal,
-                  but do not represent control flow.
+                  ${c ? this.directCategoryMeta(c.category).description : "Display and structural references matter for rename/removal, but do not represent control flow."}
                 </p>
               </div>
+              ${c ? M`<div class="lane-metadata">
+                      ${this.roleCount(c.category, c.refs)}
+                    </div>` : P}
             </div>
-            ${i.map(({ category: e, refs: t }) => this.renderDirectRoleGroup(e, t))}
+            ${s.map(({ category: e, refs: t }) => this.renderDirectRoleGroup(e, t, !c))}
           </section>` : P}
-    ${s.length ? M`<details class="shared-context">
+    ${d.length ? M`<details class="shared-context">
             <summary>
               Shared-flow context
               <span class="count"
-                >${c.context}
-                ${c.context === 1 ? "node" : "nodes"}</span
+                >${f.context}
+                ${f.context === 1 ? "node" : "nodes"}</span
               >
             </summary>
             <p class="muted">
@@ -2876,10 +2915,10 @@ var rt = {
               things this entity causes to change.
             </p>
             <div class="same-flow-list">
-              ${s.map((e) => this.renderDownstreamGroup(e))}
+              ${d.map((e) => this.renderDownstreamGroup(e))}
             </div>
           </details>` : P}
-    ${!n.length && !r.length && !i.length && !o.length ? M`<div class="empty">
+    ${!i.length && !o.length && !s.length && !u.length ? M`<div class="empty">
             <div class="symbol">${q()}</div>
             <h3>
               ${this.filtersActive ? "No matching direct references" : "No direct references found"}

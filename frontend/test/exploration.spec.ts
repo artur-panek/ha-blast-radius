@@ -614,8 +614,12 @@ test("one divider below filters and one heading for a single relationship type",
   await expect(incoming.locator(".lane-metadata .role-count")).toContainText(
     "1 source · 1 change",
   );
-  expect(await filters.evaluate((el) => getComputedStyle(el).borderBottomWidth)).toBe("1px");
-  expect(await incoming.evaluate((el) => getComputedStyle(el).borderTopWidth)).toBe("0px");
+  expect(
+    await filters.evaluate((el) => getComputedStyle(el).borderBottomWidth),
+  ).toBe("1px");
+  expect(
+    await incoming.evaluate((el) => getComputedStyle(el).borderTopWidth),
+  ).toBe("0px");
 
   await analyze(page, "binary_sensor.wall_button");
   const reaction = page.locator("#analysis-view > .reaction-lane");
@@ -628,12 +632,19 @@ test("one divider below filters and one heading for a single relationship type",
       exact: true,
     }),
   ).toBeVisible();
-  expect(await reaction.evaluate((el) => getComputedStyle(el).borderTopWidth)).toBe("0px");
-  expect(await display.evaluate((el) => getComputedStyle(el).borderTopWidth)).toBe("1px");
+  expect(
+    await reaction.evaluate((el) => getComputedStyle(el).borderTopWidth),
+  ).toBe("0px");
+  expect(
+    await display.evaluate((el) => getComputedStyle(el).borderTopWidth),
+  ).toBe("1px");
 
   await analyze(page, "script.music_toggle");
   await expect(
-    page.getByRole("heading", { name: "What can invoke this entity", exact: true }),
+    page.getByRole("heading", {
+      name: "What can invoke this entity",
+      exact: true,
+    }),
   ).toBeVisible();
   await expect(page.locator(".incoming-lane .role-heading")).toHaveCount(0);
 
@@ -694,8 +705,16 @@ for (const viewport of [
     const uncertainty = page.locator(".shared-context + .uncertainty");
     await expect(disclosure).toBeVisible();
     await expect(uncertainty).toBeVisible();
-    expect(await uncertainty.evaluate((el) => getComputedStyle(el).borderTopWidth)).toBe("0px");
-    await expect(page.locator(".uncertainty-scope.direct-context")).toBeVisible();
-    expect(await page.locator("blast-radius-panel").evaluate((panel) => panel.scrollWidth <= panel.clientWidth)).toBe(true);
+    expect(
+      await uncertainty.evaluate((el) => getComputedStyle(el).borderTopWidth),
+    ).toBe("0px");
+    await expect(
+      page.locator(".uncertainty-scope.direct-context"),
+    ).toBeVisible();
+    expect(
+      await page
+        .locator("blast-radius-panel")
+        .evaluate((panel) => panel.scrollWidth <= panel.clientWidth),
+    ).toBe(true);
   });
 }

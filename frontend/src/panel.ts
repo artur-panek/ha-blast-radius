@@ -905,8 +905,8 @@ export class BlastRadiusPanel extends LitElement {
     const sources = this.uniqueSources(refs);
     const unit = refs.length === 1 ? meta.badge.slice(0, -1) : meta.badge;
     return html`<span class="role-count"
-      >${sources} ${sources === 1 ? "source" : "sources"} ·
-      ${refs.length} ${unit}</span
+      >${sources} ${sources === 1 ? "source" : "sources"} · ${refs.length}
+      ${unit}</span
     >`;
   }
 
@@ -921,15 +921,17 @@ export class BlastRadiusPanel extends LitElement {
       class="role-group role-${category} ${showHeading ? "" : "role-group-compact"}"
       aria-label=${meta.title}
     >
-      ${showHeading
-        ? html`<div class="role-heading">
-            <div>
-              <h3>${meta.title}</h3>
-              <p>${meta.description}</p>
-            </div>
-            ${this.roleCount(category, refs)}
-          </div>`
-        : nothing}
+      ${
+        showHeading
+          ? html`<div class="role-heading">
+              <div>
+                <h3>${meta.title}</h3>
+                <p>${meta.description}</p>
+              </div>
+              ${this.roleCount(category, refs)}
+            </div>`
+          : nothing
+      }
       <div class="source-grid">${this.references(refs)}</div>
     </section>`;
   }
@@ -1031,16 +1033,20 @@ export class BlastRadiusPanel extends LitElement {
             <div class="section-heading">
               <div>
                 <h2>
-                  ${onlyControl === "change"
-                    ? "What can change this entity"
-                    : onlyControl === "invoke"
-                      ? "What can invoke this entity"
-                      : "What can change or invoke this entity"}
+                  ${
+                    onlyControl === "change"
+                      ? "What can change this entity"
+                      : onlyControl === "invoke"
+                        ? "What can invoke this entity"
+                        : "What can change or invoke this entity"
+                  }
                 </h2>
                 <p>
-                  ${onlyControl
-                    ? this.directCategoryMeta(onlyControl).description
-                    : "These configurations can control or invoke the selected entity. Review their references before making changes."}
+                  ${
+                    onlyControl
+                      ? this.directCategoryMeta(onlyControl).description
+                      : "These configurations can control or invoke the selected entity. Review their references before making changes."
+                  }
                 </p>
               </div>
               <div class="lane-metadata">
@@ -1103,23 +1109,30 @@ export class BlastRadiusPanel extends LitElement {
             <div class="section-heading">
               <div>
                 <h2>
-                  ${onlyPassive?.category === "display"
-                    ? "Where this entity is displayed"
-                    : onlyPassive
-                      ? this.directCategoryMeta(onlyPassive.category).title
-                      : "Other direct uses"}
+                  ${
+                    onlyPassive?.category === "display"
+                      ? "Where this entity is displayed"
+                      : onlyPassive
+                        ? this.directCategoryMeta(onlyPassive.category).title
+                        : "Other direct uses"
+                  }
                 </h2>
                 <p>
-                  ${onlyPassive
-                    ? this.directCategoryMeta(onlyPassive.category).description
-                    : "Display and structural references matter for rename/removal, but do not represent control flow."}
+                  ${
+                    onlyPassive
+                      ? this.directCategoryMeta(onlyPassive.category)
+                          .description
+                      : "Display and structural references matter for rename/removal, but do not represent control flow."
+                  }
                 </p>
               </div>
-              ${onlyPassive
-                ? html`<div class="lane-metadata">
-                    ${this.roleCount(onlyPassive.category, onlyPassive.refs)}
-                  </div>`
-                : nothing}
+              ${
+                onlyPassive
+                  ? html`<div class="lane-metadata">
+                      ${this.roleCount(onlyPassive.category, onlyPassive.refs)}
+                    </div>`
+                  : nothing
+              }
             </div>
             ${passive.map(({ category, refs }) =>
               this.renderDirectRoleGroup(category, refs, !onlyPassive),
