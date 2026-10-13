@@ -7,7 +7,6 @@ async function openAdvanced(page: Page) {
     await details.locator(":scope > summary").click();
 }
 
-
 async function screenshotPanel(page: Page, path: string) {
   // The HA panel has its own scroll container. Expand it only for documentation
   // capture so a full-page screenshot includes the report below the viewport.
@@ -79,9 +78,7 @@ test("empty, missing, error and retry states", async ({ page }) => {
   const search = page.getByRole("combobox", { name: "Entity", exact: true });
   await search.fill("sensor.unused");
   await search.press("Enter");
-  await expect(
-    page.locator(".plain-lead p"),
-  ).toBeVisible();
+  await expect(page.locator(".plain-lead p")).toBeVisible();
   await search.fill("light.removed");
   await search.press("Enter");
   await expect(
@@ -407,7 +404,10 @@ test("analysis tabs support keyboard navigation and readable configuration locat
     .fill("binary_sensor.wall_button");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
   await openAdvanced(page);
-  const impact = page.getByRole("tab", { name: "Detailed impact", exact: true });
+  const impact = page.getByRole("tab", {
+    name: "Detailed impact",
+    exact: true,
+  });
   await impact.focus();
   await impact.press("ArrowRight");
   await expect(
