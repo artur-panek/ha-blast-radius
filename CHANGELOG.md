@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.9 — 2026-10-13
+
+- Report skipped dashboards and membership sources with stable scan-gap reason codes. Keep the existing warning text for older clients.
+- Add Copy path to exact reference locations, with a visible fallback when clipboard access is unavailable.
+- Clarify source navigation and document commit conventions. Analysis behavior and the read-only API are unchanged.
+
+
 ## 0.2.8 — 2026-10-13
 
 - Put direct entity uses first. The panel now lists the configurations that
