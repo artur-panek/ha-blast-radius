@@ -1625,7 +1625,8 @@ export class BlastRadiusPanel extends LitElement {
       <main>
         <h1>Where is this entity used?</h1>
         <p class="muted intro">
-          Find the Home Assistant configurations that use an entity before changing it.
+          Find the Home Assistant configurations that use an entity before
+          changing it.
         </p>
         <form
           class="search"
@@ -1841,7 +1842,10 @@ export class BlastRadiusPanel extends LitElement {
                       </div>
                       <div class="advanced-tools-row">
                         <button @click=${this.copy}>Copy Markdown</button>
-                        <button ?disabled=${this.loading} @click=${() => this.run()}>
+                        <button
+                          ?disabled=${this.loading}
+                          @click=${() => this.run()}
+                        >
                           Refresh snapshot
                         </button>
                       </div>

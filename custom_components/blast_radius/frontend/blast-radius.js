@@ -3518,9 +3518,10 @@ var rt = {
         >
       </header>
       <main>
-        <h1>Dependency impact</h1>
+        <h1>Where is this entity used?</h1>
         <p class="muted intro">
-          See what references an entity before you rename or remove it.
+          Find the Home Assistant configurations that use an entity before
+          changing it.
         </p>
         <form
           class="search"
@@ -3629,11 +3630,7 @@ var rt = {
                   <button @click=${this.showAdvanced}>
                     Explore relationships
                   </button>
-                  <button @click=${this.copy}>Copy Markdown</button>
                   <button @click=${this.download}>Export JSON</button>
-                  <button ?disabled=${this.loading} @click=${() => this.run()}>
-                    Refresh snapshot
-                  </button>
                 </div>
                 <a
                   class="issue-link"
@@ -3717,6 +3714,15 @@ var rt = {
                         aria-labelledby=${`tab-${this.tab}`}
                       >
                         ${this.tab === "impact" ? this.impact(e) : this.tab === "graph" ? this.graph(e) : this.raw(e)}
+                      </div>
+                      <div class="advanced-tools-row">
+                        <button @click=${this.copy}>Copy Markdown</button>
+                        <button
+                          ?disabled=${this.loading}
+                          @click=${() => this.run()}
+                        >
+                          Refresh snapshot
+                        </button>
                       </div>
                     </section>
                   </details>
@@ -3864,8 +3870,8 @@ var rt = {
                   <div class="symbol">${K()}</div>
                   <h2>Start with one entity</h2>
                   <p class="muted">
-                    A button, a helper, an old light.<br />Find out what points
-                    to it and what sits downstream.
+                    Search for a light, sensor, script or any other entity to
+                    find where Home Assistant uses it.
                   </p>
                   <p class="muted">
                     ${this.entities.length} entity IDs available · Missing IDs
