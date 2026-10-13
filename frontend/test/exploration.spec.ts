@@ -220,7 +220,7 @@ test("Analyze this from Used by and Possible targets resets preview and enters R
   page,
 }) => {
   await analyze(page, "binary_sensor.wall_button");
-  await page.getByText("Preview a change", { exact: true }).click();
+  await page.locator(".change-preview > summary").click();
   await page.getByLabel("New entity ID").fill("binary_sensor.new_button");
   await page
     .getByRole("button", { name: "Preview rename", exact: true })

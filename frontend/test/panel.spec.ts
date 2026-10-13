@@ -209,17 +209,18 @@ for (const related of [0, 1]) {
       "Unresolved",
     );
     await expect(page.locator(".impact-summary")).not.toContainText("170");
-    await page.getByText("Coverage & diagnostics", { exact: false }).click();
+    await page.locator("#coverage > summary").click();
+    await page.locator(".coverage-breakdown > summary").click();
     await expect(
       page.getByText(
-        "170 locations without an entity target across the full snapshot",
+        "170 locations without a fixed",
         {
           exact: false,
         },
       ),
     ).toBeVisible();
     await expect(
-      page.getByText("they cannot be attributed to this entity", {
+      page.getByText("not necessarily", {
         exact: false,
       }),
     ).toBeVisible();
