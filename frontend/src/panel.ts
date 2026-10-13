@@ -1111,7 +1111,8 @@ export class BlastRadiusPanel extends LitElement {
                                   <span
                                     class="review-hint"
                                     title="Some references could not be fully verified. Check the exact locations."
-                                  >Needs review</span>`
+                                    >Needs review</span
+                                  >`
                               : nothing
                           }
                         </p>

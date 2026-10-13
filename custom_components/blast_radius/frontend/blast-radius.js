@@ -1240,6 +1240,10 @@ var De = {
     line-height: 1.45;
     overflow-wrap: anywhere;
   }
+  .plain-source h5 .source-name:focus-visible {
+    outline: 2px solid var(--br-accent);
+    outline-offset: 3px;
+  }
   .plain-source .source-heading p {
     margin: 2px 0 0;
     font-size: 12px;
@@ -2117,9 +2121,6 @@ var De = {
     font-size: 12px;
   }
   @media (max-width: 850px) {
-    .columns {
-      grid-template-columns: 1fr;
-    }
     main {
       padding: 22px 18px;
     }
@@ -3192,14 +3193,18 @@ var rt = {
                     <div class="source-heading">
                       ${X(n[0].source_type)}
                       <div>
-                        <h5>${this.sourceName(t)}</h5>
+                        <h5>${this.sourceControl(t)}</h5>
                         <p>
                           ${q[n[0].source_type] || n[0].source_type}
                           · ${n.length}
                           ${n.length === 1 ? "reference" : "references"}
                           ${e !== "read" && n.some((e) => this.referenceCategory(e) === "read") ? j` · also reads it` : N}
                           ${n.some((e) => e.confidence !== "explicit") ? j` ·
-                                  <span class="review-hint">Needs review</span>` : N}
+                                  <span
+                                    class="review-hint"
+                                    title="Some references could not be fully verified. Check the exact locations."
+                                    >Needs review</span
+                                  >` : N}
                         </p>
                       </div>
                     </div>
@@ -3207,7 +3212,7 @@ var rt = {
                   </div>
                   <details class="plain-source-details">
                     <summary
-                      aria-label=${`Show reference locations in ${this.sourceName(t)}`}
+                      aria-label=${`View exact locations in ${this.sourceName(t)}`}
                     >
                       View exact locations
                     </summary>

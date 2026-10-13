@@ -995,7 +995,12 @@ test("multiple control references and a dashboard produce one row per configurat
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
   await page.locator("blast-radius-panel").evaluate((panel: any) => {
     const base = panel.report.references[0];
-    const ref = (source_id: string, source_type: string, role: string, path: string) => ({
+    const ref = (
+      source_id: string,
+      source_type: string,
+      role: string,
+      path: string,
+    ) => ({
       ...base,
       source_id,
       source_type,
@@ -1007,11 +1012,31 @@ test("multiple control references and a dashboard produce one row per configurat
     panel.report = {
       ...panel.report,
       references: [
-        ref("automation.room_switch", "automation", "write", "actions[0].target.entity_id"),
-        ref("automation.room_switch", "automation", "write", "actions[1].target.entity_id"),
-        ref("script.room_mode", "script", "write", "sequence[0].target.entity_id"),
+        ref(
+          "automation.room_switch",
+          "automation",
+          "write",
+          "actions[0].target.entity_id",
+        ),
+        ref(
+          "automation.room_switch",
+          "automation",
+          "write",
+          "actions[1].target.entity_id",
+        ),
+        ref(
+          "script.room_mode",
+          "script",
+          "write",
+          "sequence[0].target.entity_id",
+        ),
         ref("scene.relax", "scene", "write", "entity_id[0]"),
-        ref("dashboard.home", "dashboard", "display", "views[0].cards[0].entity"),
+        ref(
+          "dashboard.home",
+          "dashboard",
+          "display",
+          "views[0].cards[0].entity",
+        ),
       ],
       source_names: {
         ...panel.report.source_names,
@@ -1028,7 +1053,9 @@ test("multiple control references and a dashboard produce one row per configurat
   );
   await expect(overview.locator(".plain-source")).toHaveCount(4);
   await expect(
-    overview.locator('.plain-use-group[aria-label="Can change it"] .plain-source'),
+    overview.locator(
+      '.plain-use-group[aria-label="Can change it"] .plain-source',
+    ),
   ).toHaveCount(3);
   await expect(
     overview.locator('.plain-use-group[aria-label="Shows it"] .plain-source'),
