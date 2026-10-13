@@ -62,6 +62,8 @@ Each reference keeps its location, role and confidence classification. The previ
 
 ### HACS custom repository
 
+HACS displays a short product overview from [`info.md`](info.md); this README contains the full setup and technical documentation.
+
 [![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=artur-panek&repository=ha-blast-radius&category=integration)
 
 Use the button above for one-click HACS setup, or add the repository manually:

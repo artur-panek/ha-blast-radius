@@ -1205,39 +1205,105 @@ export const styles = css`
   .scan-details > summary {
     font-weight: 600;
   }
-  .scan-overview p {
-    color: var(--br-muted);
-    margin: 6px 0 12px;
-    font-size: 13px;
+  .scan-overview {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px 16px;
+    margin: 12px 0 16px;
   }
   .scan-overview strong {
     color: var(--primary-text-color, #212121);
+    font-size: 15px;
   }
-  .scan-warnings h3 {
-    font-size: 14px;
-    margin: 6px 0;
-  }
-  .scan-warnings ul {
+  .scan-overview p {
+    color: var(--br-muted);
+    margin: 5px 0 0;
     font-size: 13px;
-    margin: 0 0 10px;
+    line-height: 1.5;
+  }
+  .scan-state {
+    color: var(--br-muted);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .scan-gaps {
+    margin: 0 0 14px;
+  }
+  .scan-gaps h3 {
+    font-size: 14px;
+    margin: 0 0 6px;
+  }
+  .scan-gaps ul {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .scan-gaps p,
+  .scan-guidance,
+  .scan-context {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--br-muted);
+  }
+  .scan-gaps p {
+    margin: 8px 0 0;
+  }
+  .scan-guidance {
+    margin: 10px 0 16px;
   }
   .coverage-breakdown {
     border-top: 1px solid var(--br-border);
-    padding-top: 6px;
+    padding-top: 8px;
   }
   .coverage-breakdown > summary {
     font-size: 13px;
     font-weight: 500;
     color: var(--br-muted);
+    padding: 6px 0;
   }
-  .coverage-breakdown p,
-  .coverage-breakdown li {
+  .scan-context {
+    margin: 10px 0 12px;
+  }
+  .scan-context code {
+    overflow-wrap: anywhere;
+  }
+  .scan-stat-list {
+    display: grid;
+    gap: 0;
+    margin: 0;
+  }
+  .scan-stat-list > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--br-border);
     font-size: 12px;
   }
+  .scan-stat-list dt {
+    color: var(--br-muted);
+  }
+  .scan-stat-list dd {
+    margin: 0;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+  .scan-extra-notes > summary {
+    padding: 8px 0;
+    font-size: 13px;
+  }
+  .scan-extra-notes ul {
+    font-size: 12px;
+    line-height: 1.55;
+  }
   .coverage-diagnostics {
-    margin-top: 18px;
+    margin-top: 12px;
     padding-top: 4px;
-    border-top: 1px solid var(--br-border);
   }
   .confidence-help {
     margin-top: 12px;

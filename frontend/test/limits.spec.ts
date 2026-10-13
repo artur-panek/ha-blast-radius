@@ -197,3 +197,84 @@ test("older reports with only a truncation flag still show a warning", async ({
     page.getByRole("button", { name: /Inspect to depth/ }),
   ).toHaveCount(0);
 });
+
+
+test("scan details separate current gaps from installation-wide statistics", async ({
+  page,
+}) => {
+  await page
+    .getByRole("combobox", { name: "Entity", exact: true })
+    .fill("light.desk");
+  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    panel.report = {
+      ...panel.report,
+      unresolved_total: 203,
+      coverage: {
+        ...panel.report.coverage,
+        sources: 73,
+        source_types: {
+          automation: 45,
+          script: 24,
+          scene: 2,
+          dashboard: 2,
+        },
+        warnings: [
+          "dashboard.lovelace: configuration unavailable or generated automatically.",
+        ],
+      },
+      review_summary: {
+        linked: { groups: 6, locations: 15, device_locations: 0, selector_locations: 0, unresolved_locations: 15 },
+        other_dashboard: { groups: 8, locations: 44, device_locations: 0, selector_locations: 0, unresolved_locations: 44 },
+        snapshot: { groups: 77, locations: 203, device_locations: 32, selector_locations: 0, unresolved_locations: 171 },
+      },
+    };
+  });
+  await page.getByRole("button", { name: "Scan details →" }).click();
+  const coverage = page.locator("#coverage");
+  await expect(coverage).toHaveAttribute("open", "");
+  await expect(coverage.locator(".scan-overview")).toContainText(
+    "73 configurations inspected",
+  );
+  await expect(coverage.locator(".scan-state")).toHaveText("Partial scan");
+  await expect(coverage.locator(".scan-gaps")).toContainText("dashboard.lovelace");
+  await expect(coverage.locator(".scan-gaps")).toContainText(
+    "configuration unavailable or generated automatically",
+  );
+  await expect(coverage.locator(".coverage-breakdown")).not.toHaveAttribute(
+    "open",
+    "",
+  );
+  await expect(coverage.locator(".scan-stat-list")).toBeHidden();
+  await coverage.locator(".coverage-breakdown > summary").click();
+  await expect(coverage.locator(".scan-stat-list")).toBeVisible();
+  await expect(coverage.locator(".scan-stat-list")).toContainText("203");
+  await expect(coverage.locator(".scan-context").first()).toContainText(
+    "not a count of dependencies",
+  );
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  expect(
+    await page.locator("blast-radius-panel").evaluate(
+      (panel) => panel.scrollWidth <= panel.clientWidth,
+    ),
+  ).toBe(true);
+});
+
+test("scan details stay readable when no scanner warnings are reported", async ({
+  page,
+}) => {
+  await page
+    .getByRole("combobox", { name: "Entity", exact: true })
+    .fill("sensor.unused");
+  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await page.getByRole("button", { name: "Scan details", exact: true }).click();
+  const coverage = page.locator("#coverage");
+  await expect(coverage.locator(".scan-state")).toHaveText("Static scan");
+  await expect(coverage.locator(".scan-gaps")).toHaveCount(0);
+  await expect(coverage.locator(".scan-guidance")).toContainText(
+    "not proof that an entity is unused",
+  );
+});
