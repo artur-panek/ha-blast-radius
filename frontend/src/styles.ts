@@ -1159,6 +1159,38 @@ export const styles = css`
     padding: 6px 10px;
     font-size: 12px;
   }
+  .scan-details > summary {
+    font-weight: 600;
+  }
+  .scan-overview p {
+    color: var(--br-muted);
+    margin: 6px 0 12px;
+    font-size: 13px;
+  }
+  .scan-overview strong {
+    color: var(--primary-text-color, #212121);
+  }
+  .scan-warnings h3 {
+    font-size: 14px;
+    margin: 6px 0;
+  }
+  .scan-warnings ul {
+    font-size: 13px;
+    margin: 0 0 10px;
+  }
+  .coverage-breakdown {
+    border-top: 1px solid var(--br-border);
+    padding-top: 6px;
+  }
+  .coverage-breakdown > summary {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--br-muted);
+  }
+  .coverage-breakdown p,
+  .coverage-breakdown li {
+    font-size: 12px;
+  }
   .coverage-diagnostics {
     margin-top: 18px;
     padding-top: 4px;

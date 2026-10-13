@@ -1912,38 +1912,63 @@ export class BlastRadiusPanel extends LitElement {
                     </div>
                   </details>
                 </div>
-                <details class="card" id="coverage">
-                  <summary>
-                    Coverage & diagnostics · ${report.coverage.sources} sources
-                    inspected${report.coverage.warnings?.length ? " · partial" : ""}
-                  </summary>
-                  <p class="muted">
-                    ${Object.entries(report.coverage.source_types)
-                      .map(([kind, count]) => `${count} ${kind}`)
-                      .join(" · ")}
-                  </p>
-                  <ul>
-                    ${report.warnings.map((warning) => html`<li>${warning}</li>`)}
-                    <li>
-                      ${report.unresolved_total} locations without an entity
-                      target across the full snapshot. These include device IDs,
-                      selectors and expressions; they cannot be attributed to
-                      this entity.
-                    </li>
-                    <li>
-                      ${reviewCounts(report.uncertain_references)} in inspected
-                      linked flows (including direct sources);
-                      ${reviewCounts(report.other_dashboard_references || [])}
-                      in system-wide dashboard context. Groups summarize
-                      repeated reasons and selector identities, not a count of
-                      affected entities.
-                    </li>
-                    ${report.review_summary?.snapshot.locations === report.unresolved_total ? html`<li>Full snapshot: ${report.review_summary.snapshot.device_locations} device-reference locations · ${report.review_summary.snapshot.selector_locations} unexpanded-selector locations · ${report.review_summary.snapshot.unresolved_locations} dynamic or unrecognized locations.</li>` : nothing}
-                    <li>
-                      Conditional branches are not evaluated. A reference does
-                      not prove an action will run.
-                    </li>
-                  </ul>
+                <details class="card scan-details" id="coverage">
+                  <summary>Scan details</summary>
+                  <div class="scan-overview">
+                    <p>
+                      <strong>${report.coverage.sources} configurations inspected.</strong>
+                      This is static analysis: conditions are not executed, and
+                      dynamically selected targets may be missed.
+                    </p>
+                  </div>
+                  ${report.coverage.warnings?.length
+                    ? html`<div class="scan-warnings">
+                        <h3>Not fully inspected</h3>
+                        <ul>
+                          ${report.coverage.warnings.map(
+                            (warning) => html`<li>${warning}</li>`,
+                          )}
+                        </ul>
+                      </div>`
+                    : nothing}
+                  <details class="coverage-breakdown">
+                    <summary>Full scanner counts and limitations</summary>
+                    <p class="muted">
+                      ${Object.entries(report.coverage.source_types)
+                        .map(
+                          ([kind, count]) =>
+                            `${count} ${kind}${count === 1 ? "" : "s"}`,
+                        )
+                        .join(" · ")}
+                    </p>
+                    <ul>
+                      ${report.warnings
+                        .filter((warning) => !(report.coverage.warnings || []).includes(warning))
+                        .map((warning) => html`<li>${warning}</li>`)}
+                      <li>
+                        ${report.unresolved_total} locations without a fixed
+                        entity target across the full snapshot. Device IDs,
+                        selectors and dynamic expressions are not necessarily
+                        dependencies of the selected entity.
+                      </li>
+                      <li>
+                        ${reviewCounts(report.uncertain_references)} in linked
+                        configurations; ${reviewCounts(report.other_dashboard_references || [])}
+                        elsewhere in dashboards. These are review locations,
+                        not a count of affected entities.
+                      </li>
+                      ${report.review_summary?.snapshot.locations === report.unresolved_total
+                        ? html`<li>
+                            Full snapshot: ${report.review_summary.snapshot.device_locations}
+                            device-reference locations ·
+                            ${report.review_summary.snapshot.selector_locations}
+                            unexpanded selectors ·
+                            ${report.review_summary.snapshot.unresolved_locations}
+                            dynamic or unrecognized locations.
+                          </li>`
+                        : nothing}
+                    </ul>
+                  </details>
                   ${this.coverageDiagnostics(report)}
                   <details class="confidence-help">
                     <summary>Reference confidence</summary>
