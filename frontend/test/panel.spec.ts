@@ -212,12 +212,9 @@ for (const related of [0, 1]) {
     await page.locator("#coverage > summary").click();
     await page.locator(".coverage-breakdown > summary").click();
     await expect(
-      page.getByText(
-        "170 locations without a fixed",
-        {
-          exact: false,
-        },
-      ),
+      page.getByText("170 locations without a fixed", {
+        exact: false,
+      }),
     ).toBeVisible();
     await expect(
       page.getByText("not necessarily", {

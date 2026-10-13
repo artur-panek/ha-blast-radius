@@ -129,8 +129,12 @@ test("coverage gaps remain visible with zero references, open details and surviv
     }),
   ).toBeVisible();
   await expect(page.locator("#coverage")).not.toHaveAttribute("open", "");
-  await expect(page.locator("#coverage > summary")).toContainText("Scan details");
-  await expect(page.locator(".plain-scan-note")).toContainText("may be incomplete");
+  await expect(page.locator("#coverage > summary")).toContainText(
+    "Scan details",
+  );
+  await expect(page.locator(".plain-scan-note")).toContainText(
+    "may be incomplete",
+  );
   await expect(
     page.getByRole("button", { name: /Inspect to depth/ }),
   ).toHaveCount(0);
