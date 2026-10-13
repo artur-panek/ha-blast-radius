@@ -546,6 +546,218 @@ export const styles = css`
     margin-top: 10px;
   }
 
+
+  /* One clear result list; graph and scanner internals stay optional. */
+  .plain-impact {
+    background: var(--br-card);
+    border: 1px solid var(--br-border);
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin: 16px 0 14px;
+  }
+  .plain-lead {
+    padding-bottom: 14px;
+  }
+  .plain-lead h3 {
+    font-size: 21px;
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 0 0 4px;
+  }
+  .plain-lead p {
+    font-size: 14px;
+    color: var(--br-muted);
+    margin: 0;
+  }
+  .plain-use-group {
+    padding-top: 15px;
+  }
+  .plain-use-group + .plain-use-group {
+    border-top: 1px solid var(--br-border);
+    margin-top: 10px;
+  }
+  .plain-use-group h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 3px;
+  }
+  .plain-use-list {
+    display: grid;
+    gap: 0;
+  }
+  .plain-source {
+    padding: 12px 0 9px;
+    border-bottom: 1px solid var(--br-border);
+    min-width: 0;
+  }
+  .plain-source:last-child {
+    border-bottom: 0;
+  }
+  .plain-source-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+  }
+  .plain-source .source-heading {
+    align-items: center;
+  }
+  .plain-source h5 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+  .plain-source .source-heading p {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--br-muted);
+  }
+  .plain-source .review-hint {
+    display: inline;
+    font-size: inherit;
+  }
+  .plain-source-details {
+    margin: 3px 0 0 32px;
+    color: var(--br-muted);
+  }
+  .plain-source-details > summary {
+    display: list-item;
+    width: fit-content;
+    padding: 6px 0;
+    font-size: 12px;
+  }
+  .plain-source-paths {
+    margin: 6px 0 8px;
+    padding-left: 12px;
+    border-left: 1px solid var(--br-border);
+  }
+  .plain-source-path {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px 9px;
+    padding: 7px 0;
+    font-size: 12px;
+  }
+  .plain-source-path + .plain-source-path {
+    border-top: 1px solid var(--br-border);
+  }
+  .plain-source-path code {
+    display: block;
+    flex-basis: 100%;
+    color: var(--br-muted);
+    overflow-wrap: anywhere;
+  }
+  .plain-source-path p {
+    margin: 0;
+  }
+  .plain-scan-note {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px 12px;
+    margin-top: 10px;
+    padding-top: 12px;
+    border-top: 1px solid var(--br-border);
+    font-size: 12px;
+    color: var(--br-muted);
+  }
+  .plain-scan-note button {
+    padding: 5px 8px;
+    min-height: 34px;
+    font-size: 12px;
+    border: 0;
+    background: transparent;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .read-only-note {
+    color: var(--br-muted);
+    font-size: 12px;
+  }
+  .report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 0;
+  }
+  .report-actions button {
+    font-size: 13px;
+  }
+  .columns {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .columns > .change-preview {
+    order: 0;
+  }
+  .columns > .advanced-analysis {
+    order: 1;
+  }
+  .advanced-analysis {
+    width: 100%;
+    margin-top: 0;
+    border: 1px solid var(--br-border);
+    border-radius: 12px;
+    padding: 5px 20px;
+    background: var(--br-card);
+  }
+  .advanced-analysis > summary {
+    font-weight: 600;
+    padding: 13px 0;
+  }
+  .advanced-analysis > summary small {
+    display: block;
+    margin-left: 19px;
+    color: var(--br-muted);
+    font-size: 12px;
+    font-weight: 400;
+  }
+  .advanced-content {
+    margin-top: 8px;
+  }
+  .advanced-content .impact-summary {
+    margin-top: 12px;
+  }
+  .advanced-analysis > .card {
+    margin-top: 12px;
+    padding: 18px;
+  }
+  @media (max-width: 600px) {
+    .plain-impact {
+      padding: 16px;
+    }
+    .plain-lead h3 {
+      font-size: 19px;
+    }
+    .plain-source-header {
+      gap: 8px;
+    }
+    .plain-source-details {
+      margin-left: 0;
+    }
+    .plain-source .open-source {
+      padding: 6px 9px;
+      min-height: 44px;
+    }
+    .advanced-analysis {
+      padding: 5px 14px;
+    }
+    .advanced-analysis > .card {
+      padding: 8px;
+    }
+    .report-actions > button {
+      flex: 1 1 auto;
+    }
+  }
+
   .columns {
     display: grid;
     grid-template-columns: minmax(0, 1fr);

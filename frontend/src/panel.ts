@@ -70,6 +70,7 @@ export class BlastRadiusPanel extends LitElement {
     recentSearches: { state: true },
     sourceFilters: { state: true },
     reviewFilters: { state: true },
+    advancedOpen: { state: true },
     previewError: { state: true },
   };
   declare hass: Hass;
@@ -87,6 +88,7 @@ export class BlastRadiusPanel extends LitElement {
   copyFallback = false;
   sourceFilters: SourceType[] = [];
   reviewFilters: ReviewFilter[] = [];
+  advancedOpen = false;
   previewError = "";
   private analyzedRoot = "";
   private initialized = false;
@@ -173,6 +175,7 @@ export class BlastRadiusPanel extends LitElement {
       this.query = saved.last?.entityId || "";
       this.depth = saved.last?.depth || 6;
       this.tab = saved.last?.tab || "impact";
+      this.advancedOpen = this.tab !== "impact";
       this.report = undefined;
       this.sourceFilters = [];
       this.reviewFilters = [];
@@ -1294,6 +1297,20 @@ export class BlastRadiusPanel extends LitElement {
     ${this.uncertainty(report)}`;
   }
 
+
+  private showAdvanced() {
+    this.advancedOpen = true;
+    this.tab = "graph";
+    void this.updateComplete.then(() => {
+      const details =
+        this.renderRoot.querySelector<HTMLDetailsElement>(".advanced-analysis");
+      if (!details) return;
+      details.open = true;
+      details.querySelector("summary")?.focus();
+      details.scrollIntoView({ block: "start" });
+    });
+  }
+
   private showCoverage() {
     const details =
       this.renderRoot.querySelector<HTMLDetailsElement>("#coverage");
@@ -1680,38 +1697,40 @@ export class BlastRadiusPanel extends LitElement {
                     <h2 tabindex="-1">${this.sourceName(report.entity_id)}</h2>
                     <code>${report.entity_id}</code>
                   </div>
-                  <div
-                    class="result-badges"
-                    aria-label="Analysis and coverage status"
-                  >
-                    <span
-                      class="summary-pill"
-                      title="Confidence applies only to detected direct references"
-                      >${this.directConfidence(report)}</span
-                    >
-                    ${
-                      report.coverage.warnings?.length
-                        ? html`<button
-                            class="summary-pill coverage-pill"
-                            title="Some configuration could not be fully inspected"
-                            aria-label="Coverage partial — view diagnostics"
-                            @click=${this.showCoverage}
-                          >
-                            Coverage partial ↗
-                          </button>`
-                        : nothing
-                    }
-                    <button
-                      class="preview-shortcut"
-                      @click=${this.showChangePreview}
-                    >
-                      Preview change →
-                    </button>
-                  </div>
+                  <span class="read-only-note">Read-only analysis</span>
                 </div>
                 ${!report.exists ? html`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>` : nothing}
                 ${report.graph.truncated ? this.completeness(report) : nothing}
-                <section class="impact-summary" aria-label="Impact summary">
+                ${this.plainUses(report)}
+                <div class="report-actions">
+                  <button class="primary" @click=${this.showChangePreview}>
+                    Preview a change
+                  </button>
+                  <button @click=${this.showAdvanced}>Explore relationships</button>
+                  <button @click=${this.copy}>Copy Markdown</button>
+                  <button @click=${this.download}>Export JSON</button>
+                  <button ?disabled=${this.loading} @click=${() => this.run()}>Refresh snapshot</button>
+                </div>
+                <a
+                  class="issue-link"
+                  href="https://github.com/artur-panek/ha-blast-radius/issues/new?template=bug.yml"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >Report issue ↗</a>
+                <p class="status" role="status" ?hidden=${!this.status}>${this.status}</p>
+                ${this.copyFallback ? html`<textarea aria-label="Markdown report" readonly .value=${report.markdown}></textarea>` : nothing}
+                <div class="columns">
+                  <details class="advanced-analysis"
+                    .open=${this.advancedOpen}
+                    @toggle=${(event: Event) =>
+                      (this.advancedOpen = (event.currentTarget as HTMLDetailsElement).open)}
+                  >
+                    <summary>
+                      Advanced analysis
+                      <small>Detailed impact, relationship map and raw references</small>
+                    </summary>
+                    <div class="advanced-content">
+                      <section class="impact-summary" aria-label="Impact summary">
                   <div class="impact-verdict">
                     <span class="eyebrow">At a glance</span>
                     <strong>
@@ -1757,10 +1776,10 @@ export class BlastRadiusPanel extends LitElement {
                       </div>`
                     : nothing
                 }
-                <div class="columns">
-                  <section class="card">
+                    </div>
+                    <section class="card">
                     <nav role="tablist" aria-label="Analysis views">
-                      ${(["impact", "graph", "raw"] as const).map((tab) => html`<button role="tab" id=${`tab-${tab}`} aria-controls="analysis-view" aria-selected=${this.tab === tab} tabindex=${this.tab === tab ? 0 : -1} @keydown=${this.tabKeydown} @click=${() => (this.tab = tab)}>${tab === "impact" ? "Overview" : tab === "graph" ? "Relationship map" : "Raw references"}</button>`)}
+                      ${(["impact", "graph", "raw"] as const).map((tab) => html`<button role="tab" id=${`tab-${tab}`} aria-controls="analysis-view" aria-selected=${this.tab === tab} tabindex=${this.tab === tab ? 0 : -1} @keydown=${this.tabKeydown} @click=${() => (this.tab = tab)}>${tab === "impact" ? "Detailed impact" : tab === "graph" ? "Relationship map" : "Raw references"}</button>`)}
                     </nav>
                     ${this.filters(report)}
                     <div
@@ -1770,28 +1789,8 @@ export class BlastRadiusPanel extends LitElement {
                     >
                       ${this.tab === "impact" ? this.impact(report) : this.tab === "graph" ? this.graph(report) : this.raw(report)}
                     </div>
-                    <div class="controls">
-                      <button @click=${this.copy}>Copy Markdown</button
-                      ><button @click=${this.download}>Export JSON</button
-                      ><button
-                        ?disabled=${this.loading}
-                        @click=${() => this.run()}
-                      >
-                        Refresh snapshot
-                      </button>
-                    </div>
-                    <a
-                      class="issue-link"
-                      href="https://github.com/artur-panek/ha-blast-radius/issues/new?template=bug.yml"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      >Report issue ↗</a
-                    >
-                    <p class="status" role="status" ?hidden=${!this.status}>
-                      ${this.status}
-                    </p>
-                    ${this.copyFallback ? html`<textarea aria-label="Markdown report" readonly .value=${report.markdown}></textarea>` : nothing}
                   </section>
+                  </details>
                   <details
                     class="card change-preview"
                     .open=${!!report.preview}
