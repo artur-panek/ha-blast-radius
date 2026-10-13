@@ -1036,7 +1036,7 @@ export class BlastRadiusPanel extends LitElement {
     }
     const groups = new Map<string, Array<{ id: string; refs: Reference[] }>>();
     for (const [id, refs] of bySource) {
-      const categories = new Set(refs.map((ref) => this.referenceCategory(ref)));
+      const categories = new Set<string>(refs.map((ref) => this.referenceCategory(ref)));
       const role = order.find((item) => categories.has(item)) || "other";
       const existing = groups.get(role);
       if (existing) existing.push({ id, refs });
