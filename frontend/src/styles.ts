@@ -134,6 +134,17 @@ export const styles = css`
     max-width: 540px;
     font-size: 13px;
   }
+  .analysis-options-body .clear-history-option {
+    align-self: center;
+    flex-shrink: 0;
+    border: 0;
+    background: transparent;
+    padding: 8px;
+    min-height: 36px;
+    font-size: 12px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
   .recent-searches {
     display: flex;
     align-items: center;

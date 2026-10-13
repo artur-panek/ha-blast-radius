@@ -1694,6 +1694,14 @@ export class BlastRadiusPanel extends LitElement {
               Higher depth expands the surrounding dependency graph. Direct
               references do not depend on traversal depth.
             </p>
+            ${this.recentSearches.length
+              ? html`<button
+                  class="clear-history-option"
+                  @click=${this.clearRecentSearches}
+                >
+                  Clear search history
+                </button>`
+              : nothing}
           </div>
         </details>
         ${

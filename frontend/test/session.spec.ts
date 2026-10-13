@@ -275,7 +275,7 @@ test("blocked browser storage does not break analysis or return navigation", asy
   });
   await expect(search(page)).toHaveValue("binary_sensor.wall_button");
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
-  await page.getByRole("button", { name: "Clear recent searches" }).click();
+  await page.getByRole("button", { name: "Clear search history" }).click();
   await expect(page.locator(".recent-search")).toHaveCount(0);
 });
 
@@ -293,4 +293,6 @@ test("the first search is not repeated in Recent, but is recoverable after failu
   await expect(
     page.getByRole("button", { name: "Analyze again: light.desk" }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Clear search history" }).click();
+  await expect(page.locator(".recent-search")).toHaveCount(0);
 });
