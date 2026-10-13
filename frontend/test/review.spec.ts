@@ -308,9 +308,7 @@ test("overview separates direct unknowns, wider context and scan coverage", asyn
   );
   await wider.locator(":scope > summary").click();
   await expect(wider).toContainText("not known to reference or react");
-  await page
-    .getByRole("button", { name: "Scan details →" })
-    .click();
+  await page.getByRole("button", { name: "Scan details →" }).click();
   await expect(page.locator("#coverage")).toHaveAttribute("open", "");
   await page.getByRole("button", { name: "Preview a change" }).click();
   await expect(page.locator(".change-preview")).toHaveAttribute("open", "");
