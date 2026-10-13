@@ -168,6 +168,7 @@ test("a failed refresh does not leave a stale report available to export", async
       },
     };
   });
+  await openAdvanced(page);
   await page.getByRole("button", { name: "Refresh snapshot" }).click();
   await expect(page.getByRole("alert")).toContainText("Snapshot unavailable");
   await expect(page.getByRole("button", { name: "Export JSON" })).toHaveCount(
