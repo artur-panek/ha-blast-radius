@@ -759,10 +759,10 @@ export const styles = css`
   }
 
   .columns {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
-    align-items: start;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: stretch;
   }
   .card {
     border: 1px solid var(--br-border);
