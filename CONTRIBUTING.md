@@ -11,6 +11,30 @@ Run pytest, Ruff, mypy, frontend build and browser tests. Commit the compiled pa
 with its source. Do not commit real configuration, tokens, `.storage`, installation
 paths or screenshots of a real household.
 
+## Commits and pull requests
+
+Keep commits focused on one change. Use a short subject that says what changed,
+not how much work went into it. A `fix:`, `test:`, `docs:` or `ui:` prefix is
+fine when it helps, but isn't required.
+
+For example:
+
+```text
+fix: report skipped dashboard scans
+test: cover unresolved entity references
+ui: separate state reads from action targets
+docs: explain scan coverage limits
+```
+
+Avoid generic subjects such as `final polish`, `improve UX` or `complete
+redesign`. Don't split a single fix into several cosmetic commits just to
+make the history look busy. Generated frontend assets belong in the same
+commit as their source changes.
+
+In a pull request, explain the failure or confusing behavior, the change,
+how it was checked and any known limitations. Keep release notes about
+user-visible behavior; implementation details belong in the PR.
+
 ## Before opening a pull request
 
 Use Python 3.14.2+ for the full HA suite (pinned to Core 2026.9.4), or Python 3.12+
