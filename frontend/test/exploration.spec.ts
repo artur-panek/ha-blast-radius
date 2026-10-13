@@ -6,6 +6,7 @@ const filters = (page: Page) => page.locator("details.result-filters");
 const chip = (page: Page, name: string) =>
   filters(page).getByRole("button", { name, exact: true });
 async function openFilters(page: Page) {
+  await openAdvanced(page);
   const resultFilters = filters(page);
   if ((await resultFilters.getAttribute("open")) === null)
     await resultFilters.locator(":scope > summary").click();
@@ -731,7 +732,7 @@ test("failed change preview keeps the analysis and shows an error in the form", 
 }) => {
   await analyze(page, "light.desk");
   const selected = page.locator(".result-heading code");
-  await page.getByRole("button", { name: "Preview change →" }).click();
+  await page.getByRole("button", { name: "Preview a change" }).click();
   await expect(page.locator(".change-preview")).toHaveAttribute("open", "");
   await page
     .getByRole("textbox", { name: "New entity ID" })
@@ -772,7 +773,7 @@ test("preview errors remain readable on mobile without losing the result", async
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator("#theme").click();
   await analyze(page, "light.desk");
-  await page.getByRole("button", { name: "Preview change →" }).click();
+  await page.getByRole("button", { name: "Preview a change" }).click();
   await page.getByRole("textbox", { name: "New entity ID" }).fill("not-an-id");
   await page.getByRole("button", { name: "Preview rename" }).click();
   await expect(page.locator(".preview-error")).toBeVisible();
@@ -793,7 +794,7 @@ test("shared-flow note wraps as a sentence and idle export status is hidden", as
   expect(await note.evaluate((el) => getComputedStyle(el).display)).toBe(
     "block",
   );
-  const status = page.locator(".card .status");
+  const status = page.locator(".status").first();
   await expect(status).toBeHidden();
   await page.getByRole("button", { name: "Copy Markdown" }).click();
   await expect(status).toBeVisible();

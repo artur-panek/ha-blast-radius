@@ -175,7 +175,7 @@ test("a failed refresh does not leave a stale report available to export", async
     0,
   );
   await expect(
-    page.getByText("triggers[0].entity_id", { exact: true }),
+    page.locator(".advanced-analysis").getByText("triggers[0].entity_id", { exact: true }),
   ).toHaveCount(0);
 });
 
@@ -218,8 +218,8 @@ for (const related of [0, 1]) {
       }),
     ).toBeVisible();
     await expect(
-      page.getByText("not necessarily", {
-        exact: false,
+      page.locator(".coverage-breakdown li").filter({
+        hasText: "not necessarily",
       }),
     ).toBeVisible();
   });
@@ -280,7 +280,7 @@ for (const theme of ["light", "dark", "custom-dark"]) {
       "button.primary",
       '.filter-row button[aria-pressed="true"]',
     ]) {
-      const badge = page.locator(selector).first();
+      const badge = page.locator(`${selector}:visible`).first();
       await expect(badge).toBeVisible();
       const colors = await badge.evaluate((element) => {
         const context = document.createElement("canvas").getContext("2d")!;
@@ -364,11 +364,11 @@ test("a large dashboard stays compact, explains unknowns and retains exact paths
       .first(),
   ).toBeVisible();
   await expect(
-    page.getByText("triggers[0].entity_id", { exact: true }),
+    page.locator(".advanced-analysis").getByText("triggers[0].entity_id", { exact: true }),
   ).not.toBeVisible();
   await page.locator(".technical > summary").first().click();
   await expect(
-    page.getByText("triggers[0].entity_id", { exact: true }),
+    page.locator(".advanced-analysis").getByText("triggers[0].entity_id", { exact: true }),
   ).toBeVisible();
   await page.locator(".technical > summary").first().click();
   await screenshotPanel(page, "/tmp/blast-radius-review-desktop.png");
@@ -435,7 +435,7 @@ test("analysis tabs support keyboard navigation and readable configuration locat
   await expect(impact).toBeFocused();
   await page.locator(".source-grid .technical > summary").first().click();
   await expect(
-    page.getByText("Trigger 1 › Entity ID", { exact: true }),
+    page.locator(".advanced-analysis").getByText("Trigger 1 › Entity ID", { exact: true }),
   ).toBeVisible();
   expect(
     await page
