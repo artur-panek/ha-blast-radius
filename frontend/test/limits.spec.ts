@@ -1,4 +1,12 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+async function openAdvanced(page: Page) {
+  const advanced = page.locator(".advanced-analysis");
+  await expect(advanced).toBeVisible();
+  if ((await advanced.getAttribute("open")) === null)
+    await advanced.locator(":scope > summary").click();
+}
+
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
@@ -26,6 +34,7 @@ test("depth warnings precede counts and a deeper fresh analysis finds more targe
         ),
     ),
   ).toBe(true);
+  await openAdvanced(page);
   await page
     .getByRole("tab", { name: "Relationship map", exact: true })
     .click();
@@ -117,7 +126,7 @@ test("coverage gaps remain visible with zero references, open details and surviv
   ).toHaveCount(0);
   await expect(
     page.getByRole("button", {
-      name: "Coverage partial — view diagnostics",
+      name: "Scan details →",
     }),
   ).toBeVisible();
   await expect(page.locator("#coverage")).not.toHaveAttribute("open", "");
@@ -144,7 +153,7 @@ test("coverage gaps remain visible with zero references, open details and surviv
   await expect(page.locator("#coverage > summary")).toBeFocused();
   await expect(page.locator("#coverage")).toContainText("dashboard.broken");
   await expect(
-    page.getByText("No direct references found", { exact: true }),
+    page.locator(".plain-lead p"),
   ).toBeVisible();
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export JSON" }).click();

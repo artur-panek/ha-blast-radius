@@ -1,4 +1,12 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+async function openAdvanced(page: Page) {
+  const advanced = page.locator(".advanced-analysis");
+  await expect(advanced).toBeVisible();
+  if ((await advanced.getAttribute("open")) === null)
+    await advanced.locator(":scope > summary").click();
+}
+
 import {
   groupReviewReferences,
   reviewCounts,
@@ -75,6 +83,7 @@ for (const mobile of [false, true]) {
     await expect(
       page.getByRole("button", { name: "Export JSON" }),
     ).toBeVisible();
+    await openAdvanced(page);
     const refs = keypadReferences();
     await page
       .locator("blast-radius-panel")
@@ -182,6 +191,7 @@ test("missing and unchecked selectors remain visible with escaped identifiers", 
     .fill("binary_sensor.wall_button");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await openAdvanced(page);
   await page.locator("blast-radius-panel").evaluate((panel: any) => {
     const base = panel.report.uncertain_references[0];
     panel.report = {
@@ -264,6 +274,7 @@ test("overview separates direct unknowns, wider context and scan coverage", asyn
     .fill("binary_sensor.wall_button");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await openAdvanced(page);
   await page.locator("blast-radius-panel").evaluate((panel: any) => {
     const base = panel.report.uncertain_references[0];
     panel.report = {
@@ -298,10 +309,10 @@ test("overview separates direct unknowns, wider context and scan coverage", asyn
   await wider.locator(":scope > summary").click();
   await expect(wider).toContainText("not known to reference or react");
   await page
-    .getByRole("button", { name: "Coverage partial — view diagnostics" })
+    .getByRole("button", { name: "Scan details →" })
     .click();
   await expect(page.locator("#coverage")).toHaveAttribute("open", "");
-  await page.getByRole("button", { name: "Preview change →" }).click();
+  await page.getByRole("button", { name: "Preview a change" }).click();
   await expect(page.locator(".change-preview")).toHaveAttribute("open", "");
   await expect(page.locator(".change-preview > summary")).toBeFocused();
 });
@@ -314,6 +325,7 @@ test("selected configuration's own unknowns are direct even without incoming mat
     .getByRole("combobox", { name: "Entity", exact: true })
     .fill("automation.indicator");
   await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  await openAdvanced(page);
   await expect(page.locator(".uncertainty-scope.direct-context")).toContainText(
     "1 group · 1 location",
   );

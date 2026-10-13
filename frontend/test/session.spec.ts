@@ -1,6 +1,14 @@
 import { test, expect, type Page } from "@playwright/test";
 
 const storageKey = "blast-radius:session:v1:demo-admin";
+
+async function openAdvanced(page: Page) {
+  const advanced = page.locator(".advanced-analysis");
+  await expect(advanced).toBeVisible();
+  if ((await advanced.getAttribute("open")) === null)
+    await advanced.locator(":scope > summary").click();
+}
+
 const search = (page: Page) =>
   page.getByRole("combobox", { name: "Entity", exact: true });
 
@@ -21,6 +29,7 @@ test("Back recreates the panel with its search, depth, tab and scroll and reques
 }) => {
   await analyze(page, "binary_sensor.wall_button");
   await page.getByLabel("Traversal depth").selectOption("12");
+  await openAdvanced(page);
   await page
     .getByRole("tab", { name: "Relationship map", exact: true })
     .click();
@@ -168,6 +177,7 @@ test("reload and reconnect restore a successful search; failed searches do not e
   page,
 }) => {
   await analyze(page, "media_player.speaker");
+  await openAdvanced(page);
   await page.getByRole("tab", { name: "Raw references", exact: true }).click();
   await page.reload();
   await expect(
