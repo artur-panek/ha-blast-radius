@@ -10,10 +10,17 @@ async function openFilters(page: Page) {
   if ((await resultFilters.getAttribute("open")) === null)
     await resultFilters.locator(":scope > summary").click();
 }
+async function openAdvanced(page: Page) {
+  const advanced = page.locator(".advanced-analysis");
+  await expect(advanced).toBeVisible();
+  if ((await advanced.getAttribute("open")) === null)
+    await advanced.locator(":scope > summary").click();
+}
 async function analyze(page: Page, id = "media_player.speaker") {
   await input(page).fill(id);
   await input(page).press("Enter");
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await openAdvanced(page);
   await openFilters(page);
 }
 test.beforeEach(async ({ page }) => {
@@ -790,4 +797,93 @@ test("shared-flow note wraps as a sentence and idle export status is hidden", as
   await expect(status).toBeHidden();
   await page.getByRole("button", { name: "Copy Markdown" }).click();
   await expect(status).toBeVisible();
+});
+
+test("the default result answers where the entity is used without exposing the graph", async ({
+  page,
+}) => {
+  await input(page).fill("binary_sensor.wall_button");
+  await input(page).press("Enter");
+  await expect(
+    page.getByRole("heading", { name: "3 configurations found" }),
+  ).toBeVisible();
+  const simple = page.locator(".plain-impact");
+  await expect(simple.locator(".plain-source")).toHaveCount(3);
+  await expect(
+    simple.getByRole("heading", { name: "Reads or reacts to this entity" }),
+  ).toBeVisible();
+  await expect(
+    simple.getByRole("heading", { name: "Displays this entity" }),
+  ).toBeVisible();
+  await expect(page.locator(".advanced-analysis")).not.toHaveAttribute("open", "");
+  await expect(page.locator(".advanced-analysis .graph-node")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  const firstSource = simple.locator(".plain-source").first();
+  await expect(firstSource.locator("code")).not.toBeVisible();
+  await firstSource.locator(".plain-source-details > summary").click();
+  await expect(firstSource.locator(".plain-source-path code")).toBeVisible();
+
+  await page.getByRole("button", { name: "Explore relationships" }).click();
+  await expect(page.locator(".advanced-analysis")).toHaveAttribute("open", "");
+  await expect(
+    page.getByRole("tab", { name: "Relationship map", exact: true }),
+  ).toHaveAttribute("aria-selected", "true");
+});
+
+test("each direct source appears once even when it has more than one role", async ({
+  page,
+}) => {
+  await input(page).fill("binary_sensor.wall_button");
+  await input(page).press("Enter");
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    const ref = panel.report.references[0];
+    panel.report = {
+      ...panel.report,
+      references: [
+        { ...ref, role: "write" },
+        { ...ref, role: "read", path: "conditions[0].entity_id" },
+        { ...ref, source_id: "dashboard.home", source_type: "dashboard", role: "display" },
+      ],
+    };
+  });
+  await expect(
+    page.getByRole("heading", { name: "2 configurations found" }),
+  ).toBeVisible();
+  const list = page.locator(".plain-impact .plain-source");
+  await expect(list).toHaveCount(2);
+  await expect(list.first()).toContainText("2 references");
+});
+
+test("no incoming references does not conceal the selected configuration's possible outputs", async ({
+  page,
+}) => {
+  await input(page).fill("scene.evening");
+  await input(page).press("Enter");
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await expect(page.locator(".plain-impact")).toContainText(
+    "No incoming references found. This configuration has possible outputs",
+  );
+});
+
+test("scan limitations appear as a short note with a link to full diagnostics", async ({
+  page,
+}) => {
+  await input(page).fill("light.desk");
+  await input(page).press("Enter");
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    panel.report = {
+      ...panel.report,
+      coverage: {
+        ...panel.report.coverage,
+        warnings: ["dashboard.home: configuration unavailable"],
+      },
+    };
+  });
+  await expect(page.locator(".plain-impact .plain-scan-note")).toContainText(
+    "Results may be incomplete",
+  );
+  await page.getByRole("button", { name: "Scan details →" }).click();
+  await expect(page.locator("#coverage")).toHaveAttribute("open", "");
 });
