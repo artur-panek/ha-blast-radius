@@ -40,14 +40,8 @@ needed on the Home Assistant machine; the built panel is included.
 - HACS checks for new numbered releases and exposes available updates in Home
   Assistant. Discovery is periodic, not immediate. Install the offered update,
   then restart HA; this integration never installs itself or restarts your server.
-- **One-time switch from `main`:** open HACS → HA Blast Radius → menu →
-  **Redownload**, select the newest numbered release, and download it. Restart HA
-  and reload the browser. Even if the panel already shows that version, this switches
-  HACS from branch tracking to numbered release tracking.
 - If a new release is missing, use the repository menu's **Update information**
   option and reopen Redownload. Do not delete the integration or edit HACS storage.
-- Staying on `main` is an opt-in development choice; branch updates may include
-  unreleased changes and do not follow the numbered release channel.
 - For manual installation, back up the existing `blast_radius` folder and replace
   it with the complete folder from the chosen version. Do not mix files from versions.
 - Restart Home Assistant and fully reload the browser. The desktop panel header
