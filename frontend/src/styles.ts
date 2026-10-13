@@ -551,11 +551,11 @@ export const styles = css`
     background: var(--br-card);
     border: 1px solid var(--br-border);
     border-radius: 12px;
-    padding: 22px 24px;
-    margin: 16px 0 14px;
+    padding: 20px 22px;
+    margin: 16px 0 0;
   }
   .plain-lead {
-    padding-bottom: 14px;
+    padding-bottom: 8px;
   }
   .plain-lead h3 {
     font-size: 21px;
@@ -569,7 +569,7 @@ export const styles = css`
     margin: 0;
   }
   .plain-use-group {
-    padding-top: 15px;
+    padding-top: 14px;
   }
   .plain-use-group + .plain-use-group {
     border-top: 1px solid var(--br-border);
@@ -585,7 +585,7 @@ export const styles = css`
     gap: 0;
   }
   .plain-source {
-    padding: 12px 0 9px;
+    padding: 10px 0 7px;
     border-bottom: 1px solid var(--br-border);
     min-width: 0;
   }
@@ -619,14 +619,19 @@ export const styles = css`
     font-size: inherit;
   }
   .plain-source-details {
-    margin: 3px 0 0 32px;
+    margin: 2px 0 0 32px;
     color: var(--br-muted);
   }
   .plain-source-details > summary {
     display: list-item;
     width: fit-content;
-    padding: 6px 0;
+    min-height: 30px;
+    padding: 5px 0;
     font-size: 12px;
+    text-underline-offset: 3px;
+  }
+  .plain-source-details > summary:hover {
+    text-decoration: underline;
   }
   .plain-source-paths {
     margin: 6px 0 8px;
@@ -674,19 +679,33 @@ export const styles = css`
     text-decoration: underline;
     text-underline-offset: 3px;
   }
-  .read-only-note {
-    color: var(--br-muted);
-    font-size: 12px;
-  }
   .report-actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
-    margin: 12px 0 0;
+    gap: 6px 10px;
+    margin: 14px 0 0;
   }
   .report-actions button {
     font-size: 13px;
+  }
+  .report-actions .quiet-action {
+    border: 0;
+    background: transparent;
+    color: var(--primary-text-color, #212121);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    min-height: 40px;
+    padding: 8px 10px;
+    font-weight: 500;
+  }
+  .report-actions .quiet-action:hover {
+    color: var(--br-accent);
+  }
+  .change-preview[hidden],
+  .advanced-analysis[hidden],
+  .scan-details[hidden] {
+    display: none;
   }
   .columns {
     display: flex;
@@ -761,17 +780,16 @@ export const styles = css`
     .advanced-analysis > .card {
       padding: 8px;
     }
-    .report-actions > button {
-      flex: 1 1 auto;
+    .report-actions > .primary {
+      flex: 1 1 100%;
+      min-height: 44px;
+    }
+    .report-actions > .quiet-action {
+      flex: 0 0 auto;
+      min-height: 44px;
     }
   }
 
-  .columns {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    align-items: stretch;
-  }
   .card {
     border: 1px solid var(--br-border);
     border-radius: 12px;

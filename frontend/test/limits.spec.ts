@@ -2,9 +2,13 @@ import { test, expect, type Page } from "@playwright/test";
 
 async function openAdvanced(page: Page) {
   const advanced = page.locator(".advanced-analysis");
-  await expect(advanced).toBeVisible();
-  if ((await advanced.getAttribute("open")) === null)
+  if (await advanced.isHidden()) {
+    await page.getByRole("button", { name: "Explore relationships" }).click();
+    await page.getByRole("tab", { name: "Detailed impact", exact: true }).click();
+  } else if ((await advanced.getAttribute("open")) === null) {
     await advanced.locator(":scope > summary").click();
+  }
+  await expect(advanced).toBeVisible();
 }
 
 test.beforeEach(async ({ page }) => {
@@ -149,7 +153,7 @@ test("coverage gaps remain visible with zero references, open details and surviv
   await page.screenshot({
     path: "/tmp/ha-blast-radius-incomplete-desktop.png",
   });
-  await page.locator("#coverage > summary").click();
+  await page.getByRole("button", { name: "Scan details →" }).click();
   await expect(page.locator("#coverage")).toHaveAttribute("open", "");
   await expect(page.locator("#coverage > summary")).toBeFocused();
   await expect(page.locator("#coverage")).toContainText("dashboard.broken");

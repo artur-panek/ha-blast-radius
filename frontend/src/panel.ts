@@ -72,6 +72,8 @@ export class BlastRadiusPanel extends LitElement {
     reviewFilters: { state: true },
     advancedOpen: { state: true },
     previewError: { state: true },
+    previewOpen: { state: true },
+    scanOpen: { state: true },
   };
   declare hass: Hass;
   narrow = false;
@@ -90,6 +92,8 @@ export class BlastRadiusPanel extends LitElement {
   reviewFilters: ReviewFilter[] = [];
   advancedOpen = false;
   previewError = "";
+  previewOpen = false;
+  scanOpen = false;
   private analyzedRoot = "";
   private initialized = false;
   private requestId = 0;
@@ -185,6 +189,8 @@ export class BlastRadiusPanel extends LitElement {
       this.status = "";
       this.copyFallback = false;
       this.previewError = "";
+      this.previewOpen = false;
+      this.scanOpen = false;
       void this.loadEntities();
     } else if (changed.has("tab") && this.lastView) {
       this.rememberView();
@@ -226,6 +232,8 @@ export class BlastRadiusPanel extends LitElement {
     this.status = "";
     this.copyFallback = false;
     this.previewError = "";
+    this.previewOpen = false;
+    this.scanOpen = false;
   }
 
   private async run(operation?: "rename" | "delete", restoreScroll?: number) {
@@ -238,6 +246,8 @@ export class BlastRadiusPanel extends LitElement {
       this.sourceFilters = [];
       this.reviewFilters = [];
       this.replacement = "";
+      this.previewOpen = false;
+      this.scanOpen = false;
     }
     this.analyzedRoot = entityId;
     const id = ++this.requestId;
@@ -1019,20 +1029,12 @@ export class BlastRadiusPanel extends LitElement {
       "other",
     ];
     const headings: Record<string, string> = {
-      change: "Can change this entity",
-      invoke: "Can call this entity",
-      read: "Reads or reacts to this entity",
-      display: "Displays this entity",
-      structural: "Includes this entity",
-      other: "Other references",
-    };
-    const descriptions: Record<string, [string, string]> = {
-      change: ["can change it", "can change it"],
-      invoke: ["can call it", "can call it"],
-      read: ["reads or reacts to it", "read or react to it"],
-      display: ["displays it", "display it"],
-      structural: ["includes it", "include it"],
-      other: ["references it", "reference it"],
+      change: "Can change it",
+      invoke: "Can run it",
+      read: "Uses its state",
+      display: "Shows it",
+      structural: "Includes it",
+      other: "Other uses",
     };
     const bySource = new Map<string, Reference[]>();
     for (const ref of report.references) {
@@ -1050,12 +1052,6 @@ export class BlastRadiusPanel extends LitElement {
       if (existing) existing.push({ id, refs });
       else groups.set(role, [{ id, refs }]);
     }
-    const summary = order.flatMap((role) => {
-      const count = groups.get(role)?.length || 0;
-      return count
-        ? [`${count} ${descriptions[role][count === 1 ? 0 : 1]}`]
-        : [];
-    });
     const count = bySource.size;
     const hasOutputs = this.downstreamStats(report).possible > 0;
     return html`<section
@@ -1064,16 +1060,16 @@ export class BlastRadiusPanel extends LitElement {
     >
       <div class="plain-lead">
         <h3>
-          ${count} ${count === 1 ? "configuration" : "configurations"} found
+          ${count
+            ? `${count} ${count === 1 ? "configuration references" : "configurations reference"} this entity`
+            : "No direct references found"}
         </h3>
         <p>
-          ${
-            summary.length
-              ? summary.join(" · ")
-              : hasOutputs
-                ? "No incoming references found. This configuration has possible outputs; explore relationships below."
-                : "No direct references found in the inspected sources."
-          }
+          ${count
+            ? "Review these configurations before renaming or removing the entity."
+            : hasOutputs
+              ? "No direct uses found in the scanned sources. This configuration has possible outputs; explore relationships for details."
+              : "No direct uses found in the scanned sources. This does not guarantee the entity is unused."}
         </p>
       </div>
       ${order.map((role) => {
@@ -1120,7 +1116,7 @@ export class BlastRadiusPanel extends LitElement {
                     <summary
                       aria-label=${`Show reference locations in ${this.sourceName(id)}`}
                     >
-                      Show reference locations
+                      View exact locations
                     </summary>
                     <div class="plain-source-paths">
                       ${refs.map(
@@ -1360,21 +1356,27 @@ export class BlastRadiusPanel extends LitElement {
   }
 
   private showCoverage() {
-    const details =
-      this.renderRoot.querySelector<HTMLDetailsElement>("#coverage");
-    if (!details) return;
-    details.open = true;
-    details.querySelector("summary")?.focus();
-    details.scrollIntoView({ block: "start" });
+    this.scanOpen = true;
+    void this.updateComplete.then(() => {
+      const details =
+        this.renderRoot.querySelector<HTMLDetailsElement>("#coverage");
+      if (!details) return;
+      details.open = true;
+      details.querySelector("summary")?.focus();
+      details.scrollIntoView({ block: "start" });
+    });
   }
 
   private showChangePreview() {
-    const details =
-      this.renderRoot.querySelector<HTMLDetailsElement>(".change-preview");
-    if (!details) return;
-    details.open = true;
-    details.querySelector("summary")?.focus();
-    details.scrollIntoView({ block: "start" });
+    this.previewOpen = true;
+    void this.updateComplete.then(() => {
+      const details =
+        this.renderRoot.querySelector<HTMLDetailsElement>(".change-preview");
+      if (!details) return;
+      details.open = true;
+      details.querySelector("summary")?.focus();
+      details.scrollIntoView({ block: "start" });
+    });
   }
 
   private completeness(report: Report) {
@@ -1746,7 +1748,6 @@ export class BlastRadiusPanel extends LitElement {
                     <h2 tabindex="-1">${this.sourceName(report.entity_id)}</h2>
                     <code>${report.entity_id}</code>
                   </div>
-                  <span class="read-only-note">Read-only analysis</span>
                 </div>
                 ${!report.exists ? html`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>` : nothing}
                 ${report.graph.truncated ? this.completeness(report) : nothing}
@@ -1755,10 +1756,15 @@ export class BlastRadiusPanel extends LitElement {
                   <button class="primary" @click=${this.showChangePreview}>
                     Preview a change
                   </button>
-                  <button @click=${this.showAdvanced}>
+                  <button class="quiet-action" @click=${this.showAdvanced}>
                     Explore relationships
                   </button>
-                  <button @click=${this.download}>Export JSON</button>
+                  <button class="quiet-action" @click=${this.download}>Export JSON</button>
+                  ${!report.coverage.warnings?.length
+                    ? html`<button class="quiet-action" @click=${this.showCoverage}>
+                        Scan details
+                      </button>`
+                    : nothing}
                 </div>
                 <a
                   class="issue-link"
@@ -1774,6 +1780,7 @@ export class BlastRadiusPanel extends LitElement {
                 <div class="columns">
                   <details
                     class="advanced-analysis"
+                    ?hidden=${!this.advancedOpen}
                     .open=${this.advancedOpen}
                     @toggle=${(event: Event) =>
                       (this.advancedOpen = (
@@ -1867,14 +1874,16 @@ export class BlastRadiusPanel extends LitElement {
                   </details>
                   <details
                     class="card change-preview"
-                    .open=${!!report.preview}
+                    ?hidden=${!this.previewOpen}
+                    .open=${this.previewOpen}
+                    @toggle=${(event: Event) =>
+                      (this.previewOpen = (event.currentTarget as HTMLDetailsElement).open)}
                   >
-                    <summary>Preview a change</summary>
+                    <summary>Preview rename or removal</summary>
                     <div class="preview-form">
-                      <h2>Change preview</h2>
                       <p class="muted">
-                        See which references need attention before making a
-                        change.
+                        Check what may need updating. This tool will not change
+                        Home Assistant configuration.
                       </p>
                       <label
                         >New entity ID<input
@@ -1932,7 +1941,14 @@ export class BlastRadiusPanel extends LitElement {
                     </div>
                   </details>
                 </div>
-                <details class="card scan-details" id="coverage">
+                <details
+                  class="card scan-details"
+                  id="coverage"
+                  ?hidden=${!this.scanOpen}
+                  .open=${this.scanOpen}
+                  @toggle=${(event: Event) =>
+                    (this.scanOpen = (event.currentTarget as HTMLDetailsElement).open)}
+                >
                   <summary>Scan details</summary>
                   <div class="scan-overview">
                     <p>

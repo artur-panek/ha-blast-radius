@@ -2,9 +2,13 @@ import { test, expect, type Page } from "@playwright/test";
 
 async function openAdvanced(page: Page) {
   const advanced = page.locator(".advanced-analysis");
-  await expect(advanced).toBeVisible();
-  if ((await advanced.getAttribute("open")) === null)
+  if (await advanced.isHidden()) {
+    await page.getByRole("button", { name: "Explore relationships" }).click();
+    await page.getByRole("tab", { name: "Detailed impact", exact: true }).click();
+  } else if ((await advanced.getAttribute("open")) === null) {
     await advanced.locator(":scope > summary").click();
+  }
+  await expect(advanced).toBeVisible();
 }
 
 import {

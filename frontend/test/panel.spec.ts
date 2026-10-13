@@ -1,10 +1,14 @@
 import { test, expect, type Page } from "@playwright/test";
 
 async function openAdvanced(page: Page) {
-  const details = page.locator(".advanced-analysis");
-  await expect(details).toBeVisible();
-  if ((await details.getAttribute("open")) === null)
-    await details.locator(":scope > summary").click();
+  const advanced = page.locator(".advanced-analysis");
+  if (await advanced.isHidden()) {
+    await page.getByRole("button", { name: "Explore relationships" }).click();
+    await page.getByRole("tab", { name: "Detailed impact", exact: true }).click();
+  } else if ((await advanced.getAttribute("open")) === null) {
+    await advanced.locator(":scope > summary").click();
+  }
+  await expect(advanced).toBeVisible();
 }
 
 async function screenshotPanel(page: Page, path: string) {
@@ -56,7 +60,7 @@ test("inspect, traverse, preview rename and removal, export JSON", async ({
   await expect(
     page.locator('.tree .graph-node[data-source="media_player.tablet"]'),
   ).toBeVisible();
-  await page.locator(".change-preview > summary").click();
+  await page.getByRole("button", { name: "Preview a change" }).click();
   await page
     .getByRole("textbox", { name: "New entity ID" })
     .fill("binary_sensor.music_button");
@@ -212,7 +216,7 @@ for (const related of [0, 1]) {
       "Unresolved",
     );
     await expect(page.locator(".impact-summary")).not.toContainText("170");
-    await page.locator("#coverage > summary").click();
+    await page.getByRole("button", { name: "Scan details", exact: true }).click();
     await page.locator(".coverage-breakdown > summary").click();
     await expect(
       page.getByText("170 locations without a fixed", {
