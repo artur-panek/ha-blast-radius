@@ -198,7 +198,6 @@ test("older reports with only a truncation flag still show a warning", async ({
   ).toHaveCount(0);
 });
 
-
 test("scan details separate current gaps from installation-wide statistics", async ({
   page,
 }) => {
@@ -226,9 +225,27 @@ test("scan details separate current gaps from installation-wide statistics", asy
         ],
       },
       review_summary: {
-        linked: { groups: 6, locations: 15, device_locations: 0, selector_locations: 0, unresolved_locations: 15 },
-        other_dashboard: { groups: 8, locations: 44, device_locations: 0, selector_locations: 0, unresolved_locations: 44 },
-        snapshot: { groups: 77, locations: 203, device_locations: 32, selector_locations: 0, unresolved_locations: 171 },
+        linked: {
+          groups: 6,
+          locations: 15,
+          device_locations: 0,
+          selector_locations: 0,
+          unresolved_locations: 15,
+        },
+        other_dashboard: {
+          groups: 8,
+          locations: 44,
+          device_locations: 0,
+          selector_locations: 0,
+          unresolved_locations: 44,
+        },
+        snapshot: {
+          groups: 77,
+          locations: 203,
+          device_locations: 32,
+          selector_locations: 0,
+          unresolved_locations: 171,
+        },
       },
     };
   });
@@ -239,7 +256,9 @@ test("scan details separate current gaps from installation-wide statistics", asy
     "73 configurations inspected",
   );
   await expect(coverage.locator(".scan-state")).toHaveText("Partial scan");
-  await expect(coverage.locator(".scan-gaps")).toContainText("dashboard.lovelace");
+  await expect(coverage.locator(".scan-gaps")).toContainText(
+    "dashboard.lovelace",
+  );
   await expect(coverage.locator(".scan-gaps")).toContainText(
     "configuration unavailable or generated automatically",
   );
@@ -256,9 +275,9 @@ test("scan details separate current gaps from installation-wide statistics", asy
   );
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
   expect(
-    await page.locator("blast-radius-panel").evaluate(
-      (panel) => panel.scrollWidth <= panel.clientWidth,
-    ),
+    await page
+      .locator("blast-radius-panel")
+      .evaluate((panel) => panel.scrollWidth <= panel.clientWidth),
   ).toBe(true);
 });
 
