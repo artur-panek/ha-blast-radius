@@ -1026,13 +1026,13 @@ export class BlastRadiusPanel extends LitElement {
       structural: "Includes this entity",
       other: "Other references",
     };
-    const descriptions: Record<string, string> = {
-      change: "can change it",
-      invoke: "can call it",
-      read: "read or react to it",
-      display: "display it",
-      structural: "include it",
-      other: "reference it",
+    const descriptions: Record<string, [string, string]> = {
+      change: ["can change it", "can change it"],
+      invoke: ["can call it", "can call it"],
+      read: ["reads or reacts to it", "read or react to it"],
+      display: ["displays it", "display it"],
+      structural: ["includes it", "include it"],
+      other: ["references it", "reference it"],
     };
     const bySource = new Map<string, Reference[]>();
     for (const ref of report.references) {
@@ -1052,7 +1052,7 @@ export class BlastRadiusPanel extends LitElement {
     }
     const summary = order.flatMap((role) => {
       const count = groups.get(role)?.length || 0;
-      return count ? [`${count} ${descriptions[role]}`] : [];
+      return count ? [`${count} ${descriptions[role][count === 1 ? 0 : 1]}`] : [];
     });
     const count = bySource.size;
     const hasOutputs = this.downstreamStats(report).possible > 0;
@@ -1095,6 +1095,10 @@ export class BlastRadiusPanel extends LitElement {
                           ${sourceLabels[refs[0].source_type] || refs[0].source_type}
                           · ${refs.length}
                           ${refs.length === 1 ? "reference" : "references"}
+                          ${role !== "read" &&
+                          refs.some((ref) => this.referenceCategory(ref) === "read")
+                            ? html` · also reads it`
+                            : nothing}
                           ${
                             refs.some((ref) => ref.confidence !== "explicit")
                               ? html` ·
@@ -1107,7 +1111,9 @@ export class BlastRadiusPanel extends LitElement {
                     ${this.sourceControl(id, true)}
                   </div>
                   <details class="plain-source-details">
-                    <summary>Show reference locations</summary>
+                    <summary aria-label=${`Show reference locations in ${this.sourceName(id)}`}>
+                      Show reference locations
+                    </summary>
                     <div class="plain-source-paths">
                       ${refs.map(
                         (ref) =>
