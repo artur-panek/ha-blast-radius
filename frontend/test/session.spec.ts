@@ -275,6 +275,9 @@ test("blocked browser storage does not break analysis or return navigation", asy
   });
   await expect(search(page)).toHaveValue("binary_sensor.wall_button");
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  const analysisOptions = page.locator(".analysis-options");
+  if ((await analysisOptions.getAttribute("open")) === null)
+    await analysisOptions.locator(":scope > summary").click();
   await page.getByRole("button", { name: "Clear search history" }).click();
   await expect(page.locator(".recent-search")).toHaveCount(0);
 });
