@@ -64,8 +64,8 @@ does not establish production stability or broader HA compatibility.
   Documentation-only pushes remain excluded from Quality and do not republish releases.
 
 After publication, verify the tag, release assets and installation through HACS.
-Existing branch-based installations should Redownload once and select the numbered
-version; see [installation](installation.md). HACS detects releases periodically;
+See [installation](installation.md) for normal update and rollback steps.
+HACS detects releases periodically;
 the integration never auto-installs itself or restarts HA. No HACS default-directory
 submission is performed by this workflow.
 
