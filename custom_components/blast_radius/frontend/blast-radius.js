@@ -754,6 +754,17 @@ var De = {
     max-width: 540px;
     font-size: 13px;
   }
+  .analysis-options-body .clear-history-option {
+    align-self: center;
+    flex-shrink: 0;
+    border: 0;
+    background: transparent;
+    padding: 8px;
+    min-height: 36px;
+    font-size: 12px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
   .recent-searches {
     display: flex;
     align-items: center;
@@ -1237,6 +1248,7 @@ var De = {
   .plain-source .review-hint {
     display: inline;
     font-size: inherit;
+    white-space: nowrap;
   }
   .plain-source-details {
     margin: 2px 0 0 32px;
@@ -3161,7 +3173,7 @@ var rt = {
     >
       <div class="plain-lead">
         <h3>
-          ${a ? `${a} ${a === 1 ? "configuration references" : "configurations reference"} this entity` : "No direct references found"}
+          ${a ? `${a} ${a === 1 ? "configuration uses" : "configurations use"} this entity` : "No direct references found"}
         </h3>
         <p>
           ${a ? "Review these configurations before renaming or removing the entity." : o ? "No direct uses found in the scanned sources. This configuration has possible outputs; explore relationships for details." : "No direct uses found in the scanned sources. This does not guarantee the entity is unused."}
@@ -3603,9 +3615,15 @@ var rt = {
               Higher depth expands the surrounding dependency graph. Direct
               references do not depend on traversal depth.
             </p>
+            ${this.recentSearches.length ? j`<button
+                    class="clear-history-option"
+                    @click=${this.clearRecentSearches}
+                  >
+                    Clear search history
+                  </button>` : N}
           </div>
         </details>
-        ${this.recentSearches.length ? j`<section
+        ${this.recentSearches.length && (this.recentSearches.length > 1 || !e) ? j`<section
                 class="recent-searches"
                 aria-label="Recent searches"
               >
