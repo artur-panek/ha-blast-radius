@@ -1006,6 +1006,101 @@ export class BlastRadiusPanel extends LitElement {
     </details>`;
   }
 
+
+  private plainUses(report: Report) {
+    const order = ["change", "invoke", "read", "display", "structural", "other"];
+    const headings: Record<string, string> = {
+      change: "Can change this entity",
+      invoke: "Can call this entity",
+      read: "Reads or reacts to this entity",
+      display: "Displays this entity",
+      structural: "Includes this entity",
+      other: "Other references",
+    };
+    const descriptions: Record<string, string> = {
+      change: "can change it",
+      invoke: "can call it",
+      read: "read or react to it",
+      display: "display it",
+      structural: "include it",
+      other: "reference it",
+    };
+    const bySource = new Map<string, Reference[]>();
+    for (const ref of report.references) {
+      const existing = bySource.get(ref.source_id);
+      if (existing) existing.push(ref);
+      else bySource.set(ref.source_id, [ref]);
+    }
+    const groups = new Map<string, Array<{ id: string; refs: Reference[] }>>();
+    for (const [id, refs] of bySource) {
+      const categories = new Set(refs.map((ref) => this.referenceCategory(ref)));
+      const role = order.find((item) => categories.has(item)) || "other";
+      const existing = groups.get(role);
+      if (existing) existing.push({ id, refs });
+      else groups.set(role, [{ id, refs }]);
+    }
+    const summary = order.flatMap((role) => {
+      const count = groups.get(role)?.length || 0;
+      return count ? [`${count} ${descriptions[role]}`] : [];
+    });
+    const count = bySource.size;
+    const hasOutputs = this.downstreamStats(report).possible > 0;
+    return html`<section class="plain-impact" aria-label="Where this entity is used">
+      <div class="plain-lead">
+        <h3>${count} ${count === 1 ? "configuration" : "configurations"} found</h3>
+        <p>${summary.length
+          ? summary.join(" · ")
+          : hasOutputs
+            ? "No incoming references found. This configuration has possible outputs; explore relationships below."
+            : "No direct references found in the inspected sources."}</p>
+      </div>
+      ${order.map((role) => {
+        const sources = groups.get(role) || [];
+        if (!sources.length) return nothing;
+        return html`<section class="plain-use-group" aria-label=${headings[role]}>
+          <h4>${headings[role]}</h4>
+          <div class="plain-use-list">
+            ${sources.map(({ id, refs }) => html`<article class="plain-source" data-source=${id}>
+              <div class="plain-source-header">
+                <div class="source-heading">
+                  ${sourceIcon(refs[0].source_type)}
+                  <div>
+                    <h5>${this.sourceName(id)}</h5>
+                    <p>
+                      ${sourceLabels[refs[0].source_type] || refs[0].source_type}
+                      · ${refs.length} ${refs.length === 1 ? "reference" : "references"}
+                      ${refs.some((ref) => ref.confidence !== "explicit")
+                        ? html` · <span class="review-hint">Needs review</span>`
+                        : nothing}
+                    </p>
+                  </div>
+                </div>
+                ${this.sourceControl(id, true)}
+              </div>
+              <details class="plain-source-details">
+                <summary>Show reference locations</summary>
+                <div class="plain-source-paths">
+                  ${refs.map((ref) => html`<div class="plain-source-path">
+                    <span>${readablePath(ref.path)}</span>
+                    ${this.badge(ref.confidence)}
+                    <code>${ref.path}</code>
+                    ${ref.reason ? html`<p>${explainReason(ref.reason)}</p>` : nothing}
+                  </div>`)}
+                </div>
+              </details>
+            </article>`)}
+          </div>
+        </section>`;
+      })}
+      ${report.coverage.warnings?.length
+        ? html`<div class="plain-scan-note">
+            <span>Some configuration could not be fully inspected. Results may be incomplete.</span>
+            <button @click=${this.showCoverage}>Scan details →</button>
+          </div>`
+        : nothing}
+    </section>`;
+  }
+
   private impact(report: Report) {
     const categories = new Map(
       this.directCategories(report).map(({ category, refs }) => [
