@@ -1,4 +1,17 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+async function openAdvanced(page: Page) {
+  const advanced = page.locator(".advanced-analysis");
+  if (await advanced.isHidden()) {
+    await page.getByRole("button", { name: "Explore relationships" }).click();
+    await page
+      .getByRole("tab", { name: "Detailed impact", exact: true })
+      .click();
+  } else if ((await advanced.getAttribute("open")) === null) {
+    await advanced.locator(":scope > summary").click();
+  }
+  await expect(advanced).toBeVisible();
+}
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
@@ -26,6 +39,7 @@ test("depth warnings precede counts and a deeper fresh analysis finds more targe
         ),
     ),
   ).toBe(true);
+  await openAdvanced(page);
   await page
     .getByRole("tab", { name: "Relationship map", exact: true })
     .click();
@@ -117,14 +131,16 @@ test("coverage gaps remain visible with zero references, open details and surviv
   ).toHaveCount(0);
   await expect(
     page.getByRole("button", {
-      name: "Coverage partial — view diagnostics",
+      name: "Scan details →",
     }),
   ).toBeVisible();
   await expect(page.locator("#coverage")).not.toHaveAttribute("open", "");
   await expect(page.locator("#coverage > summary")).toContainText(
-    "Coverage & diagnostics",
+    "Scan details",
   );
-  await expect(page.locator("#coverage > summary")).toContainText("partial");
+  await expect(page.locator(".plain-scan-note")).toContainText(
+    "may be incomplete",
+  );
   await expect(
     page.getByRole("button", { name: /Inspect to depth/ }),
   ).toHaveCount(0);
@@ -139,13 +155,11 @@ test("coverage gaps remain visible with zero references, open details and surviv
   await page.screenshot({
     path: "/tmp/ha-blast-radius-incomplete-desktop.png",
   });
-  await page.locator("#coverage > summary").click();
+  await page.getByRole("button", { name: "Scan details →" }).click();
   await expect(page.locator("#coverage")).toHaveAttribute("open", "");
   await expect(page.locator("#coverage > summary")).toBeFocused();
   await expect(page.locator("#coverage")).toContainText("dashboard.broken");
-  await expect(
-    page.getByText("No direct references found", { exact: true }),
-  ).toBeVisible();
+  await expect(page.locator(".plain-lead p")).toBeVisible();
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export JSON" }).click();
   const stream = await (await downloadPromise).createReadStream();

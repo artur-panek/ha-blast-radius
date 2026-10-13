@@ -1,6 +1,20 @@
 import { test, expect, type Page } from "@playwright/test";
 
 const storageKey = "blast-radius:session:v1:demo-admin";
+
+async function openAdvanced(page: Page) {
+  const advanced = page.locator(".advanced-analysis");
+  if (await advanced.isHidden()) {
+    await page.getByRole("button", { name: "Explore relationships" }).click();
+    await page
+      .getByRole("tab", { name: "Detailed impact", exact: true })
+      .click();
+  } else if ((await advanced.getAttribute("open")) === null) {
+    await advanced.locator(":scope > summary").click();
+  }
+  await expect(advanced).toBeVisible();
+}
+
 const search = (page: Page) =>
   page.getByRole("combobox", { name: "Entity", exact: true });
 
@@ -21,6 +35,7 @@ test("Back recreates the panel with its search, depth, tab and scroll and reques
 }) => {
   await analyze(page, "binary_sensor.wall_button");
   await page.getByLabel("Traversal depth").selectOption("12");
+  await openAdvanced(page);
   await page
     .getByRole("tab", { name: "Relationship map", exact: true })
     .click();
@@ -168,6 +183,7 @@ test("reload and reconnect restore a successful search; failed searches do not e
   page,
 }) => {
   await analyze(page, "media_player.speaker");
+  await openAdvanced(page);
   await page.getByRole("tab", { name: "Raw references", exact: true }).click();
   await page.reload();
   await expect(
@@ -209,7 +225,7 @@ test("HA users have separate search sessions", async ({ page }) => {
   });
   await expect(search(page)).toHaveValue("binary_sensor.wall_button");
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
-  await expect(page.locator(".recent-search")).toHaveCount(1);
+  await expect(page.locator(".recent-search")).toHaveCount(0);
   await expect(
     page.getByRole("button", {
       name: "Analyze again: sensor.unused",
@@ -259,6 +275,27 @@ test("blocked browser storage does not break analysis or return navigation", asy
   });
   await expect(search(page)).toHaveValue("binary_sensor.wall_button");
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
-  await page.getByRole("button", { name: "Clear recent searches" }).click();
+  const analysisOptions = page.locator(".analysis-options");
+  if ((await analysisOptions.getAttribute("open")) === null)
+    await analysisOptions.locator(":scope > summary").click();
+  await page.getByRole("button", { name: "Clear search history" }).click();
+  await expect(page.locator(".recent-search")).toHaveCount(0);
+});
+
+test("the first search is not repeated in Recent, but is recoverable after failure", async ({
+  page,
+}) => {
+  await analyze(page, "light.desk");
+  await expect(page.locator(".recent-search")).toHaveCount(0);
+  await expect(
+    page.getByRole("region", { name: "Recent searches" }),
+  ).toHaveCount(0);
+  await search(page).fill("sensor.not_in_demo");
+  await search(page).press("Enter");
+  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Analyze again: light.desk" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Clear search history" }).click();
   await expect(page.locator(".recent-search")).toHaveCount(0);
 });

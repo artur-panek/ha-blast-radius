@@ -39,17 +39,17 @@ The screenshot uses synthetic fixtures, not a real household's configuration.
 - Recursive script calls, action targets, scene membership and exposed group membership.
 - Configured Lovelace dashboards, including YAML, through HA's own loader.
 - Jinja literals found without executing templates; unresolved expressions kept separate.
-- A compact overview separates incoming controls, readers/reactors,
-  display-only uses and possible downstream outputs. Shared-flow co-targets are
-  context, not effects.
+- A simple results list groups each configuration by what it does with the selected
+  entity. Open a source in Home Assistant or expand it for its exact reference locations.
+- Advanced analysis retains the detailed impact view, relationship map, source filters
+  and raw reference table. Shared-flow co-targets remain context, not effects.
 - Bounded traversal and cycle detection. Graph truncation is reported separately
   from normal static-analysis coverage limits.
 - Clickable sources: inspect loaded automations/scripts in HA's read-only view,
   open scenes in their editor, dashboards in their view, and entities in details.
-- Show partial scan coverage separately from direct-reference confidence.
-  Distinguish unresolved expressions in direct sources from those in wider graph
-  context. Coverage & diagnostics retains device/selector and system-wide
-  dashboard context without claiming these are confirmed dependencies.
+- Keep scan limitations visible without mixing global unresolved expressions
+  with the selected entity's direct references. Scan details retains the full
+  device/selector and dashboard diagnostics when you need them.
 - Return to your last search, depth and tab after opening a source. Reopen any of
   six recent searches from a compact bar in the same browser tab.
 - Rename/removal previews retain the analysis if a preview fails and show
@@ -95,15 +95,19 @@ and select the latest numbered release. Updates do not install or restart HA aut
 
 1. Select or type an entity ID. Missing old IDs are accepted.
 2. Press **Analyze**. Traversal depth is available under **Analysis options** when you need to adjust it.
-3. Start with **Overview** to see which configurations control, read or display
-   the entity. Possible downstream effects are separate from **Shared-flow context**,
-   which does not establish causality. Use **Relationship map** and **Raw references**
-   for exact paths. **Analyze this** changes the root; **Open** inspects a source in HA.
-4. Use **Preview change** by the result heading to open the read-only
-   **Preview a change** section. Enter a same-domain replacement for
-   **Preview rename**, or choose **Preview removal**. Check **Coverage partial**
-   and diagnostics before drawing conclusions.
-5. Copy/export the report. Make actual changes yourself in Home Assistant.
+3. Review the configurations listed below the selected entity. They're grouped
+   by what they can do: **Can change it**, **Uses its state**, or **Shows it**,
+   with other reference types shown when relevant. Each configuration appears
+   once. Select its name or **Open** to inspect it in Home Assistant, or **View exact locations**
+   to see the matching configuration paths.
+4. Choose **Preview a change** to check a same-domain rename or removal. The
+   preview form opens only when requested and never writes any configuration.
+   **Export JSON** saves the complete report.
+5. Choose **Explore relationships** for the detailed impact view, graph, source
+   filters, raw references, and Markdown export. This advanced section can be
+   collapsed again; shared-flow context does not prove causality.
+6. When the results note a gap in scan coverage, choose **Scan details** to see
+   what was not inspected. Make actual Home Assistant changes yourself.
 
 Use the source chips (Automation, Script, Dashboard, Scene, Group) and confidence
 chips (Explicit, Template literal, Needs review) to narrow the displayed results.
@@ -112,7 +116,9 @@ selectors and unresolved expressions. Filters apply to source cards, graph
 connections and raw references; full totals, coverage, previews and exports remain unchanged. **All
 sources** / **All confidence** reset each group. Filters reset on a new root or
 panel remount and are not saved in session storage. The selected tab is preserved.
-Graph paths may pass through hidden configurations; filters do not recalculate reachability.
+Graph paths may pass through hidden configurations; filters do not recalculate
+reachability. Filters in Advanced analysis do not change the main results list
+or exported report.
 
 Every request takes a fresh snapshot. Registry-only entities, including disabled
 entities, count as known even when they have no current state.
@@ -177,7 +183,7 @@ under one reason may still have different targets. Two scopes remain available:
   dashboard level. They remain visible and exported but are not attributed to the
   selected entity. Custom card boundaries cannot always be inferred.
 
-The full-snapshot total and category breakdown remain under **Coverage and limitations**.
+The full-snapshot total and category breakdown remain under **Scan details**.
 Counts describe configuration locations and review groups, not broken entities.
 Even expressions in a linked configuration may refer to something else. Zero references is not a guarantee that
 removal is safe. The main summary counts known references and linked configurations.

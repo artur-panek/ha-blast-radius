@@ -70,7 +70,10 @@ export class BlastRadiusPanel extends LitElement {
     recentSearches: { state: true },
     sourceFilters: { state: true },
     reviewFilters: { state: true },
+    advancedOpen: { state: true },
     previewError: { state: true },
+    previewOpen: { state: true },
+    scanOpen: { state: true },
   };
   declare hass: Hass;
   narrow = false;
@@ -87,7 +90,10 @@ export class BlastRadiusPanel extends LitElement {
   copyFallback = false;
   sourceFilters: SourceType[] = [];
   reviewFilters: ReviewFilter[] = [];
+  advancedOpen = false;
   previewError = "";
+  previewOpen = false;
+  scanOpen = false;
   private analyzedRoot = "";
   private initialized = false;
   private requestId = 0;
@@ -173,6 +179,7 @@ export class BlastRadiusPanel extends LitElement {
       this.query = saved.last?.entityId || "";
       this.depth = saved.last?.depth || 6;
       this.tab = saved.last?.tab || "impact";
+      this.advancedOpen = this.tab !== "impact";
       this.report = undefined;
       this.sourceFilters = [];
       this.reviewFilters = [];
@@ -182,6 +189,8 @@ export class BlastRadiusPanel extends LitElement {
       this.status = "";
       this.copyFallback = false;
       this.previewError = "";
+      this.previewOpen = false;
+      this.scanOpen = false;
       void this.loadEntities();
     } else if (changed.has("tab") && this.lastView) {
       this.rememberView();
@@ -223,6 +232,8 @@ export class BlastRadiusPanel extends LitElement {
     this.status = "";
     this.copyFallback = false;
     this.previewError = "";
+    this.previewOpen = false;
+    this.scanOpen = false;
   }
 
   private async run(operation?: "rename" | "delete", restoreScroll?: number) {
@@ -235,6 +246,8 @@ export class BlastRadiusPanel extends LitElement {
       this.sourceFilters = [];
       this.reviewFilters = [];
       this.replacement = "";
+      this.previewOpen = false;
+      this.scanOpen = false;
     }
     this.analyzedRoot = entityId;
     const id = ++this.requestId;
@@ -1006,6 +1019,144 @@ export class BlastRadiusPanel extends LitElement {
     </details>`;
   }
 
+  private plainUses(report: Report) {
+    const order = [
+      "change",
+      "invoke",
+      "read",
+      "display",
+      "structural",
+      "other",
+    ];
+    const headings: Record<string, string> = {
+      change: "Can change it",
+      invoke: "Can run it",
+      read: "Uses its state",
+      display: "Shows it",
+      structural: "Includes it",
+      other: "Other uses",
+    };
+    const bySource = new Map<string, Reference[]>();
+    for (const ref of report.references) {
+      const existing = bySource.get(ref.source_id);
+      if (existing) existing.push(ref);
+      else bySource.set(ref.source_id, [ref]);
+    }
+    const groups = new Map<string, Array<{ id: string; refs: Reference[] }>>();
+    for (const [id, refs] of bySource) {
+      const categories = new Set<string>(
+        refs.map((ref) => this.referenceCategory(ref)),
+      );
+      const role = order.find((item) => categories.has(item)) || "other";
+      const existing = groups.get(role);
+      if (existing) existing.push({ id, refs });
+      else groups.set(role, [{ id, refs }]);
+    }
+    const count = bySource.size;
+    const hasOutputs = this.downstreamStats(report).possible > 0;
+    return html`<section
+      class="plain-impact"
+      aria-label="Where this entity is used"
+    >
+      <div class="plain-lead">
+        <h3>
+          ${
+            count
+              ? `${count} ${count === 1 ? "configuration uses" : "configurations use"} this entity`
+              : "No direct references found"
+          }
+        </h3>
+        <p>
+          ${
+            count
+              ? "Review these configurations before renaming or removing the entity."
+              : hasOutputs
+                ? "No direct uses found in the scanned sources. This configuration has possible outputs; explore relationships for details."
+                : "No direct uses found in the scanned sources. This does not guarantee the entity is unused."
+          }
+        </p>
+      </div>
+      ${order.map((role) => {
+        const sources = groups.get(role) || [];
+        if (!sources.length) return nothing;
+        return html`<section
+          class="plain-use-group"
+          aria-label=${headings[role]}
+        >
+          <h4>${headings[role]}</h4>
+          <div class="plain-use-list">
+            ${sources.map(
+              ({ id, refs }) =>
+                html`<article class="plain-source" data-source=${id}>
+                  <div class="plain-source-header">
+                    <div class="source-heading">
+                      ${sourceIcon(refs[0].source_type)}
+                      <div>
+                        <h5>${this.sourceControl(id)}</h5>
+                        <p>
+                          ${sourceLabels[refs[0].source_type] || refs[0].source_type}
+                          · ${refs.length}
+                          ${refs.length === 1 ? "reference" : "references"}
+                          ${
+                            role !== "read" &&
+                            refs.some(
+                              (ref) => this.referenceCategory(ref) === "read",
+                            )
+                              ? html` · also reads it`
+                              : nothing
+                          }
+                          ${
+                            refs.some((ref) => ref.confidence !== "explicit")
+                              ? html` ·
+                                  <span
+                                    class="review-hint"
+                                    title="Some references could not be fully verified. Check the exact locations."
+                                    >Needs review</span
+                                  >`
+                              : nothing
+                          }
+                        </p>
+                      </div>
+                    </div>
+                    ${this.sourceControl(id, true)}
+                  </div>
+                  <details class="plain-source-details">
+                    <summary
+                      aria-label=${`View exact locations in ${this.sourceName(id)}`}
+                    >
+                      View exact locations
+                    </summary>
+                    <div class="plain-source-paths">
+                      ${refs.map(
+                        (ref) =>
+                          html`<div class="plain-source-path">
+                            <span>${readablePath(ref.path)}</span>
+                            ${this.badge(ref.confidence)}
+                            <code>${ref.path}</code>
+                            ${ref.reason ? html`<p>${explainReason(ref.reason)}</p>` : nothing}
+                          </div>`,
+                      )}
+                    </div>
+                  </details>
+                </article>`,
+            )}
+          </div>
+        </section>`;
+      })}
+      ${
+        report.coverage.warnings?.length
+          ? html`<div class="plain-scan-note">
+              <span
+                >Some configuration could not be fully inspected. Results may be
+                incomplete.</span
+              >
+              <button @click=${this.showCoverage}>Scan details →</button>
+            </div>`
+          : nothing
+      }
+    </section>`;
+  }
+
   private impact(report: Report) {
     const categories = new Map(
       this.directCategories(report).map(({ category, refs }) => [
@@ -1199,22 +1350,41 @@ export class BlastRadiusPanel extends LitElement {
     ${this.uncertainty(report)}`;
   }
 
+  private showAdvanced() {
+    this.advancedOpen = true;
+    this.tab = "graph";
+    void this.updateComplete.then(() => {
+      const details =
+        this.renderRoot.querySelector<HTMLDetailsElement>(".advanced-analysis");
+      if (!details) return;
+      details.open = true;
+      details.querySelector("summary")?.focus();
+      details.scrollIntoView({ block: "start" });
+    });
+  }
+
   private showCoverage() {
-    const details =
-      this.renderRoot.querySelector<HTMLDetailsElement>("#coverage");
-    if (!details) return;
-    details.open = true;
-    details.querySelector("summary")?.focus();
-    details.scrollIntoView({ block: "start" });
+    this.scanOpen = true;
+    void this.updateComplete.then(() => {
+      const details =
+        this.renderRoot.querySelector<HTMLDetailsElement>("#coverage");
+      if (!details) return;
+      details.open = true;
+      details.querySelector("summary")?.focus();
+      details.scrollIntoView({ block: "start" });
+    });
   }
 
   private showChangePreview() {
-    const details =
-      this.renderRoot.querySelector<HTMLDetailsElement>(".change-preview");
-    if (!details) return;
-    details.open = true;
-    details.querySelector("summary")?.focus();
-    details.scrollIntoView({ block: "start" });
+    this.previewOpen = true;
+    void this.updateComplete.then(() => {
+      const details =
+        this.renderRoot.querySelector<HTMLDetailsElement>(".change-preview");
+      if (!details) return;
+      details.open = true;
+      details.querySelector("summary")?.focus();
+      details.scrollIntoView({ block: "start" });
+    });
   }
 
   private completeness(report: Report) {
@@ -1477,9 +1647,10 @@ export class BlastRadiusPanel extends LitElement {
         >
       </header>
       <main>
-        <h1>Dependency impact</h1>
+        <h1>Where is this entity used?</h1>
         <p class="muted intro">
-          See what references an entity before you rename or remove it.
+          Find the Home Assistant configurations that use an entity before
+          changing it.
         </p>
         <form
           class="search"
@@ -1527,10 +1698,21 @@ export class BlastRadiusPanel extends LitElement {
               Higher depth expands the surrounding dependency graph. Direct
               references do not depend on traversal depth.
             </p>
+            ${
+              this.recentSearches.length
+                ? html`<button
+                    class="clear-history-option"
+                    @click=${this.clearRecentSearches}
+                  >
+                    Clear search history
+                  </button>`
+                : nothing
+            }
           </div>
         </details>
         ${
-          this.recentSearches.length
+          this.recentSearches.length &&
+          (this.recentSearches.length > 1 || !report)
             ? html`<section
                 class="recent-searches"
                 aria-label="Recent searches"
@@ -1585,128 +1767,151 @@ export class BlastRadiusPanel extends LitElement {
                     <h2 tabindex="-1">${this.sourceName(report.entity_id)}</h2>
                     <code>${report.entity_id}</code>
                   </div>
-                  <div
-                    class="result-badges"
-                    aria-label="Analysis and coverage status"
-                  >
-                    <span
-                      class="summary-pill"
-                      title="Confidence applies only to detected direct references"
-                      >${this.directConfidence(report)}</span
-                    >
-                    ${
-                      report.coverage.warnings?.length
-                        ? html`<button
-                            class="summary-pill coverage-pill"
-                            title="Some configuration could not be fully inspected"
-                            aria-label="Coverage partial — view diagnostics"
-                            @click=${this.showCoverage}
-                          >
-                            Coverage partial ↗
-                          </button>`
-                        : nothing
-                    }
-                    <button
-                      class="preview-shortcut"
-                      @click=${this.showChangePreview}
-                    >
-                      Preview change →
-                    </button>
-                  </div>
                 </div>
                 ${!report.exists ? html`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>` : nothing}
                 ${report.graph.truncated ? this.completeness(report) : nothing}
-                <section class="impact-summary" aria-label="Impact summary">
-                  <div class="impact-verdict">
-                    <span class="eyebrow">At a glance</span>
-                    <strong>
-                      ${
-                        report.summary.sources
-                          ? `${report.summary.sources} direct ${report.summary.sources === 1 ? "source" : "sources"}`
-                          : "No incoming sources found"
-                      }
-                    </strong>
-                    <p>${this.impactNarrative(report)}</p>
-                  </div>
-                  <div class="impact-metrics semantic-metrics">
-                    <div>
-                      <strong>${this.directStats(report).action}</strong>
-                      <span>sources can change / invoke</span>
-                    </div>
-                    <div>
-                      <strong>${this.directStats(report).read}</strong>
-                      <span>sources read / react</span>
-                    </div>
-                    <div>
-                      <strong>${this.downstreamStats(report).possible}</strong>
-                      <span>downstream nodes identified</span>
-                    </div>
-                    <div>
-                      <strong>${this.directStats(report).display}</strong>
-                      <span>display sources</span>
-                    </div>
-                  </div>
-                </section>
-                ${
-                  this.downstreamStats(report).context
-                    ? html`<div class="summary-context-note">
-                        <strong>${this.downstreamStats(report).context}</strong>
-                        ${
-                          this.downstreamStats(report).context === 1
-                            ? "additional node is"
-                            : "additional nodes are"
-                        }
-                        shared-flow context only — useful for understanding the
-                        surrounding controller, not an outgoing effect of the
-                        selected entity.
-                      </div>`
-                    : nothing
-                }
+                ${this.plainUses(report)}
+                <div class="report-actions">
+                  <button class="primary" @click=${this.showChangePreview}>
+                    Preview a change
+                  </button>
+                  <button class="quiet-action" @click=${this.showAdvanced}>
+                    Explore relationships
+                  </button>
+                  <button class="quiet-action" @click=${this.download}>
+                    Export JSON
+                  </button>
+                  ${
+                    !report.coverage.warnings?.length
+                      ? html`<button
+                          class="quiet-action"
+                          @click=${this.showCoverage}
+                        >
+                          Scan details
+                        </button>`
+                      : nothing
+                  }
+                </div>
+                <a
+                  class="issue-link"
+                  href="https://github.com/artur-panek/ha-blast-radius/issues/new?template=bug.yml"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Report issue ↗</a
+                >
+                <p class="status" role="status" ?hidden=${!this.status}>
+                  ${this.status}
+                </p>
+                ${this.copyFallback ? html`<textarea aria-label="Markdown report" readonly .value=${report.markdown}></textarea>` : nothing}
                 <div class="columns">
-                  <section class="card">
-                    <nav role="tablist" aria-label="Analysis views">
-                      ${(["impact", "graph", "raw"] as const).map((tab) => html`<button role="tab" id=${`tab-${tab}`} aria-controls="analysis-view" aria-selected=${this.tab === tab} tabindex=${this.tab === tab ? 0 : -1} @keydown=${this.tabKeydown} @click=${() => (this.tab = tab)}>${tab === "impact" ? "Overview" : tab === "graph" ? "Relationship map" : "Raw references"}</button>`)}
-                    </nav>
-                    ${this.filters(report)}
-                    <div
-                      role="tabpanel"
-                      id="analysis-view"
-                      aria-labelledby=${`tab-${this.tab}`}
-                    >
-                      ${this.tab === "impact" ? this.impact(report) : this.tab === "graph" ? this.graph(report) : this.raw(report)}
-                    </div>
-                    <div class="controls">
-                      <button @click=${this.copy}>Copy Markdown</button
-                      ><button @click=${this.download}>Export JSON</button
-                      ><button
-                        ?disabled=${this.loading}
-                        @click=${() => this.run()}
+                  <details
+                    class="advanced-analysis"
+                    ?hidden=${!this.advancedOpen}
+                    .open=${this.advancedOpen}
+                    @toggle=${(event: Event) =>
+                      (this.advancedOpen = (
+                        event.currentTarget as HTMLDetailsElement
+                      ).open)}
+                  >
+                    <summary>
+                      Advanced analysis
+                      <small
+                        >Detailed impact, relationship map and raw
+                        references</small
                       >
-                        Refresh snapshot
-                      </button>
+                    </summary>
+                    <div class="advanced-content">
+                      <section
+                        class="impact-summary"
+                        aria-label="Impact summary"
+                      >
+                        <div class="impact-verdict">
+                          <span class="eyebrow">At a glance</span>
+                          <strong>
+                            ${
+                              report.summary.sources
+                                ? `${report.summary.sources} direct ${report.summary.sources === 1 ? "source" : "sources"}`
+                                : "No incoming sources found"
+                            }
+                          </strong>
+                          <p>${this.impactNarrative(report)}</p>
+                        </div>
+                        <div class="impact-metrics semantic-metrics">
+                          <div>
+                            <strong>${this.directStats(report).action}</strong>
+                            <span>sources can change / invoke</span>
+                          </div>
+                          <div>
+                            <strong>${this.directStats(report).read}</strong>
+                            <span>sources read / react</span>
+                          </div>
+                          <div>
+                            <strong
+                              >${this.downstreamStats(report).possible}</strong
+                            >
+                            <span>downstream nodes identified</span>
+                          </div>
+                          <div>
+                            <strong>${this.directStats(report).display}</strong>
+                            <span>display sources</span>
+                          </div>
+                        </div>
+                      </section>
+                      ${
+                        this.downstreamStats(report).context
+                          ? html`<div class="summary-context-note">
+                              <strong
+                                >${this.downstreamStats(report).context}</strong
+                              >
+                              ${
+                                this.downstreamStats(report).context === 1
+                                  ? "additional node is"
+                                  : "additional nodes are"
+                              }
+                              shared-flow context only — useful for
+                              understanding the surrounding controller, not an
+                              outgoing effect of the selected entity.
+                            </div>`
+                          : nothing
+                      }
                     </div>
-                    <a
-                      class="issue-link"
-                      href="https://github.com/artur-panek/ha-blast-radius/issues/new?template=bug.yml"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      >Report issue ↗</a
-                    >
-                    <p class="status" role="status" ?hidden=${!this.status}>
-                      ${this.status}
-                    </p>
-                    ${this.copyFallback ? html`<textarea aria-label="Markdown report" readonly .value=${report.markdown}></textarea>` : nothing}
-                  </section>
+                    <section class="card">
+                      <nav role="tablist" aria-label="Analysis views">
+                        ${(["impact", "graph", "raw"] as const).map((tab) => html`<button role="tab" id=${`tab-${tab}`} aria-controls="analysis-view" aria-selected=${this.tab === tab} tabindex=${this.tab === tab ? 0 : -1} @keydown=${this.tabKeydown} @click=${() => (this.tab = tab)}>${tab === "impact" ? "Detailed impact" : tab === "graph" ? "Relationship map" : "Raw references"}</button>`)}
+                      </nav>
+                      ${this.filters(report)}
+                      <div
+                        role="tabpanel"
+                        id="analysis-view"
+                        aria-labelledby=${`tab-${this.tab}`}
+                      >
+                        ${this.tab === "impact" ? this.impact(report) : this.tab === "graph" ? this.graph(report) : this.raw(report)}
+                      </div>
+                      <div class="advanced-tools-row">
+                        <button @click=${this.copy}>Copy Markdown</button>
+                        <button
+                          ?disabled=${this.loading}
+                          @click=${() => this.run()}
+                        >
+                          Refresh snapshot
+                        </button>
+                      </div>
+                    </section>
+                  </details>
                   <details
                     class="card change-preview"
-                    .open=${!!report.preview}
+                    ?hidden=${!this.previewOpen}
+                    .open=${this.previewOpen}
+                    @toggle=${(event: Event) =>
+                      (this.previewOpen = (
+                        event.currentTarget as HTMLDetailsElement
+                      ).open)}
                   >
-                    <summary>Preview a change</summary>
+                    <summary>Preview rename or removal</summary>
                     <div class="preview-form">
-                      <h2>Change preview</h2>
                       <p class="muted">
-                        See which references need attention before making a
-                        change.
+                        Check what may need updating. This tool will not change
+                        Home Assistant configuration.
                       </p>
                       <label
                         >New entity ID<input
@@ -1764,38 +1969,85 @@ export class BlastRadiusPanel extends LitElement {
                     </div>
                   </details>
                 </div>
-                <details class="card" id="coverage">
-                  <summary>
-                    Coverage & diagnostics · ${report.coverage.sources} sources
-                    inspected${report.coverage.warnings?.length ? " · partial" : ""}
-                  </summary>
-                  <p class="muted">
-                    ${Object.entries(report.coverage.source_types)
-                      .map(([kind, count]) => `${count} ${kind}`)
-                      .join(" · ")}
-                  </p>
-                  <ul>
-                    ${report.warnings.map((warning) => html`<li>${warning}</li>`)}
-                    <li>
-                      ${report.unresolved_total} locations without an entity
-                      target across the full snapshot. These include device IDs,
-                      selectors and expressions; they cannot be attributed to
-                      this entity.
-                    </li>
-                    <li>
-                      ${reviewCounts(report.uncertain_references)} in inspected
-                      linked flows (including direct sources);
-                      ${reviewCounts(report.other_dashboard_references || [])}
-                      in system-wide dashboard context. Groups summarize
-                      repeated reasons and selector identities, not a count of
-                      affected entities.
-                    </li>
-                    ${report.review_summary?.snapshot.locations === report.unresolved_total ? html`<li>Full snapshot: ${report.review_summary.snapshot.device_locations} device-reference locations · ${report.review_summary.snapshot.selector_locations} unexpanded-selector locations · ${report.review_summary.snapshot.unresolved_locations} dynamic or unrecognized locations.</li>` : nothing}
-                    <li>
-                      Conditional branches are not evaluated. A reference does
-                      not prove an action will run.
-                    </li>
-                  </ul>
+                <details
+                  class="card scan-details"
+                  id="coverage"
+                  ?hidden=${!this.scanOpen}
+                  .open=${this.scanOpen}
+                  @toggle=${(event: Event) =>
+                    (this.scanOpen = (
+                      event.currentTarget as HTMLDetailsElement
+                    ).open)}
+                >
+                  <summary>Scan details</summary>
+                  <div class="scan-overview">
+                    <p>
+                      <strong
+                        >${report.coverage.sources} configurations
+                        inspected.</strong
+                      >
+                      This is static analysis: conditions are not executed, and
+                      dynamically selected targets may be missed.
+                    </p>
+                  </div>
+                  ${
+                    report.coverage.warnings?.length
+                      ? html`<div class="scan-warnings">
+                          <h3>Not fully inspected</h3>
+                          <ul>
+                            ${report.coverage.warnings.map(
+                              (warning) => html`<li>${warning}</li>`,
+                            )}
+                          </ul>
+                        </div>`
+                      : nothing
+                  }
+                  <details class="coverage-breakdown">
+                    <summary>Full scanner counts and limitations</summary>
+                    <p class="muted">
+                      ${Object.entries(report.coverage.source_types)
+                        .map(
+                          ([kind, count]) =>
+                            `${count} ${kind}${count === 1 ? "" : "s"}`,
+                        )
+                        .join(" · ")}
+                    </p>
+                    <ul>
+                      ${report.warnings
+                        .filter(
+                          (warning) =>
+                            !(report.coverage.warnings || []).includes(warning),
+                        )
+                        .map((warning) => html`<li>${warning}</li>`)}
+                      <li>
+                        ${report.unresolved_total} locations without a fixed
+                        entity target across the full snapshot. Device IDs,
+                        selectors and dynamic expressions are not necessarily
+                        dependencies of the selected entity.
+                      </li>
+                      <li>
+                        ${reviewCounts(report.uncertain_references)} in linked
+                        configurations;
+                        ${reviewCounts(report.other_dashboard_references || [])}
+                        elsewhere in dashboards. These are review locations, not
+                        a count of affected entities.
+                      </li>
+                      ${
+                        report.review_summary?.snapshot.locations ===
+                        report.unresolved_total
+                          ? html`<li>
+                              Full snapshot:
+                              ${report.review_summary.snapshot.device_locations}
+                              device-reference locations ·
+                              ${report.review_summary.snapshot.selector_locations}
+                              unexpanded selectors ·
+                              ${report.review_summary.snapshot.unresolved_locations}
+                              dynamic or unrecognized locations.
+                            </li>`
+                          : nothing
+                      }
+                    </ul>
+                  </details>
                   ${this.coverageDiagnostics(report)}
                   <details class="confidence-help">
                     <summary>Reference confidence</summary>
@@ -1834,8 +2086,8 @@ export class BlastRadiusPanel extends LitElement {
                   <div class="symbol">${brandMark()}</div>
                   <h2>Start with one entity</h2>
                   <p class="muted">
-                    A button, a helper, an old light.<br />Find out what points
-                    to it and what sits downstream.
+                    Search for a light, sensor, script or any other entity to
+                    find where Home Assistant uses it.
                   </p>
                   <p class="muted">
                     ${this.entities.length} entity IDs available · Missing IDs

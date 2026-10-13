@@ -6,14 +6,28 @@ const filters = (page: Page) => page.locator("details.result-filters");
 const chip = (page: Page, name: string) =>
   filters(page).getByRole("button", { name, exact: true });
 async function openFilters(page: Page) {
+  await openAdvanced(page);
   const resultFilters = filters(page);
   if ((await resultFilters.getAttribute("open")) === null)
     await resultFilters.locator(":scope > summary").click();
+}
+async function openAdvanced(page: Page) {
+  const advanced = page.locator(".advanced-analysis");
+  if (await advanced.isHidden()) {
+    await page.getByRole("button", { name: "Explore relationships" }).click();
+    await page
+      .getByRole("tab", { name: "Detailed impact", exact: true })
+      .click();
+  } else if ((await advanced.getAttribute("open")) === null) {
+    await advanced.locator(":scope > summary").click();
+  }
+  await expect(advanced).toBeVisible();
 }
 async function analyze(page: Page, id = "media_player.speaker") {
   await input(page).fill(id);
   await input(page).press("Enter");
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await openAdvanced(page);
   await openFilters(page);
 }
 test.beforeEach(async ({ page }) => {
@@ -213,7 +227,7 @@ test("Analyze this from Used by and Possible targets resets preview and enters R
   page,
 }) => {
   await analyze(page, "binary_sensor.wall_button");
-  await page.getByText("Preview a change", { exact: true }).click();
+  await page.getByRole("button", { name: "Preview a change" }).click();
   await page.getByLabel("New entity ID").fill("binary_sensor.new_button");
   await page
     .getByRole("button", { name: "Preview rename", exact: true })
@@ -724,7 +738,7 @@ test("failed change preview keeps the analysis and shows an error in the form", 
 }) => {
   await analyze(page, "light.desk");
   const selected = page.locator(".result-heading code");
-  await page.getByRole("button", { name: "Preview change →" }).click();
+  await page.getByRole("button", { name: "Preview a change" }).click();
   await expect(page.locator(".change-preview")).toHaveAttribute("open", "");
   await page
     .getByRole("textbox", { name: "New entity ID" })
@@ -765,7 +779,7 @@ test("preview errors remain readable on mobile without losing the result", async
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator("#theme").click();
   await analyze(page, "light.desk");
-  await page.getByRole("button", { name: "Preview change →" }).click();
+  await page.getByRole("button", { name: "Preview a change" }).click();
   await page.getByRole("textbox", { name: "New entity ID" }).fill("not-an-id");
   await page.getByRole("button", { name: "Preview rename" }).click();
   await expect(page.locator(".preview-error")).toBeVisible();
@@ -786,8 +800,270 @@ test("shared-flow note wraps as a sentence and idle export status is hidden", as
   expect(await note.evaluate((el) => getComputedStyle(el).display)).toBe(
     "block",
   );
-  const status = page.locator(".card .status");
+  const status = page.locator(".status").first();
   await expect(status).toBeHidden();
   await page.getByRole("button", { name: "Copy Markdown" }).click();
   await expect(status).toBeVisible();
+});
+
+test("the default result answers where the entity is used without exposing the graph", async ({
+  page,
+}) => {
+  await input(page).fill("binary_sensor.wall_button");
+  await input(page).press("Enter");
+  await expect(
+    page.getByRole("heading", {
+      name: "3 configurations use this entity",
+    }),
+  ).toBeVisible();
+  const simple = page.locator(".plain-impact");
+  await expect(simple.locator(".plain-source")).toHaveCount(3);
+  await expect(
+    simple.getByRole("heading", { name: "Uses its state" }),
+  ).toBeVisible();
+  await expect(simple.getByRole("heading", { name: "Shows it" })).toBeVisible();
+  await expect(page.locator(".advanced-analysis")).toBeHidden();
+  await expect(page.locator(".change-preview")).toBeHidden();
+  await expect(page.locator("#coverage")).toBeHidden();
+  await expect(page.locator(".advanced-analysis .graph-node")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  const firstSource = simple.locator(".plain-source").first();
+  await expect(firstSource.locator("code")).not.toBeVisible();
+  await firstSource.locator(".plain-source-details > summary").click();
+  await expect(firstSource.locator(".plain-source-path code")).toBeVisible();
+
+  await page.getByRole("button", { name: "Explore relationships" }).click();
+  await expect(page.locator(".advanced-analysis")).toHaveAttribute("open", "");
+  await expect(
+    page.getByRole("tab", { name: "Relationship map", exact: true }),
+  ).toHaveAttribute("aria-selected", "true");
+});
+
+test("each direct source appears once even when it has more than one role", async ({
+  page,
+}) => {
+  await input(page).fill("binary_sensor.wall_button");
+  await input(page).press("Enter");
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    const ref = panel.report.references[0];
+    panel.report = {
+      ...panel.report,
+      references: [
+        { ...ref, role: "write" },
+        { ...ref, role: "read", path: "conditions[0].entity_id" },
+        {
+          ...ref,
+          source_id: "dashboard.home",
+          source_type: "dashboard",
+          role: "display",
+        },
+      ],
+    };
+  });
+  await expect(
+    page.getByRole("heading", {
+      name: "2 configurations use this entity",
+    }),
+  ).toBeVisible();
+  const list = page.locator(".plain-impact .plain-source");
+  await expect(list).toHaveCount(2);
+  await expect(list.first()).toContainText("2 references");
+});
+
+test("no incoming references does not conceal the selected configuration's possible outputs", async ({
+  page,
+}) => {
+  await input(page).fill("scene.evening");
+  await input(page).press("Enter");
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await expect(page.locator(".plain-impact")).toContainText(
+    "No direct uses found in the scanned sources. This configuration has possible outputs",
+  );
+});
+
+test("scan limitations appear as a short note with a link to full diagnostics", async ({
+  page,
+}) => {
+  await input(page).fill("light.desk");
+  await input(page).press("Enter");
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    panel.report = {
+      ...panel.report,
+      coverage: {
+        ...panel.report.coverage,
+        warnings: ["dashboard.home: configuration unavailable"],
+      },
+    };
+  });
+  await expect(page.locator(".plain-impact .plain-scan-note")).toContainText(
+    "Results may be incomplete",
+  );
+  await page.getByRole("button", { name: "Scan details →" }).click();
+  await expect(page.locator("#coverage")).toHaveAttribute("open", "");
+});
+
+test("secondary tools stay out of sight until requested", async ({ page }) => {
+  await input(page).fill("light.desk");
+  await input(page).press("Enter");
+  const advanced = page.locator(".advanced-analysis");
+  const preview = page.locator(".change-preview");
+  const scan = page.locator("#coverage");
+  await expect(advanced).toBeHidden();
+  await expect(preview).toBeHidden();
+  await expect(scan).toBeHidden();
+
+  await page.getByRole("button", { name: "Preview a change" }).click();
+  await expect(preview).toBeVisible();
+  await expect(preview).toHaveAttribute("open", "");
+  await preview.locator(":scope > summary").click();
+  await expect(preview).toBeHidden();
+
+  await page.getByRole("button", { name: "Explore relationships" }).click();
+  await expect(advanced).toBeVisible();
+  await expect(advanced).toHaveAttribute("open", "");
+  await advanced.locator(":scope > summary").click();
+  await expect(advanced).toBeHidden();
+
+  await page.getByRole("button", { name: "Scan details", exact: true }).click();
+  await expect(scan).toBeVisible();
+  await scan.locator(":scope > summary").click();
+  await expect(scan).toBeHidden();
+});
+
+test("primary summary tells the user what to check without repeating counts", async ({
+  page,
+}) => {
+  await input(page).fill("binary_sensor.wall_button");
+  await input(page).press("Enter");
+  await expect(page.locator(".plain-lead h3")).toHaveText(
+    "3 configurations use this entity",
+  );
+  await expect(page.locator(".plain-lead p")).toContainText(
+    "Review these configurations before renaming or removing",
+  );
+  await expect(page.locator(".plain-lead")).not.toContainText(
+    "2 read or react",
+  );
+  await expect(
+    page
+      .locator(".plain-use-group")
+      .getByRole("heading", { name: "Uses its state" }),
+  ).toBeVisible();
+  await expect(
+    page.locator(".plain-use-group").getByRole("heading", { name: "Shows it" }),
+  ).toBeVisible();
+});
+
+test("direct source names navigate to Home Assistant and disclose exact paths", async ({
+  page,
+}) => {
+  await input(page).fill("binary_sensor.wall_button");
+  await input(page).press("Enter");
+  const source = page.locator(
+    '.plain-impact .plain-source[data-source="automation.wall_button"]',
+  );
+  await expect(source).toBeVisible();
+  const title = source.locator("a.source-name");
+  await expect(title).toHaveAttribute(
+    "href",
+    "/config/automation/show/automation.wall_button",
+  );
+  await expect(source.locator("a.open-source")).toHaveAttribute(
+    "href",
+    "/config/automation/show/automation.wall_button",
+  );
+  await title.focus();
+  await expect(title).toBeFocused();
+
+  // The native details control has a descriptive, visible-label-matching name.
+  const exact = source.locator(".plain-source-details > summary");
+  await expect(exact).toHaveAttribute(
+    "aria-label",
+    "View exact locations in Wall button",
+  );
+  await exact.click();
+  await expect(source.locator(".plain-source-path code")).toBeVisible();
+});
+
+test("multiple control references and a dashboard produce one row per configuration", async ({
+  page,
+}) => {
+  await input(page).fill("light.desk");
+  await input(page).press("Enter");
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    const base = panel.report.references[0];
+    const ref = (
+      source_id: string,
+      source_type: string,
+      role: string,
+      path: string,
+    ) => ({
+      ...base,
+      source_id,
+      source_type,
+      role,
+      target: "light.desk",
+      path,
+      confidence: "explicit",
+    });
+    panel.report = {
+      ...panel.report,
+      references: [
+        ref(
+          "automation.room_switch",
+          "automation",
+          "write",
+          "actions[0].target.entity_id",
+        ),
+        ref(
+          "automation.room_switch",
+          "automation",
+          "write",
+          "actions[1].target.entity_id",
+        ),
+        ref(
+          "script.room_mode",
+          "script",
+          "write",
+          "sequence[0].target.entity_id",
+        ),
+        ref("scene.relax", "scene", "write", "entity_id[0]"),
+        ref(
+          "dashboard.home",
+          "dashboard",
+          "display",
+          "views[0].cards[0].entity",
+        ),
+      ],
+      source_names: {
+        ...panel.report.source_names,
+        "automation.room_switch": "Room switch",
+        "script.room_mode": "Room mode",
+        "scene.relax": "Relax",
+        "dashboard.home": "Home",
+      },
+    };
+  });
+  const overview = page.locator(".plain-impact");
+  await expect(overview.locator(".plain-lead h3")).toHaveText(
+    "4 configurations use this entity",
+  );
+  await expect(overview.locator(".plain-source")).toHaveCount(4);
+  await expect(
+    overview.locator(
+      '.plain-use-group[aria-label="Can change it"] .plain-source',
+    ),
+  ).toHaveCount(3);
+  await expect(
+    overview.locator('.plain-use-group[aria-label="Shows it"] .plain-source'),
+  ).toHaveCount(1);
+  const automation = overview.locator(
+    '.plain-source[data-source="automation.room_switch"]',
+  );
+  await expect(automation).toContainText("2 references");
+  await automation.locator(".plain-source-details > summary").click();
+  await expect(automation.locator(".plain-source-path")).toHaveCount(2);
 });
