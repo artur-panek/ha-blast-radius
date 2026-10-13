@@ -75,8 +75,7 @@ are needed. A manifest version is not a GitHub release; see the repository's
 [Releases page](https://github.com/artur-panek/ha-blast-radius/releases) for tagged builds.
 
 New numbered versions are published after all Quality checks pass and are discoverable
-through HACS update checks. Already installed from `main`? Use **Redownload** once
-and select the latest numbered release. Updates do not install or restart HA automatically.
+through HACS update checks. Updates do not install or restart HA automatically.
 
 ## Usage
 
