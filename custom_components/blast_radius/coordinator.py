@@ -18,7 +18,7 @@ class BlastRadiusCoordinator:
 
     async def request(self, operation: str, message: dict[str, Any]) -> dict[str, Any]:
         async with self.lock:
-            sources, names, warnings = await collect_snapshot(self.hass)
+            sources, names, warnings, gaps = await collect_snapshot(self.hass)
             timestamp = datetime.now(UTC).isoformat()
 
             def analyze() -> dict[str, Any]:
@@ -42,6 +42,7 @@ class BlastRadiusCoordinator:
                 else:
                     report = engine.analyze(*args)
                 report["snapshot_at"] = timestamp
+                report["coverage"]["gaps"] = list(gaps)
                 report["markdown"] = markdown_report(report)
                 return report
 

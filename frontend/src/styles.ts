@@ -665,11 +665,36 @@ export const styles = css`
   .plain-source-path + .plain-source-path {
     border-top: 1px solid var(--br-border);
   }
-  .plain-source-path code {
-    display: block;
-    flex-basis: 100%;
+  .plain-path-line {
+    display: flex;
+    flex: 1 1 100%;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+  }
+  .plain-path-line code {
+    flex: 1 1 200px;
+    min-width: 0;
     color: var(--br-muted);
     overflow-wrap: anywhere;
+  }
+  .plain-path-line .path-copy {
+    flex: 0 0 auto;
+    border: 0;
+    background: transparent;
+    font-size: 12px;
+    padding: 7px 8px;
+    min-height: 36px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .plain-path-line .path-copy:hover {
+    color: var(--br-accent);
+  }
+  .path-copy-status {
+    color: var(--br-muted);
+    font-size: 12px;
+    flex-basis: 100%;
   }
   .plain-source-path p {
     margin: 0;

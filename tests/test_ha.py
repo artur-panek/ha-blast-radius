@@ -71,7 +71,7 @@ async def load_sources(hass):
 
 async def test_real_automation_script_adapter_and_non_mutation(hass):
     await load_sources(hass)
-    sources, names, warnings = await collect_snapshot(hass)
+    sources, names, warnings, gaps = await collect_snapshot(hass)
     assert {s.source_id for s in sources} >= {"automation.wall_button", "script.music_toggle"}
     assert "media_player.speaker" in names
     coordinator = BlastRadiusCoordinator(hass)
@@ -88,6 +88,8 @@ async def test_real_automation_script_adapter_and_non_mutation(hass):
         )
     assert report["summary"]["explicit"] == 1
     assert report["coverage"]["warnings"] == []
+    assert report["coverage"]["gaps"] == []
+    assert not gaps
     assert report["preview"]["changes_applied"] is False
     assert "media_player.speaker" in {n["id"] for n in report["graph"]["nodes"]}
     assert (await collect_snapshot(hass))[0] == sources
@@ -114,7 +116,7 @@ async def test_navigation_uses_current_entity_ids_after_renames(hass):
     registry.async_update_entity("automation.wall_button", new_entity_id="automation.renamed")
     registry.async_update_entity("script.music_toggle", new_entity_id="script.renamed")
     await hass.async_block_till_done()
-    sources, _, _ = await collect_snapshot(hass)
+    sources, _, _, _ = await collect_snapshot(hass)
     targets = navigation_targets(hass, sources, {"automation.renamed", "script.renamed"})
     assert targets["automation.renamed"]["path"] == "/config/automation/show/automation.renamed"
     assert targets["script.renamed"]["path"] == "/config/script/show/script.renamed"
@@ -154,7 +156,7 @@ async def test_dashboard_failure_is_partial_coverage(hass):
     bad = AsyncMock()
     bad.async_load.side_effect = RuntimeError("private-secret-and-path")
     hass.data[LOVELACE_DATA] = SimpleNamespace(dashboards={None: good, "broken": bad})
-    sources, _, warnings = await collect_snapshot(hass)
+    sources, _, warnings, gaps = await collect_snapshot(hass)
     assert sources[0].source_id == "dashboard.lovelace"
     assert any("dashboard.broken" in warning for warning in warnings)
     assert not any("private-secret" in warning for warning in warnings)
@@ -162,6 +164,14 @@ async def test_dashboard_failure_is_partial_coverage(hass):
     assert report["coverage"]["warnings"] == [
         "dashboard.broken: configuration unavailable or generated automatically."
     ]
+    assert list(gaps) == [
+        {
+            "code": "dashboard_unavailable",
+            "source_id": "dashboard.broken",
+            "warning": "dashboard.broken: configuration unavailable or generated automatically.",
+        }
+    ]
+    assert report["coverage"]["gaps"] == list(gaps)
     assert "Results are incomplete" in report["markdown"]
     assert "private-secret" not in str(report)
     good.async_save.assert_not_called()
@@ -186,7 +196,7 @@ async def test_loaded_config_remains_available_when_editor_returns_500(
     assert (automation if domain == "automation" else script).async_setup(hass)
     http = await hass_client()
     websocket = await hass_ws_client(hass)
-    sources, _, _ = await collect_snapshot(hass)
+    sources, _, _, _ = await collect_snapshot(hass)
     # Reproduce a failed native file-based editor independently from the valid
     # configuration still loaded in HA. Do not modify any user configuration.
     with (
@@ -223,7 +233,7 @@ async def test_loaded_yaml_automation_without_id_opens_native_inspector(hass):
         },
     )
     await hass.async_block_till_done()
-    sources, _, _ = await collect_snapshot(hass)
+    sources, _, _, _ = await collect_snapshot(hass)
     assert "id" not in hass.states.get("automation.yaml_only").attributes
     assert (
         navigation_targets(hass, sources, {"automation.yaml_only"})["automation.yaml_only"]["path"]
@@ -349,9 +359,11 @@ async def test_unexpected_errors_do_not_leak_details(hass, hass_ws_client, error
 async def test_oversized_membership_does_not_abort_snapshot(hass):
     hass.states.async_set("group.oversized", "on", {"entity_id": "x" * 65_537})
     hass.states.async_set("group.valid", "on", {"entity_id": ["light.office"]})
-    sources, _, warnings = await collect_snapshot(hass)
+    sources, _, warnings, gaps = await collect_snapshot(hass)
     assert {source.source_id for source in sources} == {"group.valid"}
     assert any("group.oversized" in warning for warning in warnings)
+    assert gaps[0]["code"] == "membership_too_large"
+    assert gaps[0]["source_id"] == "group.oversized"
 
 
 def test_template_objects_obey_the_same_string_limit(hass):

@@ -249,7 +249,11 @@ neither establishes a dependency or runtime branch. Expressions in unaffected
 sources still contribute to `unresolved_total` only.
 
 Since v0.1.9, `coverage.warnings` retains specific snapshot and scanner gaps,
-including skipped sources, failed blueprint expansion and scan bounds. It excludes
+including skipped sources, failed blueprint expansion and scan bounds. Adapter
+gaps also carry a `coverage.gaps` entry containing a stable `code`, the
+`source_id`, and the existing redacted `warning` text. The structured entries
+cover known adapter failures; scanner limits still use the warnings list.
+Older reports without `coverage.gaps` remain supported. It excludes
 the routine explanation of unsupported source types; that explanation remains in
 the report's top-level `warnings`. These gaps trigger a visible incomplete-results
 notice even when the selected entity has zero references and its graph is not

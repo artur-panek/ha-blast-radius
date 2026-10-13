@@ -86,7 +86,8 @@ and select the latest numbered release. Updates do not install or restart HA aut
    by what they can do: **Can change it**, **Uses its state**, or **Shows it**,
    with other reference types shown when relevant. Each configuration appears
    once. Select its name or **Open** to inspect it in Home Assistant, or **View exact locations**
-   to see the matching configuration paths.
+   to see the matching configuration paths. Use **Copy path** to copy a path for editing
+   elsewhere.
 4. Choose **Preview a change** to check a same-domain rename or removal. The
    preview form opens only when requested and never writes any configuration.
    **Export JSON** saves the complete report.
@@ -94,7 +95,8 @@ and select the latest numbered release. Updates do not install or restart HA aut
    filters, raw references, and Markdown export. This advanced section can be
    collapsed again; shared-flow context does not prove causality.
 6. When the results note a gap in scan coverage, choose **Scan details** to see
-   what was not inspected. Make actual Home Assistant changes yourself.
+   what was not inspected. Known gaps are described using stable reason codes
+   rather than interpreting warning text. Make actual Home Assistant changes yourself.
 
 Use the source chips (Automation, Script, Dashboard, Scene, Group) and confidence
 chips (Explicit, Template literal, Needs review) to narrow the displayed results.

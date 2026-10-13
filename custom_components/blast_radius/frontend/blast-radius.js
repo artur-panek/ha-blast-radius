@@ -1285,11 +1285,36 @@ var De = {
   .plain-source-path + .plain-source-path {
     border-top: 1px solid var(--br-border);
   }
-  .plain-source-path code {
-    display: block;
-    flex-basis: 100%;
+  .plain-path-line {
+    display: flex;
+    flex: 1 1 100%;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+  }
+  .plain-path-line code {
+    flex: 1 1 200px;
+    min-width: 0;
     color: var(--br-muted);
     overflow-wrap: anywhere;
+  }
+  .plain-path-line .path-copy {
+    flex: 0 0 auto;
+    border: 0;
+    background: transparent;
+    font-size: 12px;
+    padding: 7px 8px;
+    min-height: 36px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .plain-path-line .path-copy:hover {
+    color: var(--br-accent);
+  }
+  .path-copy-status {
+    color: var(--br-muted);
+    font-size: 12px;
+    flex-basis: 100%;
   }
   .plain-source-path p {
     margin: 0;
@@ -2616,7 +2641,7 @@ var rt = {
 	unknown: "Unclassified"
 }, it = class extends V {
 	constructor(...e) {
-		super(...e), this.narrow = !1, this.entities = [], this.query = "", this.loading = !1, this.error = "", this.tab = "impact", this.recentSearches = [], this.replacement = "", this.depth = 6, this.status = "", this.copyFallback = !1, this.sourceFilters = [], this.reviewFilters = [], this.advancedOpen = !1, this.previewError = "", this.previewOpen = !1, this.scanOpen = !1, this.analyzedRoot = "", this.initialized = !1, this.requestId = 0, this.saveSession = () => {
+		super(...e), this.narrow = !1, this.entities = [], this.query = "", this.loading = !1, this.error = "", this.tab = "impact", this.recentSearches = [], this.replacement = "", this.depth = 6, this.status = "", this.copyFallback = !1, this.sourceFilters = [], this.reviewFilters = [], this.advancedOpen = !1, this.previewError = "", this.previewOpen = !1, this.scanOpen = !1, this.copiedPath = "", this.pathCopyError = "", this.analyzedRoot = "", this.initialized = !1, this.requestId = 0, this.saveSession = () => {
 			Je(this.storageKey, {
 				recent: this.recentSearches,
 				last: this.lastView
@@ -2651,7 +2676,9 @@ var rt = {
 			advancedOpen: { state: !0 },
 			previewError: { state: !0 },
 			previewOpen: { state: !0 },
-			scanOpen: { state: !0 }
+			scanOpen: { state: !0 },
+			copiedPath: { state: !0 },
+			pathCopyError: { state: !0 }
 		};
 	}
 	connectedCallback() {
@@ -2712,7 +2739,7 @@ var rt = {
 		}
 		n !== this.analyzedRoot && (this.sourceFilters = [], this.reviewFilters = [], this.replacement = "", this.previewOpen = !1, this.scanOpen = !1), this.analyzedRoot = n;
 		let r = ++this.requestId;
-		this.loading = !0, this.error = "", this.status = "", this.copyFallback = !1, this.previewError = "";
+		this.loading = !0, this.error = "", this.status = "", this.copyFallback = !1, this.previewError = "", this.copiedPath = "", this.pathCopyError = "";
 		try {
 			e || (this.report = void 0);
 			let i = {
@@ -2740,6 +2767,14 @@ var rt = {
 			await navigator.clipboard.writeText(this.report.markdown), this.status = "Markdown report copied.";
 		} catch {
 			this.copyFallback = !0, this.status = "Clipboard unavailable. Select and copy the report below.";
+		}
+	}
+	async copyReferencePath(e) {
+		let t = `${e.source_id}:${e.path}`;
+		try {
+			await navigator.clipboard.writeText(e.path), this.copiedPath = t, this.pathCopyError = "";
+		} catch {
+			this.copiedPath = "", this.pathCopyError = t;
 		}
 	}
 	download() {
@@ -3286,7 +3321,28 @@ var rt = {
                       ${n.map((e) => j`<div class="plain-source-path">
                             <span>${J(e.path)}</span>
                             ${this.badge(e.confidence)}
-                            <code>${e.path}</code>
+                            <div class="plain-path-line">
+                              <code>${e.path}</code>
+                              <button
+                                class="path-copy"
+                                aria-label=${`Copy reference path ${e.path}`}
+                                @click=${() => this.copyReferencePath(e)}
+                              >
+                                Copy path
+                              </button>
+                              ${this.copiedPath === `${e.source_id}:${e.path}` ? j`<span
+                                      class="path-copy-status"
+                                      role="status"
+                                      >Copied</span
+                                    >` : N}
+                              ${this.pathCopyError === `${e.source_id}:${e.path}` ? j`<span
+                                      class="path-copy-status"
+                                      role="status"
+                                    >
+                                      Clipboard unavailable. Select the path to
+                                      copy it.
+                                    </span>` : N}
+                            </div>
                             ${e.reason ? j`<p>${Y(e.reason)}</p>` : N}
                           </div>`)}
                     </div>
@@ -3937,15 +3993,19 @@ var rt = {
                   ${e.coverage.warnings?.length ? j`<section class="scan-gaps" aria-label="Scan gaps">
                           <h3>What could be missing?</h3>
                           <ul>
-                            ${e.coverage.warnings.map((e) => {
-			let t = e.match(/^([^:]+): configuration unavailable or generated automatically\.$/);
-			return j`<li>
-                                ${t ? j`<strong>${t[1]}</strong> —
-                                        configuration unavailable or generated
-                                        automatically; it could not be fully
-                                        checked.` : e}
-                              </li>`;
-		})}
+                            ${(e.coverage.gaps || []).map((e) => j`<li>
+                                  <strong>${e.source_id}</strong> —
+                                  ${{
+			configuration_unavailable: "Loaded configuration could not be read.",
+			blueprint_unexpanded: "Only blueprint inputs were available.",
+			loaded_config_unavailable: "Loaded configuration was unavailable or failed validation.",
+			configuration_too_large: "Configuration exceeded the scan size limit.",
+			metadata_unavailable: "Home Assistant reference metadata was unavailable.",
+			membership_too_large: "Membership exceeded the scan size limit.",
+			dashboard_unavailable: "Dashboard configuration could not be read."
+		}[e.code] || e.warning}
+                                </li>`)}
+                            ${e.coverage.warnings.filter((t) => !e.coverage.gaps?.some((e) => e.warning === t)).map((e) => j`<li>${e}</li>`)}
                           </ul>
                           <p>
                             The references already found are shown above. Other

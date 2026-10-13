@@ -11,6 +11,11 @@ export interface Reference {
   selector?: { kind: string; value: string; exists: boolean | null };
   resolution?: "entity" | "device" | "selector" | "unresolved";
 }
+export interface ScanGap {
+  code: string;
+  source_id: string;
+  warning: string;
+}
 export interface ReviewSummary {
   locations: number;
   groups: number;
@@ -63,6 +68,7 @@ export interface Report {
     entities: number;
     source_types: Record<string, number>;
     warnings?: string[];
+    gaps?: ScanGap[];
   };
   warnings: string[];
   markdown: string;

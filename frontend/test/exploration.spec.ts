@@ -1068,3 +1068,60 @@ test("multiple control references and a dashboard produce one row per configurat
   await automation.locator(".plain-source-details > summary").click();
   await expect(automation.locator(".plain-source-path")).toHaveCount(2);
 });
+
+test("exact reference locations can be copied without changing the report", async ({
+  page,
+}) => {
+  await input(page).fill("binary_sensor.wall_button");
+  await input(page).press("Enter");
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  const source = page.locator(".plain-impact .plain-source").first();
+  await source.locator(".plain-source-details > summary").click();
+  const path = await source
+    .locator(".plain-source-path code")
+    .first()
+    .textContent();
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (value: string) => {
+          (window as any).__copiedReferencePath = value;
+        },
+      },
+    });
+  });
+  await source.locator(".plain-source-path .path-copy").first().click();
+  await expect(source.locator(".path-copy-status").first()).toHaveText(
+    "Copied",
+  );
+  expect(await page.evaluate(() => (window as any).__copiedReferencePath)).toBe(
+    path,
+  );
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+});
+
+test("copy path falls back to selecting the visible path when clipboard is denied", async ({
+  page,
+}) => {
+  await input(page).fill("binary_sensor.wall_button");
+  await input(page).press("Enter");
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  const source = page.locator(".plain-impact .plain-source").first();
+  await source.locator(".plain-source-details > summary").click();
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async () => {
+          throw new Error("clipboard denied");
+        },
+      },
+    });
+  });
+  await source.locator(".plain-source-path .path-copy").first().click();
+  await expect(source.locator(".path-copy-status").first()).toContainText(
+    "Clipboard unavailable",
+  );
+  await expect(source.locator(".plain-source-path code").first()).toBeVisible();
+});

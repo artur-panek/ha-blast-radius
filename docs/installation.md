@@ -88,9 +88,11 @@ expressions are not counts of broken entities or confirmed dependencies of the
 selected entity.
 
 The normal results list has **View exact locations** under each source.
-Friendly paths use one-based numbers (for example, Card 3); the underlying
-configuration path uses zero-based indexes (`cards[2]`). Advanced analysis
-also exposes raw paths and export options.
+Use **Copy path** beside a raw location if you need to find it in a configuration
+editor. If clipboard access is blocked, the path remains visible for manual
+selection. Friendly paths use one-based numbers (for example, Card 3); the
+underlying configuration path uses zero-based indexes (`cards[2]`). Advanced
+analysis also exposes raw paths and export options.
 
 ## Troubleshooting
 
