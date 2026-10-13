@@ -44,7 +44,7 @@ def release_notes(changelog, version):
         "Home Assistant restart stay under your control.\n\n"
         "### Changes\n\n" + match[1].strip() + "\n\n"
         "### Updating\n\n"
-        ""Install the update through HACS, restart Home Assistant, and reload the "
+        "Install the update through HACS, restart Home Assistant, and reload the "
         "browser. HACS discovers new numbered releases through its update checks.\n\n"
         "The attached ZIP is for manual installation; HACS reads the tagged integration "
         "folder directly. See [installation and rollback]"
