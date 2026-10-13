@@ -1981,95 +1981,151 @@ export class BlastRadiusPanel extends LitElement {
                 >
                   <summary>Scan details</summary>
                   <div class="scan-overview">
-                    <p>
+                    <div>
                       <strong
                         >${report.coverage.sources} configurations
-                        inspected.</strong
+                        inspected</strong
                       >
-                      This is static analysis: conditions are not executed, and
-                      dynamically selected targets may be missed.
-                    </p>
+                      <p>
+                        Blast Radius checks configuration references, not what
+                        automations actually do when they run.
+                      </p>
+                    </div>
+                    <span class="scan-state">
+                      ${
+                        report.coverage.warnings?.length
+                          ? "Partial scan"
+                          : "Static scan"
+                      }
+                    </span>
                   </div>
                   ${
                     report.coverage.warnings?.length
-                      ? html`<div class="scan-warnings">
-                          <h3>Not fully inspected</h3>
+                      ? html`<section class="scan-gaps" aria-label="Scan gaps">
+                          <h3>What could be missing?</h3>
                           <ul>
-                            ${report.coverage.warnings.map(
-                              (warning) => html`<li>${warning}</li>`,
-                            )}
+                            ${report.coverage.warnings.map((warning) => {
+                              const unavailable = warning.match(
+                                /^([^:]+): configuration unavailable or generated automatically\.$/,
+                              );
+                              return html`<li>
+                                ${
+                                  unavailable
+                                    ? html`<strong>${unavailable[1]}</strong> —
+                                        configuration unavailable or generated
+                                        automatically; it could not be fully
+                                        checked.`
+                                    : warning
+                                }
+                              </li>`;
+                            })}
                           </ul>
-                        </div>`
+                          <p>
+                            The references already found are shown above. Other
+                            uses may exist in configuration that could not be
+                            inspected.
+                          </p>
+                        </section>`
                       : nothing
                   }
+                  <p class="scan-guidance">
+                    Templates, indirect device or area targets and external
+                    integrations cannot always be traced to an entity ID. An
+                    empty result is not proof that an entity is unused.
+                  </p>
                   <details class="coverage-breakdown">
-                    <summary>Full scanner counts and limitations</summary>
-                    <p class="muted">
-                      ${Object.entries(report.coverage.source_types)
-                        .map(
-                          ([kind, count]) =>
-                            `${count} ${kind}${count === 1 ? "" : "s"}`,
-                        )
-                        .join(" · ")}
+                    <summary>Technical details</summary>
+                    <p class="scan-context">
+                      These figures describe the scanned installation, not a
+                      count of dependencies of
+                      <code>${report.entity_id}</code>. They should not be added
+                      together.
                     </p>
-                    <ul>
-                      ${report.warnings
-                        .filter(
-                          (warning) =>
-                            !(report.coverage.warnings || []).includes(warning),
-                        )
-                        .map((warning) => html`<li>${warning}</li>`)}
-                      <li>
-                        ${report.unresolved_total} locations without a fixed
-                        entity target across the full snapshot. Device IDs,
-                        selectors and dynamic expressions are not necessarily
-                        dependencies of the selected entity.
-                      </li>
-                      <li>
-                        ${reviewCounts(report.uncertain_references)} in linked
-                        configurations;
-                        ${reviewCounts(report.other_dashboard_references || [])}
-                        elsewhere in dashboards. These are review locations, not
-                        a count of affected entities.
-                      </li>
-                      ${
-                        report.review_summary?.snapshot.locations ===
-                        report.unresolved_total
-                          ? html`<li>
-                              Full snapshot:
-                              ${report.review_summary.snapshot.device_locations}
-                              device-reference locations ·
-                              ${report.review_summary.snapshot.selector_locations}
-                              unexpanded selectors ·
-                              ${report.review_summary.snapshot.unresolved_locations}
-                              dynamic or unrecognized locations.
-                            </li>`
-                          : nothing
-                      }
-                    </ul>
-                  </details>
-                  ${this.coverageDiagnostics(report)}
-                  <details class="confidence-help">
-                    <summary>Reference confidence</summary>
-                    <ul>
-                      <li>
-                        <strong>Explicit:</strong> an entity ID in a recognized
-                        configuration field.
-                      </li>
-                      <li>
-                        <strong>Template literal:</strong> visible in Jinja, but
-                        execution is not guaranteed.
-                      </li>
-                      <li>
-                        <strong>Dynamic:</strong> a target that cannot be
-                        resolved statically.
-                      </li>
-                      <li>
-                        <strong>Unclassified:</strong> a candidate in a field
-                        with unknown semantics, or HA-native metadata without a
-                        verified location and role.
-                      </li>
-                    </ul>
+                    <dl class="scan-stat-list">
+                      <div>
+                        <dt>Configuration types inspected</dt>
+                        <dd>
+                          ${Object.entries(report.coverage.source_types)
+                            .map(
+                              ([kind, count]) =>
+                                `${count} ${kind}${count === 1 ? "" : "s"}`,
+                            )
+                            .join(" · ")}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>
+                          Locations without a fixed target in the full snapshot
+                        </dt>
+                        <dd>${report.unresolved_total}</dd>
+                      </div>
+                      <div>
+                        <dt>Review locations in linked configurations</dt>
+                        <dd>
+                          ${
+                            report.review_summary?.linked.locations ??
+                            report.uncertain_references.length
+                          }
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Review locations elsewhere in dashboards</dt>
+                        <dd>
+                          ${
+                            report.review_summary?.other_dashboard.locations ??
+                            (report.other_dashboard_references || []).length
+                          }
+                        </dd>
+                      </div>
+                    </dl>
+                    <p class="scan-context">
+                      A review location is an expression with an unknown target
+                      or identity. It is not a confirmed reference to the
+                      selected entity.
+                    </p>
+                    ${
+                      report.warnings.some(
+                        (warning) =>
+                          !(report.coverage.warnings || []).includes(warning),
+                      )
+                        ? html`<details class="scan-extra-notes">
+                            <summary>Scanner scope limitations</summary>
+                            <ul>
+                              ${report.warnings
+                                .filter(
+                                  (warning) =>
+                                    !(report.coverage.warnings || []).includes(
+                                      warning,
+                                    ),
+                                )
+                                .map((warning) => html`<li>${warning}</li>`)}
+                            </ul>
+                          </details>`
+                        : nothing
+                    }
+                    ${this.coverageDiagnostics(report)}
+                    <details class="confidence-help">
+                      <summary>Reference confidence</summary>
+                      <ul>
+                        <li>
+                          <strong>Explicit:</strong> an entity ID in a
+                          recognized configuration field.
+                        </li>
+                        <li>
+                          <strong>Template literal:</strong> an ID visible in
+                          Jinja, without a guarantee that the code executes.
+                        </li>
+                        <li>
+                          <strong>Dynamic:</strong> an expression whose target
+                          cannot be resolved statically.
+                        </li>
+                        <li>
+                          <strong>Unclassified:</strong> a candidate in a field
+                          with unknown semantics, or HA-native metadata without
+                          a verified location and role.
+                        </li>
+                      </ul>
+                    </details>
                   </details>
                 </details>
                 <div class="foot">

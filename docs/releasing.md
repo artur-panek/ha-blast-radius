@@ -9,7 +9,8 @@ Publishing to GitHub and listing in HACS's default directory are separate steps.
 1. Choose a new three-part version and update `manifest.json`, `const.py`,
    `pyproject.toml`, `frontend/package.json` and its lockfile together. The package
    check rejects mismatches, including a stale frontend cache version.
-2. Update the changelog, README version and compatibility/coverage statements.
+2. Update the changelog, README and compatibility/coverage statements. If the
+   installation flow or limitations changed, update the HACS `info.md` too.
 3. Regenerate demo reports after engine changes. Regenerate brand assets after
    changing their source. Rebuild and commit the frontend and runtime assets.
 4. Run the commands in CONTRIBUTING.md. Inspect desktop/mobile screenshots and

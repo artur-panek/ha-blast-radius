@@ -1825,39 +1825,105 @@ var De = {
   .scan-details > summary {
     font-weight: 600;
   }
-  .scan-overview p {
-    color: var(--br-muted);
-    margin: 6px 0 12px;
-    font-size: 13px;
+  .scan-overview {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px 16px;
+    margin: 12px 0 16px;
   }
   .scan-overview strong {
     color: var(--primary-text-color, #212121);
+    font-size: 15px;
   }
-  .scan-warnings h3 {
-    font-size: 14px;
-    margin: 6px 0;
-  }
-  .scan-warnings ul {
+  .scan-overview p {
+    color: var(--br-muted);
+    margin: 5px 0 0;
     font-size: 13px;
-    margin: 0 0 10px;
+    line-height: 1.5;
+  }
+  .scan-state {
+    color: var(--br-muted);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .scan-gaps {
+    margin: 0 0 14px;
+  }
+  .scan-gaps h3 {
+    font-size: 14px;
+    margin: 0 0 6px;
+  }
+  .scan-gaps ul {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .scan-gaps p,
+  .scan-guidance,
+  .scan-context {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--br-muted);
+  }
+  .scan-gaps p {
+    margin: 8px 0 0;
+  }
+  .scan-guidance {
+    margin: 10px 0 16px;
   }
   .coverage-breakdown {
     border-top: 1px solid var(--br-border);
-    padding-top: 6px;
+    padding-top: 8px;
   }
   .coverage-breakdown > summary {
     font-size: 13px;
     font-weight: 500;
     color: var(--br-muted);
+    padding: 6px 0;
   }
-  .coverage-breakdown p,
-  .coverage-breakdown li {
+  .scan-context {
+    margin: 10px 0 12px;
+  }
+  .scan-context code {
+    overflow-wrap: anywhere;
+  }
+  .scan-stat-list {
+    display: grid;
+    gap: 0;
+    margin: 0;
+  }
+  .scan-stat-list > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--br-border);
     font-size: 12px;
   }
+  .scan-stat-list dt {
+    color: var(--br-muted);
+  }
+  .scan-stat-list dd {
+    margin: 0;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+  .scan-extra-notes > summary {
+    padding: 8px 0;
+    font-size: 13px;
+  }
+  .scan-extra-notes ul {
+    font-size: 12px;
+    line-height: 1.55;
+  }
   .coverage-diagnostics {
-    margin-top: 18px;
+    margin-top: 12px;
     padding-top: 4px;
-    border-top: 1px solid var(--br-border);
   }
   .confidence-help {
     margin-top: 12px;
@@ -3854,74 +3920,112 @@ var rt = {
                 >
                   <summary>Scan details</summary>
                   <div class="scan-overview">
-                    <p>
+                    <div>
                       <strong
                         >${e.coverage.sources} configurations
-                        inspected.</strong
+                        inspected</strong
                       >
-                      This is static analysis: conditions are not executed, and
-                      dynamically selected targets may be missed.
-                    </p>
+                      <p>
+                        Blast Radius checks configuration references, not what
+                        automations actually do when they run.
+                      </p>
+                    </div>
+                    <span class="scan-state">
+                      ${e.coverage.warnings?.length ? "Partial scan" : "Static scan"}
+                    </span>
                   </div>
-                  ${e.coverage.warnings?.length ? j`<div class="scan-warnings">
-                          <h3>Not fully inspected</h3>
+                  ${e.coverage.warnings?.length ? j`<section class="scan-gaps" aria-label="Scan gaps">
+                          <h3>What could be missing?</h3>
                           <ul>
-                            ${e.coverage.warnings.map((e) => j`<li>${e}</li>`)}
+                            ${e.coverage.warnings.map((e) => {
+			let t = e.match(/^([^:]+): configuration unavailable or generated automatically\.$/);
+			return j`<li>
+                                ${t ? j`<strong>${t[1]}</strong> —
+                                        configuration unavailable or generated
+                                        automatically; it could not be fully
+                                        checked.` : e}
+                              </li>`;
+		})}
                           </ul>
-                        </div>` : N}
+                          <p>
+                            The references already found are shown above. Other
+                            uses may exist in configuration that could not be
+                            inspected.
+                          </p>
+                        </section>` : N}
+                  <p class="scan-guidance">
+                    Templates, indirect device or area targets and external
+                    integrations cannot always be traced to an entity ID. An
+                    empty result is not proof that an entity is unused.
+                  </p>
                   <details class="coverage-breakdown">
-                    <summary>Full scanner counts and limitations</summary>
-                    <p class="muted">
-                      ${Object.entries(e.coverage.source_types).map(([e, t]) => `${t} ${e}${t === 1 ? "" : "s"}`).join(" · ")}
+                    <summary>Technical details</summary>
+                    <p class="scan-context">
+                      These figures describe the scanned installation, not a
+                      count of dependencies of
+                      <code>${e.entity_id}</code>. They should not be added
+                      together.
                     </p>
-                    <ul>
-                      ${e.warnings.filter((t) => !(e.coverage.warnings || []).includes(t)).map((e) => j`<li>${e}</li>`)}
-                      <li>
-                        ${e.unresolved_total} locations without a fixed
-                        entity target across the full snapshot. Device IDs,
-                        selectors and dynamic expressions are not necessarily
-                        dependencies of the selected entity.
-                      </li>
-                      <li>
-                        ${$(e.uncertain_references)} in linked
-                        configurations;
-                        ${$(e.other_dashboard_references || [])}
-                        elsewhere in dashboards. These are review locations, not
-                        a count of affected entities.
-                      </li>
-                      ${e.review_summary?.snapshot.locations === e.unresolved_total ? j`<li>
-                              Full snapshot:
-                              ${e.review_summary.snapshot.device_locations}
-                              device-reference locations ·
-                              ${e.review_summary.snapshot.selector_locations}
-                              unexpanded selectors ·
-                              ${e.review_summary.snapshot.unresolved_locations}
-                              dynamic or unrecognized locations.
-                            </li>` : N}
-                    </ul>
-                  </details>
-                  ${this.coverageDiagnostics(e)}
-                  <details class="confidence-help">
-                    <summary>Reference confidence</summary>
-                    <ul>
-                      <li>
-                        <strong>Explicit:</strong> an entity ID in a recognized
-                        configuration field.
-                      </li>
-                      <li>
-                        <strong>Template literal:</strong> visible in Jinja, but
-                        execution is not guaranteed.
-                      </li>
-                      <li>
-                        <strong>Dynamic:</strong> a target that cannot be
-                        resolved statically.
-                      </li>
-                      <li>
-                        <strong>Unclassified:</strong> a candidate in a field
-                        with unknown semantics, or HA-native metadata without a
-                        verified location and role.
-                      </li>
-                    </ul>
+                    <dl class="scan-stat-list">
+                      <div>
+                        <dt>Configuration types inspected</dt>
+                        <dd>
+                          ${Object.entries(e.coverage.source_types).map(([e, t]) => `${t} ${e}${t === 1 ? "" : "s"}`).join(" · ")}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>
+                          Locations without a fixed target in the full snapshot
+                        </dt>
+                        <dd>${e.unresolved_total}</dd>
+                      </div>
+                      <div>
+                        <dt>Review locations in linked configurations</dt>
+                        <dd>
+                          ${e.review_summary?.linked.locations ?? e.uncertain_references.length}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Review locations elsewhere in dashboards</dt>
+                        <dd>
+                          ${e.review_summary?.other_dashboard.locations ?? (e.other_dashboard_references || []).length}
+                        </dd>
+                      </div>
+                    </dl>
+                    <p class="scan-context">
+                      A review location is an expression with an unknown target
+                      or identity. It is not a confirmed reference to the
+                      selected entity.
+                    </p>
+                    ${e.warnings.some((t) => !(e.coverage.warnings || []).includes(t)) ? j`<details class="scan-extra-notes">
+                            <summary>Scanner scope limitations</summary>
+                            <ul>
+                              ${e.warnings.filter((t) => !(e.coverage.warnings || []).includes(t)).map((e) => j`<li>${e}</li>`)}
+                            </ul>
+                          </details>` : N}
+                    ${this.coverageDiagnostics(e)}
+                    <details class="confidence-help">
+                      <summary>Reference confidence</summary>
+                      <ul>
+                        <li>
+                          <strong>Explicit:</strong> an entity ID in a
+                          recognized configuration field.
+                        </li>
+                        <li>
+                          <strong>Template literal:</strong> an ID visible in
+                          Jinja, without a guarantee that the code executes.
+                        </li>
+                        <li>
+                          <strong>Dynamic:</strong> an expression whose target
+                          cannot be resolved statically.
+                        </li>
+                        <li>
+                          <strong>Unclassified:</strong> a candidate in a field
+                          with unknown semantics, or HA-native metadata without
+                          a verified location and role.
+                        </li>
+                      </ul>
+                    </details>
                   </details>
                 </details>
                 <div class="foot">

@@ -558,6 +558,7 @@ test("selector presentation separates known identity from unexpanded entity memb
   });
   await chip(page, "Needs review").click();
   await page.getByRole("button", { name: "View coverage" }).click();
+  await page.locator("#coverage .coverage-breakdown > summary").click();
   const selectorScope = page
     .locator("#coverage .uncertainty-scope")
     .filter({ hasText: "Device and selector context" });

@@ -223,15 +223,13 @@ for (const related of [0, 1]) {
       .click();
     await page.locator(".coverage-breakdown > summary").click();
     await expect(
-      page.getByText("170 locations without a fixed", {
-        exact: false,
+      page.locator(".scan-stat-list > div").filter({
+        hasText: "Locations without a fixed target in the full snapshot",
       }),
-    ).toBeVisible();
-    await expect(
-      page.locator(".coverage-breakdown li").filter({
-        hasText: "not necessarily",
-      }),
-    ).toBeVisible();
+    ).toContainText("170");
+    await expect(page.locator(".scan-context").first()).toContainText(
+      "not a count of dependencies",
+    );
   });
 }
 
@@ -361,6 +359,7 @@ test("a large dashboard stays compact, explains unknowns and retains exact paths
     ),
   ).toBeVisible();
   await page.getByRole("button", { name: "View coverage" }).click();
+  await page.locator("#coverage .coverage-breakdown > summary").click();
   const elsewhere = page.locator("#coverage .dashboard-context");
   await expect(elsewhere.locator("summary .count").first()).toHaveText(
     "1 group · 51 locations",

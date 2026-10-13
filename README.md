@@ -17,50 +17,37 @@ Find where an entity is used in automations, scripts, scenes and dashboards. Rev
 
 [Install with HACS](#hacs-custom-repository) · [Usage](#usage) · [Known limitations](#known-limitations) · [Report a bug](https://github.com/artur-panek/ha-blast-radius/issues/new?template=bug.yml)
 
-```mermaid
-flowchart TD
-  automation["automation.wall_button"] -->|trigger references| button["binary_sensor.wall_button"]
-  automation -->|calls| script["script.music_toggle"]
-  script -->|targets| speaker["media_player.speaker"]
-  script -->|targets| tablet["media_player.tablet"]
-```
+![Blast Radius results using synthetic Home Assistant configuration](docs/panel-light.png)
 
-This synthetic example shows configuration references, not a guaranteed execution
-sequence. Analyzing the button finds its dependent automation and the script's targets.
-
-![The actual panel in its synthetic demo harness](docs/panel-light.png)
-
-The screenshot uses synthetic fixtures, not a real household's configuration.
+This screenshot uses synthetic configuration, not data from a real home.
 [Dark view](docs/panel-dark.png) · [Mobile view](docs/panel-mobile-dark.png)
 
-## Features
+## What it checks
 
-- Exact reference paths in loaded automations and scripts.
-- Recursive script calls, action targets, scene membership and exposed group membership.
-- Configured Lovelace dashboards, including YAML, through HA's own loader.
-- Jinja literals found without executing templates; unresolved expressions kept separate.
-- A simple results list groups each configuration by what it does with the selected
-  entity. Open a source in Home Assistant or expand it for its exact reference locations.
-- Advanced analysis retains the detailed impact view, relationship map, source filters
-  and raw reference table. Shared-flow co-targets remain context, not effects.
-- Bounded traversal and cycle detection. Graph truncation is reported separately
-  from normal static-analysis coverage limits.
-- Clickable sources: inspect loaded automations/scripts in HA's read-only view,
-  open scenes in their editor, dashboards in their view, and entities in details.
-- Keep scan limitations visible without mixing global unresolved expressions
-  with the selected entity's direct references. Scan details retains the full
-  device/selector and dashboard diagnostics when you need them.
-- Return to your last search, depth and tab after opening a source. Reopen any of
-  six recent searches from a compact bar in the same browser tab.
-- Rename/removal previews retain the analysis if a preview fails and show
-  validation errors beside the form. **Neither operation is ever executed.**
-- Markdown copy, JSON download, dark mode and mobile layout. No cloud or telemetry.
+- **Automations and scripts:** references in the configurations currently loaded by
+  Home Assistant, including substituted blueprint inputs and exact reference paths.
+- **Scenes and groups:** membership exposed by Home Assistant.
+- **Dashboards:** Lovelace configuration available through Home Assistant's loader.
+  Unavailable dashboards are reported as gaps.
+- **Templates:** literal entity IDs without executing Jinja. Dynamic targets
+  remain unknown rather than being assigned a guessed entity.
 
-Each reference keeps its location, role and confidence classification. The preview follows configured dependencies; it cannot tell you which conditional branch will run.
+## What you can do
+
+- See which configurations use an entity and open the matching source in Home Assistant.
+- Preview a rename or removal without applying changes.
+- Expand exact reference paths, or use Advanced analysis for the relationship
+  map, filters, limits and unclassified expressions.
+- Download JSON or copy Markdown. Recent searches and the interface work on mobile.
+
+The analyzer follows configuration references; it cannot tell you which
+conditional branch will run. An empty result is not a guarantee of safety.
 
 ## Installation
 
 ### HACS custom repository
+
+HACS displays a short product overview from [`info.md`](info.md); this README contains the full setup and technical documentation.
 
 [![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=artur-panek&repository=ha-blast-radius&category=integration)
 
@@ -124,9 +111,11 @@ Every request takes a fresh snapshot. Registry-only entities, including disabled
 entities, count as known even when they have no current state.
 
 Returning to the panel or reloading it restores the last successful search and
-fetches a fresh report. The **Recent** bar reopens a search at its previous depth;
-**Clear** forgets the recent list and saved view. Browser session storage keeps
-only entity IDs, depth, tab and scroll position, scoped to your HA user and tab.
+fetches a fresh report. Recent searches let you reopen an earlier analysis at
+its previous depth; the panel does not repeat a single current search in its own
+Recent bar. **Clear search history** is available under Analysis options.
+Browser session storage keeps only entity IDs, depth, tab and scroll position,
+scoped to your HA user and tab.
 Reports and configuration contents are not stored. Closing the tab normally ends
 this history; browser session recovery may restore it.
 
@@ -139,20 +128,28 @@ upstream again from discovered action targets and invent runtime trigger chains.
 Dashboards remain visible as dependent configurations, but traversal stops there:
 actions on other cards do not become downstream effects of the selected entity.
 
-The Overview distinguishes incoming write/call paths from configurations that read
-or react to the entity, and from passive display or structural references. Targets
-that merely share a write-only flow are shown as context rather than downstream
-impact. Mixed read/write flows and reaction paths remain possibilities, not proof
-that an action will execute.
+This synthetic graph illustrates configuration references, not runtime execution:
+
+```mermaid
+flowchart TD
+  automation["automation.wall_button"] -->|trigger references| button["binary_sensor.wall_button"]
+  automation -->|calls| script["script.music_toggle"]
+  script -->|targets| speaker["media_player.speaker"]
+  script -->|targets| tablet["media_player.tablet"]
+```
+
+In Advanced analysis, the detailed impact view separates incoming write/call
+paths, reads, and display or structural references. Other targets in a shared
+write-only flow are context, not downstream effects of the selected entity.
+Even a possible reaction path does not prove an action will execute.
 
 Different locations remain separate references; identical references are deduplicated.
 Nodes appear once and the edge list retains alternative paths. Default depth is 6,
 adjustable from 1 to 12. Graphs cap at 500 nodes and 2,000 edges; scans cap at
 50,000 references and 80 nested levels. Traversal depth/size limits produce an explicit incomplete-result notice rather
-than being mixed with normal static-analysis uncertainty. Coverage & diagnostics
-keeps skipped sources, selector/device context, failed blueprint expansion and
-other coverage limits visible without presenting every ordinary limitation as a
-failed analysis. Relevant warnings also appear in Markdown and JSON exports.
+than being mixed with normal static-analysis uncertainty. Scan details
+shows skipped sources, selector/device context and blueprint coverage gaps.
+Installation-wide figures sit under Technical details, not in the main result. Relevant warnings also appear in Markdown and JSON exports.
 
 ### Confidence model
 
@@ -283,11 +280,10 @@ dumps. Security reports: [SECURITY.md](SECURITY.md). Preparing a release:
 
 ## Roadmap
 
-- Broader helper and template-integration definition coverage where HA exposes it.
-- Additional HA source types.
-- Richer comparison and change planning.
+- Open specific Lovelace views when Home Assistant exposes a reliable destination.
+- Report why a configuration was skipped with structured scan-gap reasons,
+  instead of relying on message text in the UI.
+- Support additional Home Assistant configuration sources where the loaded data
+  can be inspected without parsing private files.
 
-Loaded-blueprint coverage, source/confidence filters, graph root navigation and
-HA-next CI shipped in v0.2.1. Compatibility testing continues as routine maintenance.
-
-Automatic rewriting and runtime recording are outside this project's scope.
+Automatic configuration rewrites and runtime recording remain outside the scope.
