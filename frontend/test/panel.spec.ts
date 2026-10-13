@@ -175,7 +175,9 @@ test("a failed refresh does not leave a stale report available to export", async
     0,
   );
   await expect(
-    page.locator(".advanced-analysis").getByText("triggers[0].entity_id", { exact: true }),
+    page
+      .locator(".advanced-analysis")
+      .getByText("triggers[0].entity_id", { exact: true }),
   ).toHaveCount(0);
 });
 
@@ -364,11 +366,15 @@ test("a large dashboard stays compact, explains unknowns and retains exact paths
       .first(),
   ).toBeVisible();
   await expect(
-    page.locator(".advanced-analysis").getByText("triggers[0].entity_id", { exact: true }),
+    page
+      .locator(".advanced-analysis")
+      .getByText("triggers[0].entity_id", { exact: true }),
   ).not.toBeVisible();
   await page.locator(".technical > summary").first().click();
   await expect(
-    page.locator(".advanced-analysis").getByText("triggers[0].entity_id", { exact: true }),
+    page
+      .locator(".advanced-analysis")
+      .getByText("triggers[0].entity_id", { exact: true }),
   ).toBeVisible();
   await page.locator(".technical > summary").first().click();
   await screenshotPanel(page, "/tmp/blast-radius-review-desktop.png");
@@ -435,7 +441,9 @@ test("analysis tabs support keyboard navigation and readable configuration locat
   await expect(impact).toBeFocused();
   await page.locator(".source-grid .technical > summary").first().click();
   await expect(
-    page.locator(".advanced-analysis").getByText("Trigger 1 › Entity ID", { exact: true }),
+    page
+      .locator(".advanced-analysis")
+      .getByText("Trigger 1 › Entity ID", { exact: true }),
   ).toBeVisible();
   expect(
     await page

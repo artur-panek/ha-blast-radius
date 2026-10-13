@@ -3119,12 +3119,12 @@ var rt = {
 			structural: "Includes this entity",
 			other: "Other references"
 		}, r = {
-			change: "can change it",
-			invoke: "can call it",
-			read: "read or react to it",
-			display: "display it",
-			structural: "include it",
-			other: "reference it"
+			change: ["can change it", "can change it"],
+			invoke: ["can call it", "can call it"],
+			read: ["reads or reacts to it", "read or react to it"],
+			display: ["displays it", "display it"],
+			structural: ["includes it", "include it"],
+			other: ["references it", "reference it"]
 		}, i = /* @__PURE__ */ new Map();
 		for (let t of e.references) {
 			let e = i.get(t.source_id);
@@ -3143,7 +3143,7 @@ var rt = {
 		}
 		let o = t.flatMap((e) => {
 			let t = a.get(e)?.length || 0;
-			return t ? [`${t} ${r[e]}`] : [];
+			return t ? [`${t} ${r[e][t === 1 ? 0 : 1]}`] : [];
 		}), s = i.size, c = this.downstreamStats(e).possible > 0;
 		return j`<section
       class="plain-impact"
@@ -3165,27 +3165,32 @@ var rt = {
         >
           <h4>${n[e]}</h4>
           <div class="plain-use-list">
-            ${t.map(({ id: e, refs: t }) => j`<article class="plain-source" data-source=${e}>
+            ${t.map(({ id: t, refs: n }) => j`<article class="plain-source" data-source=${t}>
                   <div class="plain-source-header">
                     <div class="source-heading">
-                      ${X(t[0].source_type)}
+                      ${X(n[0].source_type)}
                       <div>
-                        <h5>${this.sourceName(e)}</h5>
+                        <h5>${this.sourceName(t)}</h5>
                         <p>
-                          ${q[t[0].source_type] || t[0].source_type}
-                          · ${t.length}
-                          ${t.length === 1 ? "reference" : "references"}
-                          ${t.some((e) => e.confidence !== "explicit") ? j` ·
+                          ${q[n[0].source_type] || n[0].source_type}
+                          · ${n.length}
+                          ${n.length === 1 ? "reference" : "references"}
+                          ${e !== "read" && n.some((e) => this.referenceCategory(e) === "read") ? j` · also reads it` : N}
+                          ${n.some((e) => e.confidence !== "explicit") ? j` ·
                                   <span class="review-hint">Needs review</span>` : N}
                         </p>
                       </div>
                     </div>
-                    ${this.sourceControl(e, !0)}
+                    ${this.sourceControl(t, !0)}
                   </div>
                   <details class="plain-source-details">
-                    <summary>Show reference locations</summary>
+                    <summary
+                      aria-label=${`Show reference locations in ${this.sourceName(t)}`}
+                    >
+                      Show reference locations
+                    </summary>
                     <div class="plain-source-paths">
-                      ${t.map((e) => j`<div class="plain-source-path">
+                      ${n.map((e) => j`<div class="plain-source-path">
                             <span>${J(e.path)}</span>
                             ${this.badge(e.confidence)}
                             <code>${e.path}</code>
