@@ -815,7 +815,10 @@ test("the default result answers where the entity is used without exposing the g
   await expect(
     simple.getByRole("heading", { name: "Displays this entity" }),
   ).toBeVisible();
-  await expect(page.locator(".advanced-analysis")).not.toHaveAttribute("open", "");
+  await expect(page.locator(".advanced-analysis")).not.toHaveAttribute(
+    "open",
+    "",
+  );
   await expect(page.locator(".advanced-analysis .graph-node")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
   const firstSource = simple.locator(".plain-source").first();
@@ -843,7 +846,12 @@ test("each direct source appears once even when it has more than one role", asyn
       references: [
         { ...ref, role: "write" },
         { ...ref, role: "read", path: "conditions[0].entity_id" },
-        { ...ref, source_id: "dashboard.home", source_type: "dashboard", role: "display" },
+        {
+          ...ref,
+          source_id: "dashboard.home",
+          source_type: "dashboard",
+          role: "display",
+        },
       ],
     };
   });
