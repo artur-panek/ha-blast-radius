@@ -1623,9 +1623,9 @@ export class BlastRadiusPanel extends LitElement {
         >
       </header>
       <main>
-        <h1>Dependency impact</h1>
+        <h1>Where is this entity used?</h1>
         <p class="muted intro">
-          See what references an entity before you rename or remove it.
+          Find the Home Assistant configurations that use an entity before changing it.
         </p>
         <form
           class="search"
@@ -1743,11 +1743,7 @@ export class BlastRadiusPanel extends LitElement {
                   <button @click=${this.showAdvanced}>
                     Explore relationships
                   </button>
-                  <button @click=${this.copy}>Copy Markdown</button>
                   <button @click=${this.download}>Export JSON</button>
-                  <button ?disabled=${this.loading} @click=${() => this.run()}>
-                    Refresh snapshot
-                  </button>
                 </div>
                 <a
                   class="issue-link"
@@ -1842,6 +1838,12 @@ export class BlastRadiusPanel extends LitElement {
                         aria-labelledby=${`tab-${this.tab}`}
                       >
                         ${this.tab === "impact" ? this.impact(report) : this.tab === "graph" ? this.graph(report) : this.raw(report)}
+                      </div>
+                      <div class="advanced-tools-row">
+                        <button @click=${this.copy}>Copy Markdown</button>
+                        <button ?disabled=${this.loading} @click=${() => this.run()}>
+                          Refresh snapshot
+                        </button>
                       </div>
                     </section>
                   </details>
@@ -2020,8 +2022,8 @@ export class BlastRadiusPanel extends LitElement {
                   <div class="symbol">${brandMark()}</div>
                   <h2>Start with one entity</h2>
                   <p class="muted">
-                    A button, a helper, an old light.<br />Find out what points
-                    to it and what sits downstream.
+                    Search for a light, sensor, script or any other entity to
+                    find where Home Assistant uses it.
                   </p>
                   <p class="muted">
                     ${this.entities.length} entity IDs available · Missing IDs
