@@ -18,7 +18,7 @@ Use the button above for one-click HACS setup, or add the repository manually:
 5. Confirm setup, then open **Blast Radius** in the sidebar.
 
 This is a custom repository, not a HACS default-directory listing. Choose the
-latest numbered release, not `main`, for the normal update channel. Releases are
+latest numbered release for normal updates. Releases are
 published automatically after all Quality checks pass for a new manifest version.
 The integration remains an experimental alpha; using the standard HACS release
 channel is not a claim of production stability.
