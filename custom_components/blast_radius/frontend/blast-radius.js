@@ -1171,11 +1171,11 @@ var De = {
     background: var(--br-card);
     border: 1px solid var(--br-border);
     border-radius: 12px;
-    padding: 22px 24px;
-    margin: 16px 0 14px;
+    padding: 20px 22px;
+    margin: 16px 0 0;
   }
   .plain-lead {
-    padding-bottom: 14px;
+    padding-bottom: 8px;
   }
   .plain-lead h3 {
     font-size: 21px;
@@ -1189,7 +1189,7 @@ var De = {
     margin: 0;
   }
   .plain-use-group {
-    padding-top: 15px;
+    padding-top: 14px;
   }
   .plain-use-group + .plain-use-group {
     border-top: 1px solid var(--br-border);
@@ -1205,7 +1205,7 @@ var De = {
     gap: 0;
   }
   .plain-source {
-    padding: 12px 0 9px;
+    padding: 10px 0 7px;
     border-bottom: 1px solid var(--br-border);
     min-width: 0;
   }
@@ -1239,14 +1239,19 @@ var De = {
     font-size: inherit;
   }
   .plain-source-details {
-    margin: 3px 0 0 32px;
+    margin: 2px 0 0 32px;
     color: var(--br-muted);
   }
   .plain-source-details > summary {
     display: list-item;
     width: fit-content;
-    padding: 6px 0;
+    min-height: 30px;
+    padding: 5px 0;
     font-size: 12px;
+    text-underline-offset: 3px;
+  }
+  .plain-source-details > summary:hover {
+    text-decoration: underline;
   }
   .plain-source-paths {
     margin: 6px 0 8px;
@@ -1294,19 +1299,33 @@ var De = {
     text-decoration: underline;
     text-underline-offset: 3px;
   }
-  .read-only-note {
-    color: var(--br-muted);
-    font-size: 12px;
-  }
   .report-actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
-    margin: 12px 0 0;
+    gap: 6px 10px;
+    margin: 14px 0 0;
   }
   .report-actions button {
     font-size: 13px;
+  }
+  .report-actions .quiet-action {
+    border: 0;
+    background: transparent;
+    color: var(--primary-text-color, #212121);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    min-height: 40px;
+    padding: 8px 10px;
+    font-weight: 500;
+  }
+  .report-actions .quiet-action:hover {
+    color: var(--br-accent);
+  }
+  .change-preview[hidden],
+  .advanced-analysis[hidden],
+  .scan-details[hidden] {
+    display: none;
   }
   .columns {
     display: flex;
@@ -1381,17 +1400,16 @@ var De = {
     .advanced-analysis > .card {
       padding: 8px;
     }
-    .report-actions > button {
-      flex: 1 1 auto;
+    .report-actions > .primary {
+      flex: 1 1 100%;
+      min-height: 44px;
+    }
+    .report-actions > .quiet-action {
+      flex: 0 0 auto;
+      min-height: 44px;
     }
   }
 
-  .columns {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    align-items: stretch;
-  }
   .card {
     border: 1px solid var(--br-border);
     border-radius: 12px;
@@ -2519,7 +2537,7 @@ var rt = {
 	unknown: "Unclassified"
 }, it = class extends V {
 	constructor(...e) {
-		super(...e), this.narrow = !1, this.entities = [], this.query = "", this.loading = !1, this.error = "", this.tab = "impact", this.recentSearches = [], this.replacement = "", this.depth = 6, this.status = "", this.copyFallback = !1, this.sourceFilters = [], this.reviewFilters = [], this.advancedOpen = !1, this.previewError = "", this.analyzedRoot = "", this.initialized = !1, this.requestId = 0, this.saveSession = () => {
+		super(...e), this.narrow = !1, this.entities = [], this.query = "", this.loading = !1, this.error = "", this.tab = "impact", this.recentSearches = [], this.replacement = "", this.depth = 6, this.status = "", this.copyFallback = !1, this.sourceFilters = [], this.reviewFilters = [], this.advancedOpen = !1, this.previewError = "", this.previewOpen = !1, this.scanOpen = !1, this.analyzedRoot = "", this.initialized = !1, this.requestId = 0, this.saveSession = () => {
 			Je(this.storageKey, {
 				recent: this.recentSearches,
 				last: this.lastView
@@ -2552,7 +2570,9 @@ var rt = {
 			sourceFilters: { state: !0 },
 			reviewFilters: { state: !0 },
 			advancedOpen: { state: !0 },
-			previewError: { state: !0 }
+			previewError: { state: !0 },
+			previewOpen: { state: !0 },
+			scanOpen: { state: !0 }
 		};
 	}
 	connectedCallback() {
@@ -2583,7 +2603,7 @@ var rt = {
 		if (this.hass && (!this.initialized || t !== this.storageKey)) {
 			this.initialized = !0, this.storageKey = t;
 			let e = qe(t);
-			this.recentSearches = e.recent, this.lastView = e.last, this.query = e.last?.entityId || "", this.depth = e.last?.depth || 6, this.tab = e.last?.tab || "impact", this.advancedOpen = this.tab !== "impact", this.report = void 0, this.sourceFilters = [], this.reviewFilters = [], this.analyzedRoot = "", this.entities = [], this.replacement = "", this.status = "", this.copyFallback = !1, this.previewError = "", this.loadEntities();
+			this.recentSearches = e.recent, this.lastView = e.last, this.query = e.last?.entityId || "", this.depth = e.last?.depth || 6, this.tab = e.last?.tab || "impact", this.advancedOpen = this.tab !== "impact", this.report = void 0, this.sourceFilters = [], this.reviewFilters = [], this.analyzedRoot = "", this.entities = [], this.replacement = "", this.status = "", this.copyFallback = !1, this.previewError = "", this.previewOpen = !1, this.scanOpen = !1, this.loadEntities();
 		} else e.has("tab") && this.lastView && this.rememberView();
 	}
 	async loadEntities() {
@@ -2603,7 +2623,7 @@ var rt = {
 		return e && typeof e == "object" && "message" in e ? String(e.message) : "Connection failed. Try again.";
 	}
 	changeQuery(e) {
-		this.query = e.target.value, this.requestId++, this.loading = !1, this.report = void 0, this.error = "", this.status = "", this.copyFallback = !1, this.previewError = "";
+		this.query = e.target.value, this.requestId++, this.loading = !1, this.report = void 0, this.error = "", this.status = "", this.copyFallback = !1, this.previewError = "", this.previewOpen = !1, this.scanOpen = !1;
 	}
 	async run(e, t) {
 		let n = this.query.trim();
@@ -2611,7 +2631,7 @@ var rt = {
 			this.error = "Enter an entity ID such as light.office.";
 			return;
 		}
-		n !== this.analyzedRoot && (this.sourceFilters = [], this.reviewFilters = [], this.replacement = ""), this.analyzedRoot = n;
+		n !== this.analyzedRoot && (this.sourceFilters = [], this.reviewFilters = [], this.replacement = "", this.previewOpen = !1, this.scanOpen = !1), this.analyzedRoot = n;
 		let r = ++this.requestId;
 		this.loading = !0, this.error = "", this.status = "", this.copyFallback = !1, this.previewError = "";
 		try {
@@ -3112,53 +3132,43 @@ var rt = {
 			"structural",
 			"other"
 		], n = {
-			change: "Can change this entity",
-			invoke: "Can call this entity",
-			read: "Reads or reacts to this entity",
-			display: "Displays this entity",
-			structural: "Includes this entity",
-			other: "Other references"
-		}, r = {
-			change: ["can change it", "can change it"],
-			invoke: ["can call it", "can call it"],
-			read: ["reads or reacts to it", "read or react to it"],
-			display: ["displays it", "display it"],
-			structural: ["includes it", "include it"],
-			other: ["references it", "reference it"]
-		}, i = /* @__PURE__ */ new Map();
+			change: "Can change it",
+			invoke: "Can run it",
+			read: "Uses its state",
+			display: "Shows it",
+			structural: "Includes it",
+			other: "Other uses"
+		}, r = /* @__PURE__ */ new Map();
 		for (let t of e.references) {
-			let e = i.get(t.source_id);
-			e ? e.push(t) : i.set(t.source_id, [t]);
+			let e = r.get(t.source_id);
+			e ? e.push(t) : r.set(t.source_id, [t]);
 		}
-		let a = /* @__PURE__ */ new Map();
-		for (let [e, n] of i) {
-			let r = new Set(n.map((e) => this.referenceCategory(e))), i = t.find((e) => r.has(e)) || "other", o = a.get(i);
+		let i = /* @__PURE__ */ new Map();
+		for (let [e, n] of r) {
+			let r = new Set(n.map((e) => this.referenceCategory(e))), a = t.find((e) => r.has(e)) || "other", o = i.get(a);
 			o ? o.push({
 				id: e,
 				refs: n
-			}) : a.set(i, [{
+			}) : i.set(a, [{
 				id: e,
 				refs: n
 			}]);
 		}
-		let o = t.flatMap((e) => {
-			let t = a.get(e)?.length || 0;
-			return t ? [`${t} ${r[e][t === 1 ? 0 : 1]}`] : [];
-		}), s = i.size, c = this.downstreamStats(e).possible > 0;
+		let a = r.size, o = this.downstreamStats(e).possible > 0;
 		return j`<section
       class="plain-impact"
       aria-label="Where this entity is used"
     >
       <div class="plain-lead">
         <h3>
-          ${s} ${s === 1 ? "configuration" : "configurations"} found
+          ${a ? `${a} ${a === 1 ? "configuration references" : "configurations reference"} this entity` : "No direct references found"}
         </h3>
         <p>
-          ${o.length ? o.join(" · ") : c ? "No incoming references found. This configuration has possible outputs; explore relationships below." : "No direct references found in the inspected sources."}
+          ${a ? "Review these configurations before renaming or removing the entity." : o ? "No direct uses found in the scanned sources. This configuration has possible outputs; explore relationships for details." : "No direct uses found in the scanned sources. This does not guarantee the entity is unused."}
         </p>
       </div>
       ${t.map((e) => {
-			let t = a.get(e) || [];
+			let t = i.get(e) || [];
 			return t.length ? j`<section
           class="plain-use-group"
           aria-label=${n[e]}
@@ -3187,7 +3197,7 @@ var rt = {
                     <summary
                       aria-label=${`Show reference locations in ${this.sourceName(t)}`}
                     >
-                      Show reference locations
+                      View exact locations
                     </summary>
                     <div class="plain-source-paths">
                       ${n.map((e) => j`<div class="plain-source-path">
@@ -3323,12 +3333,16 @@ var rt = {
 		});
 	}
 	showCoverage() {
-		let e = this.renderRoot.querySelector("#coverage");
-		e && (e.open = !0, e.querySelector("summary")?.focus(), e.scrollIntoView({ block: "start" }));
+		this.scanOpen = !0, this.updateComplete.then(() => {
+			let e = this.renderRoot.querySelector("#coverage");
+			e && (e.open = !0, e.querySelector("summary")?.focus(), e.scrollIntoView({ block: "start" }));
+		});
 	}
 	showChangePreview() {
-		let e = this.renderRoot.querySelector(".change-preview");
-		e && (e.open = !0, e.querySelector("summary")?.focus(), e.scrollIntoView({ block: "start" }));
+		this.previewOpen = !0, this.updateComplete.then(() => {
+			let e = this.renderRoot.querySelector(".change-preview");
+			e && (e.open = !0, e.querySelector("summary")?.focus(), e.scrollIntoView({ block: "start" }));
+		});
 	}
 	completeness(e) {
 		let t = e.graph.limits_reached || [], n = t.includes("nodes") || t.includes("edges"), r = [
@@ -3632,7 +3646,6 @@ var rt = {
                     <h2 tabindex="-1">${this.sourceName(e.entity_id)}</h2>
                     <code>${e.entity_id}</code>
                   </div>
-                  <span class="read-only-note">Read-only analysis</span>
                 </div>
                 ${e.exists ? N : j`<div class="notice">This entity is missing. References to its old ID can still be inspected.</div>`}
                 ${e.graph.truncated ? this.completeness(e) : N}
@@ -3641,10 +3654,18 @@ var rt = {
                   <button class="primary" @click=${this.showChangePreview}>
                     Preview a change
                   </button>
-                  <button @click=${this.showAdvanced}>
+                  <button class="quiet-action" @click=${this.showAdvanced}>
                     Explore relationships
                   </button>
-                  <button @click=${this.download}>Export JSON</button>
+                  <button class="quiet-action" @click=${this.download}>
+                    Export JSON
+                  </button>
+                  ${e.coverage.warnings?.length ? N : j`<button
+                          class="quiet-action"
+                          @click=${this.showCoverage}
+                        >
+                          Scan details
+                        </button>`}
                 </div>
                 <a
                   class="issue-link"
@@ -3660,6 +3681,7 @@ var rt = {
                 <div class="columns">
                   <details
                     class="advanced-analysis"
+                    ?hidden=${!this.advancedOpen}
                     .open=${this.advancedOpen}
                     @toggle=${(e) => this.advancedOpen = e.currentTarget.open}
                   >
@@ -3742,14 +3764,15 @@ var rt = {
                   </details>
                   <details
                     class="card change-preview"
-                    .open=${!!e.preview}
+                    ?hidden=${!this.previewOpen}
+                    .open=${this.previewOpen}
+                    @toggle=${(e) => this.previewOpen = e.currentTarget.open}
                   >
-                    <summary>Preview a change</summary>
+                    <summary>Preview rename or removal</summary>
                     <div class="preview-form">
-                      <h2>Change preview</h2>
                       <p class="muted">
-                        See which references need attention before making a
-                        change.
+                        Check what may need updating. This tool will not change
+                        Home Assistant configuration.
                       </p>
                       <label
                         >New entity ID<input
@@ -3799,7 +3822,13 @@ var rt = {
                     </div>
                   </details>
                 </div>
-                <details class="card scan-details" id="coverage">
+                <details
+                  class="card scan-details"
+                  id="coverage"
+                  ?hidden=${!this.scanOpen}
+                  .open=${this.scanOpen}
+                  @toggle=${(e) => this.scanOpen = e.currentTarget.open}
+                >
                   <summary>Scan details</summary>
                   <div class="scan-overview">
                     <p>

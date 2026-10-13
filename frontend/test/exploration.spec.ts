@@ -15,7 +15,9 @@ async function openAdvanced(page: Page) {
   const advanced = page.locator(".advanced-analysis");
   if (await advanced.isHidden()) {
     await page.getByRole("button", { name: "Explore relationships" }).click();
-    await page.getByRole("tab", { name: "Detailed impact", exact: true }).click();
+    await page
+      .getByRole("tab", { name: "Detailed impact", exact: true })
+      .click();
   } else if ((await advanced.getAttribute("open")) === null) {
     await advanced.locator(":scope > summary").click();
   }
@@ -810,16 +812,16 @@ test("the default result answers where the entity is used without exposing the g
   await input(page).fill("binary_sensor.wall_button");
   await input(page).press("Enter");
   await expect(
-    page.getByRole("heading", { name: "3 configurations reference this entity" }),
+    page.getByRole("heading", {
+      name: "3 configurations reference this entity",
+    }),
   ).toBeVisible();
   const simple = page.locator(".plain-impact");
   await expect(simple.locator(".plain-source")).toHaveCount(3);
   await expect(
     simple.getByRole("heading", { name: "Uses its state" }),
   ).toBeVisible();
-  await expect(
-    simple.getByRole("heading", { name: "Shows it" }),
-  ).toBeVisible();
+  await expect(simple.getByRole("heading", { name: "Shows it" })).toBeVisible();
   await expect(page.locator(".advanced-analysis")).toBeHidden();
   await expect(page.locator(".change-preview")).toBeHidden();
   await expect(page.locator("#coverage")).toBeHidden();
@@ -860,7 +862,9 @@ test("each direct source appears once even when it has more than one role", asyn
     };
   });
   await expect(
-    page.getByRole("heading", { name: "2 configurations reference this entity" }),
+    page.getByRole("heading", {
+      name: "2 configurations reference this entity",
+    }),
   ).toBeVisible();
   const list = page.locator(".plain-impact .plain-source");
   await expect(list).toHaveCount(2);
@@ -900,9 +904,7 @@ test("scan limitations appear as a short note with a link to full diagnostics", 
   await expect(page.locator("#coverage")).toHaveAttribute("open", "");
 });
 
-test("secondary tools stay out of sight until requested", async ({
-  page,
-}) => {
+test("secondary tools stay out of sight until requested", async ({ page }) => {
   await input(page).fill("light.desk");
   await input(page).press("Enter");
   const advanced = page.locator(".advanced-analysis");
@@ -941,9 +943,13 @@ test("primary summary tells the user what to check without repeating counts", as
   await expect(page.locator(".plain-lead p")).toContainText(
     "Review these configurations before renaming or removing",
   );
-  await expect(page.locator(".plain-lead")).not.toContainText("2 read or react");
+  await expect(page.locator(".plain-lead")).not.toContainText(
+    "2 read or react",
+  );
   await expect(
-    page.locator(".plain-use-group").getByRole("heading", { name: "Uses its state" }),
+    page
+      .locator(".plain-use-group")
+      .getByRole("heading", { name: "Uses its state" }),
   ).toBeVisible();
   await expect(
     page.locator(".plain-use-group").getByRole("heading", { name: "Shows it" }),

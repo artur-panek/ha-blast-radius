@@ -1060,16 +1060,20 @@ export class BlastRadiusPanel extends LitElement {
     >
       <div class="plain-lead">
         <h3>
-          ${count
-            ? `${count} ${count === 1 ? "configuration references" : "configurations reference"} this entity`
-            : "No direct references found"}
+          ${
+            count
+              ? `${count} ${count === 1 ? "configuration references" : "configurations reference"} this entity`
+              : "No direct references found"
+          }
         </h3>
         <p>
-          ${count
-            ? "Review these configurations before renaming or removing the entity."
-            : hasOutputs
-              ? "No direct uses found in the scanned sources. This configuration has possible outputs; explore relationships for details."
-              : "No direct uses found in the scanned sources. This does not guarantee the entity is unused."}
+          ${
+            count
+              ? "Review these configurations before renaming or removing the entity."
+              : hasOutputs
+                ? "No direct uses found in the scanned sources. This configuration has possible outputs; explore relationships for details."
+                : "No direct uses found in the scanned sources. This does not guarantee the entity is unused."
+          }
         </p>
       </div>
       ${order.map((role) => {
@@ -1759,12 +1763,19 @@ export class BlastRadiusPanel extends LitElement {
                   <button class="quiet-action" @click=${this.showAdvanced}>
                     Explore relationships
                   </button>
-                  <button class="quiet-action" @click=${this.download}>Export JSON</button>
-                  ${!report.coverage.warnings?.length
-                    ? html`<button class="quiet-action" @click=${this.showCoverage}>
-                        Scan details
-                      </button>`
-                    : nothing}
+                  <button class="quiet-action" @click=${this.download}>
+                    Export JSON
+                  </button>
+                  ${
+                    !report.coverage.warnings?.length
+                      ? html`<button
+                          class="quiet-action"
+                          @click=${this.showCoverage}
+                        >
+                          Scan details
+                        </button>`
+                      : nothing
+                  }
                 </div>
                 <a
                   class="issue-link"
@@ -1877,7 +1888,9 @@ export class BlastRadiusPanel extends LitElement {
                     ?hidden=${!this.previewOpen}
                     .open=${this.previewOpen}
                     @toggle=${(event: Event) =>
-                      (this.previewOpen = (event.currentTarget as HTMLDetailsElement).open)}
+                      (this.previewOpen = (
+                        event.currentTarget as HTMLDetailsElement
+                      ).open)}
                   >
                     <summary>Preview rename or removal</summary>
                     <div class="preview-form">
@@ -1947,7 +1960,9 @@ export class BlastRadiusPanel extends LitElement {
                   ?hidden=${!this.scanOpen}
                   .open=${this.scanOpen}
                   @toggle=${(event: Event) =>
-                    (this.scanOpen = (event.currentTarget as HTMLDetailsElement).open)}
+                    (this.scanOpen = (
+                      event.currentTarget as HTMLDetailsElement
+                    ).open)}
                 >
                   <summary>Scan details</summary>
                   <div class="scan-overview">
