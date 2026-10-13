@@ -2004,21 +2004,36 @@ export class BlastRadiusPanel extends LitElement {
                       ? html`<section class="scan-gaps" aria-label="Scan gaps">
                           <h3>What could be missing?</h3>
                           <ul>
-                            ${report.coverage.warnings.map((warning) => {
-                              const unavailable = warning.match(
-                                /^([^:]+): configuration unavailable or generated automatically\.$/,
-                              );
-                              return html`<li>
-                                ${
-                                  unavailable
-                                    ? html`<strong>${unavailable[1]}</strong> —
-                                        configuration unavailable or generated
-                                        automatically; it could not be fully
-                                        checked.`
-                                    : warning
-                                }
-                              </li>`;
-                            })}
+                            ${(report.coverage.gaps || []).map(
+                              (gap) => html`<li>
+                                <strong>${gap.source_id}</strong> —
+                                ${({
+                                  configuration_unavailable:
+                                    "Loaded configuration could not be read.",
+                                  blueprint_unexpanded:
+                                    "Only blueprint inputs were available.",
+                                  loaded_config_unavailable:
+                                    "Loaded configuration was unavailable or failed validation.",
+                                  configuration_too_large:
+                                    "Configuration exceeded the scan size limit.",
+                                  metadata_unavailable:
+                                    "Home Assistant reference metadata was unavailable.",
+                                  membership_too_large:
+                                    "Membership exceeded the scan size limit.",
+                                  dashboard_unavailable:
+                                    "Dashboard configuration could not be read.",
+                                } as Record<string, string>)[gap.code] ||
+                                gap.warning}
+                              </li>`,
+                            )}
+                            ${report.coverage.warnings
+                              .filter(
+                                (warning) =>
+                                  !report.coverage.gaps?.some(
+                                    (gap) => gap.warning === warning,
+                                  ),
+                              )
+                              .map((warning) => html`<li>${warning}</li>`)}
                           </ul>
                           <p>
                             The references already found are shown above. Other

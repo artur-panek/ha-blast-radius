@@ -6,7 +6,7 @@ No filesystem parsing, service calls, template rendering or config writes.
 """
 
 from types import MappingProxyType
-from typing import Any
+from typing import Any, TypedDict
 from urllib.parse import quote
 
 from homeassistant.components.lovelace.const import LOVELACE_DATA
@@ -20,6 +20,15 @@ from homeassistant.helpers.entity_component import DATA_INSTANCES
 from homeassistant.helpers.template import Template
 
 from .analysis.models import BASE_COVERAGE_NOTE, Source
+
+
+class ScanGap(TypedDict):
+    """A specific coverage gap with a stable reason and redacted warning."""
+
+    code: str
+    source_id: str
+    warning: str
+
 
 _NATIVE_SELECTORS = {
     "device_id": "referenced_devices",
@@ -105,7 +114,7 @@ def _normalize(value: Any, depth: int = 0) -> Any:
 
 async def collect_snapshot(
     hass: HomeAssistant,
-) -> tuple[tuple[Source, ...], dict[str, str], tuple[str, ...]]:
+) -> tuple[tuple[Source, ...], dict[str, str], tuple[str, ...], tuple[ScanGap, ...]]:
     registry = er.async_get(hass)
     # Copy identities on the event loop. The executor never reads live registries.
     entity_registry = MappingProxyType(
@@ -118,6 +127,13 @@ async def collect_snapshot(
     names.update({state.entity_id: state.name for state in hass.states.async_all()})
     sources: list[Source] = []
     warnings: list[str] = []
+    gaps: list[ScanGap] = []
+
+    def add_gap(code: str, source_id: str, warning: str) -> None:
+        # Keep existing warnings for older clients and Markdown exports.
+        warnings.append(warning)
+        gaps.append({"code": code, "source_id": source_id, "warning": warning})
+
     selector_registry = frozenset(
         (kind, identifier)
         for kind, identifiers in (
@@ -142,21 +158,32 @@ async def collect_snapshot(
         for entity in list(component.entities):
             config = getattr(entity, "raw_config", None)
             if not isinstance(config, dict):
-                warnings.append(f"Configuration unavailable for {entity.entity_id}.")
+                add_gap(
+                    "configuration_unavailable",
+                    entity.entity_id,
+                    f"Configuration unavailable for {entity.entity_id}.",
+                )
                 continue
             if "use_blueprint" in config:
-                warnings.append(
-                    f"{entity.entity_id}: blueprint expansion unavailable; supplied inputs only."
+                add_gap(
+                    "blueprint_unexpanded",
+                    entity.entity_id,
+                    f"{entity.entity_id}: blueprint expansion unavailable; supplied inputs only.",
                 )
             elif not entity.available:
-                warnings.append(
-                    f"{entity.entity_id}: loaded configuration is unavailable or failed validation."
+                add_gap(
+                    "loaded_config_unavailable",
+                    entity.entity_id,
+                    f"{entity.entity_id}: loaded configuration is unavailable "
+                    "or failed validation.",
                 )
             try:
                 normalized = _normalize(config)
             except ValueError:
-                warnings.append(
-                    f"Configuration size limit reached for {entity.entity_id}; skipped."
+                add_gap(
+                    "configuration_too_large",
+                    entity.entity_id,
+                    f"Configuration size limit reached for {entity.entity_id}; skipped.",
                 )
                 continue
             native_entities: frozenset[str] = frozenset()
@@ -173,7 +200,11 @@ async def collect_snapshot(
                 # input bags never enter reports, warnings or diagnostics.
                 blueprint = bool(getattr(entity, "referenced_blueprint", None))
             except Exception:
-                warnings.append(f"{entity.entity_id}: native reference metadata unavailable.")
+                add_gap(
+                    "metadata_unavailable",
+                    entity.entity_id,
+                    f"{entity.entity_id}: native reference metadata unavailable.",
+                )
             sources.append(
                 Source(
                     entity.entity_id,
@@ -197,7 +228,11 @@ async def collect_snapshot(
             try:
                 members = _normalize(members)
             except ValueError:
-                warnings.append(f"Membership size limit reached for {state.entity_id}; skipped.")
+                add_gap(
+                    "membership_too_large",
+                    state.entity_id,
+                    f"Membership size limit reached for {state.entity_id}; skipped.",
+                )
                 continue
             sources.append(
                 Source(state.entity_id, state.domain, state.name, {"entity_id": members})
@@ -220,9 +255,11 @@ async def collect_snapshot(
                 )
             except Exception:  # A broken/auto-generated dashboard must not hide other sources.
                 # Do not include exceptions: YAML errors can contain secrets or local paths.
-                warnings.append(
-                    f"{source_id}: configuration unavailable or generated automatically."
+                add_gap(
+                    "dashboard_unavailable",
+                    source_id,
+                    f"{source_id}: configuration unavailable or generated automatically.",
                 )
 
     warnings.append(BASE_COVERAGE_NOTE)
-    return tuple(sources), names, tuple(warnings)
+    return tuple(sources), names, tuple(warnings), tuple(gaps)

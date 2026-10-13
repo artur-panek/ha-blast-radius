@@ -72,8 +72,9 @@ async def test_loaded_blueprint_is_substituted_through_native_config_api(
     assert response["success"]
     assert response["result"]["config"] == entity.raw_config
     with patch.object(type(hass.services), "async_call", side_effect=AssertionError("read only")):
-        sources, _, warnings = await collect_snapshot(hass)
+        sources, _, warnings, gaps = await collect_snapshot(hass)
         report = await BlastRadiusCoordinator(hass).request("analyze", {"entity_id": "light.desk"})
+    assert not gaps
     assert sources[0].blueprint
     assert report["coverage"]["loaded_blueprints"] == 1
     assert report["coverage"]["warnings"] == []

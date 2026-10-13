@@ -297,3 +297,41 @@ test("scan details stay readable when no scanner warnings are reported", async (
     "not proof that an entity is unused",
   );
 });
+
+test("structured scan gaps use reason codes, not warning text parsing", async ({
+  page,
+}) => {
+  await page
+    .getByRole("combobox", { name: "Entity", exact: true })
+    .fill("light.desk");
+  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    panel.report = {
+      ...panel.report,
+      coverage: {
+        ...panel.report.coverage,
+        warnings: [
+          "dashboard.home: unavailable in HA.",
+          "Scanner bound reached; some targets were not scanned.",
+        ],
+        gaps: [
+          {
+            code: "dashboard_unavailable",
+            source_id: "dashboard.home",
+            warning: "dashboard.home: unavailable in HA.",
+          },
+        ],
+      },
+    };
+  });
+  await page.getByRole("button", { name: "Scan details →" }).click();
+  const list = page.locator("#coverage .scan-gaps li");
+  await expect(list).toHaveCount(2);
+  await expect(list.first()).toContainText(
+    "dashboard.home — Dashboard configuration could not be read.",
+  );
+  await expect(list.last()).toContainText(
+    "Scanner bound reached; some targets were not scanned.",
+  );
+});
