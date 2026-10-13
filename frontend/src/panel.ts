@@ -1916,21 +1916,26 @@ export class BlastRadiusPanel extends LitElement {
                   <summary>Scan details</summary>
                   <div class="scan-overview">
                     <p>
-                      <strong>${report.coverage.sources} configurations inspected.</strong>
+                      <strong
+                        >${report.coverage.sources} configurations
+                        inspected.</strong
+                      >
                       This is static analysis: conditions are not executed, and
                       dynamically selected targets may be missed.
                     </p>
                   </div>
-                  ${report.coverage.warnings?.length
-                    ? html`<div class="scan-warnings">
-                        <h3>Not fully inspected</h3>
-                        <ul>
-                          ${report.coverage.warnings.map(
-                            (warning) => html`<li>${warning}</li>`,
-                          )}
-                        </ul>
-                      </div>`
-                    : nothing}
+                  ${
+                    report.coverage.warnings?.length
+                      ? html`<div class="scan-warnings">
+                          <h3>Not fully inspected</h3>
+                          <ul>
+                            ${report.coverage.warnings.map(
+                              (warning) => html`<li>${warning}</li>`,
+                            )}
+                          </ul>
+                        </div>`
+                      : nothing
+                  }
                   <details class="coverage-breakdown">
                     <summary>Full scanner counts and limitations</summary>
                     <p class="muted">
@@ -1943,7 +1948,10 @@ export class BlastRadiusPanel extends LitElement {
                     </p>
                     <ul>
                       ${report.warnings
-                        .filter((warning) => !(report.coverage.warnings || []).includes(warning))
+                        .filter(
+                          (warning) =>
+                            !(report.coverage.warnings || []).includes(warning),
+                        )
                         .map((warning) => html`<li>${warning}</li>`)}
                       <li>
                         ${report.unresolved_total} locations without a fixed
@@ -1953,20 +1961,25 @@ export class BlastRadiusPanel extends LitElement {
                       </li>
                       <li>
                         ${reviewCounts(report.uncertain_references)} in linked
-                        configurations; ${reviewCounts(report.other_dashboard_references || [])}
-                        elsewhere in dashboards. These are review locations,
-                        not a count of affected entities.
+                        configurations;
+                        ${reviewCounts(report.other_dashboard_references || [])}
+                        elsewhere in dashboards. These are review locations, not
+                        a count of affected entities.
                       </li>
-                      ${report.review_summary?.snapshot.locations === report.unresolved_total
-                        ? html`<li>
-                            Full snapshot: ${report.review_summary.snapshot.device_locations}
-                            device-reference locations ·
-                            ${report.review_summary.snapshot.selector_locations}
-                            unexpanded selectors ·
-                            ${report.review_summary.snapshot.unresolved_locations}
-                            dynamic or unrecognized locations.
-                          </li>`
-                        : nothing}
+                      ${
+                        report.review_summary?.snapshot.locations ===
+                        report.unresolved_total
+                          ? html`<li>
+                              Full snapshot:
+                              ${report.review_summary.snapshot.device_locations}
+                              device-reference locations ·
+                              ${report.review_summary.snapshot.selector_locations}
+                              unexpanded selectors ·
+                              ${report.review_summary.snapshot.unresolved_locations}
+                              dynamic or unrecognized locations.
+                            </li>`
+                          : nothing
+                      }
                     </ul>
                   </details>
                   ${this.coverageDiagnostics(report)}

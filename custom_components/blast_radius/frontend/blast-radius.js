@@ -1779,6 +1779,38 @@ var De = {
     padding: 6px 10px;
     font-size: 12px;
   }
+  .scan-details > summary {
+    font-weight: 600;
+  }
+  .scan-overview p {
+    color: var(--br-muted);
+    margin: 6px 0 12px;
+    font-size: 13px;
+  }
+  .scan-overview strong {
+    color: var(--primary-text-color, #212121);
+  }
+  .scan-warnings h3 {
+    font-size: 14px;
+    margin: 6px 0;
+  }
+  .scan-warnings ul {
+    font-size: 13px;
+    margin: 0 0 10px;
+  }
+  .coverage-breakdown {
+    border-top: 1px solid var(--br-border);
+    padding-top: 6px;
+  }
+  .coverage-breakdown > summary {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--br-muted);
+  }
+  .coverage-breakdown p,
+  .coverage-breakdown li {
+    font-size: 12px;
+  }
   .coverage-diagnostics {
     margin-top: 18px;
     padding-top: 4px;
@@ -3747,36 +3779,55 @@ var rt = {
                     </div>
                   </details>
                 </div>
-                <details class="card" id="coverage">
-                  <summary>
-                    Coverage & diagnostics · ${e.coverage.sources} sources
-                    inspected${e.coverage.warnings?.length ? " · partial" : ""}
-                  </summary>
-                  <p class="muted">
-                    ${Object.entries(e.coverage.source_types).map(([e, t]) => `${t} ${e}`).join(" · ")}
-                  </p>
-                  <ul>
-                    ${e.warnings.map((e) => j`<li>${e}</li>`)}
-                    <li>
-                      ${e.unresolved_total} locations without an entity
-                      target across the full snapshot. These include device IDs,
-                      selectors and expressions; they cannot be attributed to
-                      this entity.
-                    </li>
-                    <li>
-                      ${$(e.uncertain_references)} in inspected
-                      linked flows (including direct sources);
-                      ${$(e.other_dashboard_references || [])}
-                      in system-wide dashboard context. Groups summarize
-                      repeated reasons and selector identities, not a count of
-                      affected entities.
-                    </li>
-                    ${e.review_summary?.snapshot.locations === e.unresolved_total ? j`<li>Full snapshot: ${e.review_summary.snapshot.device_locations} device-reference locations · ${e.review_summary.snapshot.selector_locations} unexpanded-selector locations · ${e.review_summary.snapshot.unresolved_locations} dynamic or unrecognized locations.</li>` : N}
-                    <li>
-                      Conditional branches are not evaluated. A reference does
-                      not prove an action will run.
-                    </li>
-                  </ul>
+                <details class="card scan-details" id="coverage">
+                  <summary>Scan details</summary>
+                  <div class="scan-overview">
+                    <p>
+                      <strong
+                        >${e.coverage.sources} configurations
+                        inspected.</strong
+                      >
+                      This is static analysis: conditions are not executed, and
+                      dynamically selected targets may be missed.
+                    </p>
+                  </div>
+                  ${e.coverage.warnings?.length ? j`<div class="scan-warnings">
+                          <h3>Not fully inspected</h3>
+                          <ul>
+                            ${e.coverage.warnings.map((e) => j`<li>${e}</li>`)}
+                          </ul>
+                        </div>` : N}
+                  <details class="coverage-breakdown">
+                    <summary>Full scanner counts and limitations</summary>
+                    <p class="muted">
+                      ${Object.entries(e.coverage.source_types).map(([e, t]) => `${t} ${e}${t === 1 ? "" : "s"}`).join(" · ")}
+                    </p>
+                    <ul>
+                      ${e.warnings.filter((t) => !(e.coverage.warnings || []).includes(t)).map((e) => j`<li>${e}</li>`)}
+                      <li>
+                        ${e.unresolved_total} locations without a fixed
+                        entity target across the full snapshot. Device IDs,
+                        selectors and dynamic expressions are not necessarily
+                        dependencies of the selected entity.
+                      </li>
+                      <li>
+                        ${$(e.uncertain_references)} in linked
+                        configurations;
+                        ${$(e.other_dashboard_references || [])}
+                        elsewhere in dashboards. These are review locations, not
+                        a count of affected entities.
+                      </li>
+                      ${e.review_summary?.snapshot.locations === e.unresolved_total ? j`<li>
+                              Full snapshot:
+                              ${e.review_summary.snapshot.device_locations}
+                              device-reference locations ·
+                              ${e.review_summary.snapshot.selector_locations}
+                              unexpanded selectors ·
+                              ${e.review_summary.snapshot.unresolved_locations}
+                              dynamic or unrecognized locations.
+                            </li>` : N}
+                    </ul>
+                  </details>
                   ${this.coverageDiagnostics(e)}
                   <details class="confidence-help">
                     <summary>Reference confidence</summary>
