@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.2.8 — 2026-10-13
+
+- Put direct entity uses first. The panel now lists the configurations that
+  reference an entity, grouped by what they do, with each source shown once.
+  Names and Open links lead directly to the relevant Home Assistant screen.
+- Keep exact reference paths one click away, while moving the relationship
+  map, detailed graph analysis and full scanner diagnostics out of the main view.
+- Make the read-only rename/removal preview available on demand. Clarify
+  uncertain references and scan limitations without suggesting runtime effects
+  that static analysis cannot establish.
+- Simplify labels, mobile spacing and recent-search presentation. Retain
+  keyboard navigation, search-history management and JSON/Markdown exports.
+- Refresh the desktop/mobile examples and expand regression tests for source
+  navigation, mixed-role references, repeated references and the optional views.
+  Dependency analysis, WebSocket messages and report formats are unchanged.
+
+
 ## 0.2.7 — 2026-10-13
 
 - Clean up duplicate separators and repeated headings in the dependency Overview.
