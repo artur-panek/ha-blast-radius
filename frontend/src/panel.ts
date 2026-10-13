@@ -1009,9 +1009,15 @@ export class BlastRadiusPanel extends LitElement {
     </details>`;
   }
 
-
   private plainUses(report: Report) {
-    const order = ["change", "invoke", "read", "display", "structural", "other"];
+    const order = [
+      "change",
+      "invoke",
+      "read",
+      "display",
+      "structural",
+      "other",
+    ];
     const headings: Record<string, string> = {
       change: "Can change this entity",
       invoke: "Can call this entity",
@@ -1036,7 +1042,9 @@ export class BlastRadiusPanel extends LitElement {
     }
     const groups = new Map<string, Array<{ id: string; refs: Reference[] }>>();
     for (const [id, refs] of bySource) {
-      const categories = new Set<string>(refs.map((ref) => this.referenceCategory(ref)));
+      const categories = new Set<string>(
+        refs.map((ref) => this.referenceCategory(ref)),
+      );
       const role = order.find((item) => categories.has(item)) || "other";
       const existing = groups.get(role);
       if (existing) existing.push({ id, refs });
@@ -1048,59 +1056,86 @@ export class BlastRadiusPanel extends LitElement {
     });
     const count = bySource.size;
     const hasOutputs = this.downstreamStats(report).possible > 0;
-    return html`<section class="plain-impact" aria-label="Where this entity is used">
+    return html`<section
+      class="plain-impact"
+      aria-label="Where this entity is used"
+    >
       <div class="plain-lead">
-        <h3>${count} ${count === 1 ? "configuration" : "configurations"} found</h3>
-        <p>${summary.length
-          ? summary.join(" · ")
-          : hasOutputs
-            ? "No incoming references found. This configuration has possible outputs; explore relationships below."
-            : "No direct references found in the inspected sources."}</p>
+        <h3>
+          ${count} ${count === 1 ? "configuration" : "configurations"} found
+        </h3>
+        <p>
+          ${
+            summary.length
+              ? summary.join(" · ")
+              : hasOutputs
+                ? "No incoming references found. This configuration has possible outputs; explore relationships below."
+                : "No direct references found in the inspected sources."
+          }
+        </p>
       </div>
       ${order.map((role) => {
         const sources = groups.get(role) || [];
         if (!sources.length) return nothing;
-        return html`<section class="plain-use-group" aria-label=${headings[role]}>
+        return html`<section
+          class="plain-use-group"
+          aria-label=${headings[role]}
+        >
           <h4>${headings[role]}</h4>
           <div class="plain-use-list">
-            ${sources.map(({ id, refs }) => html`<article class="plain-source" data-source=${id}>
-              <div class="plain-source-header">
-                <div class="source-heading">
-                  ${sourceIcon(refs[0].source_type)}
-                  <div>
-                    <h5>${this.sourceName(id)}</h5>
-                    <p>
-                      ${sourceLabels[refs[0].source_type] || refs[0].source_type}
-                      · ${refs.length} ${refs.length === 1 ? "reference" : "references"}
-                      ${refs.some((ref) => ref.confidence !== "explicit")
-                        ? html` · <span class="review-hint">Needs review</span>`
-                        : nothing}
-                    </p>
+            ${sources.map(
+              ({ id, refs }) =>
+                html`<article class="plain-source" data-source=${id}>
+                  <div class="plain-source-header">
+                    <div class="source-heading">
+                      ${sourceIcon(refs[0].source_type)}
+                      <div>
+                        <h5>${this.sourceName(id)}</h5>
+                        <p>
+                          ${sourceLabels[refs[0].source_type] || refs[0].source_type}
+                          · ${refs.length}
+                          ${refs.length === 1 ? "reference" : "references"}
+                          ${
+                            refs.some((ref) => ref.confidence !== "explicit")
+                              ? html` ·
+                                  <span class="review-hint">Needs review</span>`
+                              : nothing
+                          }
+                        </p>
+                      </div>
+                    </div>
+                    ${this.sourceControl(id, true)}
                   </div>
-                </div>
-                ${this.sourceControl(id, true)}
-              </div>
-              <details class="plain-source-details">
-                <summary>Show reference locations</summary>
-                <div class="plain-source-paths">
-                  ${refs.map((ref) => html`<div class="plain-source-path">
-                    <span>${readablePath(ref.path)}</span>
-                    ${this.badge(ref.confidence)}
-                    <code>${ref.path}</code>
-                    ${ref.reason ? html`<p>${explainReason(ref.reason)}</p>` : nothing}
-                  </div>`)}
-                </div>
-              </details>
-            </article>`)}
+                  <details class="plain-source-details">
+                    <summary>Show reference locations</summary>
+                    <div class="plain-source-paths">
+                      ${refs.map(
+                        (ref) =>
+                          html`<div class="plain-source-path">
+                            <span>${readablePath(ref.path)}</span>
+                            ${this.badge(ref.confidence)}
+                            <code>${ref.path}</code>
+                            ${ref.reason ? html`<p>${explainReason(ref.reason)}</p>` : nothing}
+                          </div>`,
+                      )}
+                    </div>
+                  </details>
+                </article>`,
+            )}
           </div>
         </section>`;
       })}
-      ${report.coverage.warnings?.length
-        ? html`<div class="plain-scan-note">
-            <span>Some configuration could not be fully inspected. Results may be incomplete.</span>
-            <button @click=${this.showCoverage}>Scan details →</button>
-          </div>`
-        : nothing}
+      ${
+        report.coverage.warnings?.length
+          ? html`<div class="plain-scan-note">
+              <span
+                >Some configuration could not be fully inspected. Results may be
+                incomplete.</span
+              >
+              <button @click=${this.showCoverage}>Scan details →</button>
+            </div>`
+          : nothing
+      }
     </section>`;
   }
 
@@ -1296,7 +1331,6 @@ export class BlastRadiusPanel extends LitElement {
     }
     ${this.uncertainty(report)}`;
   }
-
 
   private showAdvanced() {
     this.advancedOpen = true;
@@ -1706,90 +1740,110 @@ export class BlastRadiusPanel extends LitElement {
                   <button class="primary" @click=${this.showChangePreview}>
                     Preview a change
                   </button>
-                  <button @click=${this.showAdvanced}>Explore relationships</button>
+                  <button @click=${this.showAdvanced}>
+                    Explore relationships
+                  </button>
                   <button @click=${this.copy}>Copy Markdown</button>
                   <button @click=${this.download}>Export JSON</button>
-                  <button ?disabled=${this.loading} @click=${() => this.run()}>Refresh snapshot</button>
+                  <button ?disabled=${this.loading} @click=${() => this.run()}>
+                    Refresh snapshot
+                  </button>
                 </div>
                 <a
                   class="issue-link"
                   href="https://github.com/artur-panek/ha-blast-radius/issues/new?template=bug.yml"
                   target="_blank"
                   rel="noopener noreferrer"
-                >Report issue ↗</a>
-                <p class="status" role="status" ?hidden=${!this.status}>${this.status}</p>
+                  >Report issue ↗</a
+                >
+                <p class="status" role="status" ?hidden=${!this.status}>
+                  ${this.status}
+                </p>
                 ${this.copyFallback ? html`<textarea aria-label="Markdown report" readonly .value=${report.markdown}></textarea>` : nothing}
                 <div class="columns">
-                  <details class="advanced-analysis"
+                  <details
+                    class="advanced-analysis"
                     .open=${this.advancedOpen}
                     @toggle=${(event: Event) =>
-                      (this.advancedOpen = (event.currentTarget as HTMLDetailsElement).open)}
+                      (this.advancedOpen = (
+                        event.currentTarget as HTMLDetailsElement
+                      ).open)}
                   >
                     <summary>
                       Advanced analysis
-                      <small>Detailed impact, relationship map and raw references</small>
+                      <small
+                        >Detailed impact, relationship map and raw
+                        references</small
+                      >
                     </summary>
                     <div class="advanced-content">
-                      <section class="impact-summary" aria-label="Impact summary">
-                  <div class="impact-verdict">
-                    <span class="eyebrow">At a glance</span>
-                    <strong>
+                      <section
+                        class="impact-summary"
+                        aria-label="Impact summary"
+                      >
+                        <div class="impact-verdict">
+                          <span class="eyebrow">At a glance</span>
+                          <strong>
+                            ${
+                              report.summary.sources
+                                ? `${report.summary.sources} direct ${report.summary.sources === 1 ? "source" : "sources"}`
+                                : "No incoming sources found"
+                            }
+                          </strong>
+                          <p>${this.impactNarrative(report)}</p>
+                        </div>
+                        <div class="impact-metrics semantic-metrics">
+                          <div>
+                            <strong>${this.directStats(report).action}</strong>
+                            <span>sources can change / invoke</span>
+                          </div>
+                          <div>
+                            <strong>${this.directStats(report).read}</strong>
+                            <span>sources read / react</span>
+                          </div>
+                          <div>
+                            <strong
+                              >${this.downstreamStats(report).possible}</strong
+                            >
+                            <span>downstream nodes identified</span>
+                          </div>
+                          <div>
+                            <strong>${this.directStats(report).display}</strong>
+                            <span>display sources</span>
+                          </div>
+                        </div>
+                      </section>
                       ${
-                        report.summary.sources
-                          ? `${report.summary.sources} direct ${report.summary.sources === 1 ? "source" : "sources"}`
-                          : "No incoming sources found"
+                        this.downstreamStats(report).context
+                          ? html`<div class="summary-context-note">
+                              <strong
+                                >${this.downstreamStats(report).context}</strong
+                              >
+                              ${
+                                this.downstreamStats(report).context === 1
+                                  ? "additional node is"
+                                  : "additional nodes are"
+                              }
+                              shared-flow context only — useful for
+                              understanding the surrounding controller, not an
+                              outgoing effect of the selected entity.
+                            </div>`
+                          : nothing
                       }
-                    </strong>
-                    <p>${this.impactNarrative(report)}</p>
-                  </div>
-                  <div class="impact-metrics semantic-metrics">
-                    <div>
-                      <strong>${this.directStats(report).action}</strong>
-                      <span>sources can change / invoke</span>
-                    </div>
-                    <div>
-                      <strong>${this.directStats(report).read}</strong>
-                      <span>sources read / react</span>
-                    </div>
-                    <div>
-                      <strong>${this.downstreamStats(report).possible}</strong>
-                      <span>downstream nodes identified</span>
-                    </div>
-                    <div>
-                      <strong>${this.directStats(report).display}</strong>
-                      <span>display sources</span>
-                    </div>
-                  </div>
-                </section>
-                ${
-                  this.downstreamStats(report).context
-                    ? html`<div class="summary-context-note">
-                        <strong>${this.downstreamStats(report).context}</strong>
-                        ${
-                          this.downstreamStats(report).context === 1
-                            ? "additional node is"
-                            : "additional nodes are"
-                        }
-                        shared-flow context only — useful for understanding the
-                        surrounding controller, not an outgoing effect of the
-                        selected entity.
-                      </div>`
-                    : nothing
-                }
                     </div>
                     <section class="card">
-                    <nav role="tablist" aria-label="Analysis views">
-                      ${(["impact", "graph", "raw"] as const).map((tab) => html`<button role="tab" id=${`tab-${tab}`} aria-controls="analysis-view" aria-selected=${this.tab === tab} tabindex=${this.tab === tab ? 0 : -1} @keydown=${this.tabKeydown} @click=${() => (this.tab = tab)}>${tab === "impact" ? "Detailed impact" : tab === "graph" ? "Relationship map" : "Raw references"}</button>`)}
-                    </nav>
-                    ${this.filters(report)}
-                    <div
-                      role="tabpanel"
-                      id="analysis-view"
-                      aria-labelledby=${`tab-${this.tab}`}
-                    >
-                      ${this.tab === "impact" ? this.impact(report) : this.tab === "graph" ? this.graph(report) : this.raw(report)}
-                    </div>
-                  </section>
+                      <nav role="tablist" aria-label="Analysis views">
+                        ${(["impact", "graph", "raw"] as const).map((tab) => html`<button role="tab" id=${`tab-${tab}`} aria-controls="analysis-view" aria-selected=${this.tab === tab} tabindex=${this.tab === tab ? 0 : -1} @keydown=${this.tabKeydown} @click=${() => (this.tab = tab)}>${tab === "impact" ? "Detailed impact" : tab === "graph" ? "Relationship map" : "Raw references"}</button>`)}
+                      </nav>
+                      ${this.filters(report)}
+                      <div
+                        role="tabpanel"
+                        id="analysis-view"
+                        aria-labelledby=${`tab-${this.tab}`}
+                      >
+                        ${this.tab === "impact" ? this.impact(report) : this.tab === "graph" ? this.graph(report) : this.raw(report)}
+                      </div>
+                    </section>
                   </details>
                   <details
                     class="card change-preview"

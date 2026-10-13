@@ -546,7 +546,6 @@ export const styles = css`
     margin-top: 10px;
   }
 
-
   /* One clear result list; graph and scanner internals stay optional. */
   .plain-impact {
     background: var(--br-card);
