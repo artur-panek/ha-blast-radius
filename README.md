@@ -95,17 +95,19 @@ and select the latest numbered release. Updates do not install or restart HA aut
 
 1. Select or type an entity ID. Missing old IDs are accepted.
 2. Press **Analyze**. Traversal depth is available under **Analysis options** when you need to adjust it.
-3. Read **Configurations found** to see what can change, read, or display the
-   selected entity. Each source appears once. Choose **Open** to inspect the source
-   in Home Assistant, or expand **Show reference locations** for exact paths.
-4. Use **Preview a change** to review a same-domain rename or removal. No
-   configuration is changed. **Export JSON** saves the complete report.
-5. For a deeper investigation, choose **Explore relationships** or expand
-   **Advanced analysis** to see the detailed impact view, relationship map,
-   source filters, raw references, and Markdown export. Shared-flow co-targets
-   are context, not proof that changing the entity affects them.
-6. Check **Scan details** when coverage is partial, especially before removing
-   an entity. Make any actual changes yourself in Home Assistant.
+3. Review the configurations listed below the selected entity. They're grouped
+   by what they can do: **Can change it**, **Uses its state**, or **Shows it**,
+   with other reference types shown when relevant. Each configuration appears
+   once. Choose **Open** to inspect it in Home Assistant, or **View exact locations**
+   to see the matching configuration paths.
+4. Choose **Preview a change** to check a same-domain rename or removal. The
+   preview form opens only when requested and never writes any configuration.
+   **Export JSON** saves the complete report.
+5. Choose **Explore relationships** for the detailed impact view, graph, source
+   filters, raw references, and Markdown export. This advanced section can be
+   collapsed again; shared-flow context does not prove causality.
+6. When the results note a gap in scan coverage, choose **Scan details** to see
+   what was not inspected. Make actual Home Assistant changes yourself.
 
 Use the source chips (Automation, Script, Dashboard, Scene, Group) and confidence
 chips (Explicit, Template literal, Needs review) to narrow the displayed results.

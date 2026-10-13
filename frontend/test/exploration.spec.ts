@@ -813,7 +813,7 @@ test("the default result answers where the entity is used without exposing the g
   await input(page).press("Enter");
   await expect(
     page.getByRole("heading", {
-      name: "3 configurations reference this entity",
+      name: "3 configurations use this entity",
     }),
   ).toBeVisible();
   const simple = page.locator(".plain-impact");
@@ -863,7 +863,7 @@ test("each direct source appears once even when it has more than one role", asyn
   });
   await expect(
     page.getByRole("heading", {
-      name: "2 configurations reference this entity",
+      name: "2 configurations use this entity",
     }),
   ).toBeVisible();
   const list = page.locator(".plain-impact .plain-source");
@@ -938,7 +938,7 @@ test("primary summary tells the user what to check without repeating counts", as
   await input(page).fill("binary_sensor.wall_button");
   await input(page).press("Enter");
   await expect(page.locator(".plain-lead h3")).toHaveText(
-    "3 configurations reference this entity",
+    "3 configurations use this entity",
   );
   await expect(page.locator(".plain-lead p")).toContainText(
     "Review these configurations before renaming or removing",

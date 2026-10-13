@@ -225,7 +225,7 @@ test("HA users have separate search sessions", async ({ page }) => {
   });
   await expect(search(page)).toHaveValue("binary_sensor.wall_button");
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
-  await expect(page.locator(".recent-search")).toHaveCount(1);
+  await expect(page.locator(".recent-search")).toHaveCount(0);
   await expect(
     page.getByRole("button", {
       name: "Analyze again: sensor.unused",
@@ -277,4 +277,20 @@ test("blocked browser storage does not break analysis or return navigation", asy
   await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
   await page.getByRole("button", { name: "Clear recent searches" }).click();
   await expect(page.locator(".recent-search")).toHaveCount(0);
+});
+
+test("the first search is not repeated in Recent, but is recoverable after failure", async ({
+  page,
+}) => {
+  await analyze(page, "light.desk");
+  await expect(page.locator(".recent-search")).toHaveCount(0);
+  await expect(
+    page.getByRole("region", { name: "Recent searches" }),
+  ).toHaveCount(0);
+  await search(page).fill("sensor.not_in_demo");
+  await search(page).press("Enter");
+  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Analyze again: light.desk" }),
+  ).toBeVisible();
 });

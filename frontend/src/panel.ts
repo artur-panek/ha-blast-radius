@@ -1062,7 +1062,7 @@ export class BlastRadiusPanel extends LitElement {
         <h3>
           ${
             count
-              ? `${count} ${count === 1 ? "configuration references" : "configurations reference"} this entity`
+              ? `${count} ${count === 1 ? "configuration uses" : "configurations use"} this entity`
               : "No direct references found"
           }
         </h3>
@@ -1697,7 +1697,8 @@ export class BlastRadiusPanel extends LitElement {
           </div>
         </details>
         ${
-          this.recentSearches.length
+          this.recentSearches.length &&
+          (this.recentSearches.length > 1 || !report)
             ? html`<section
                 class="recent-searches"
                 aria-label="Recent searches"

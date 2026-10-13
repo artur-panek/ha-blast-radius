@@ -617,6 +617,7 @@ export const styles = css`
   .plain-source .review-hint {
     display: inline;
     font-size: inherit;
+    white-space: nowrap;
   }
   .plain-source-details {
     margin: 2px 0 0 32px;
