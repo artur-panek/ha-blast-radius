@@ -620,6 +620,10 @@ export const styles = css`
     line-height: 1.45;
     overflow-wrap: anywhere;
   }
+  .plain-source h5 .source-name:focus-visible {
+    outline: 2px solid var(--br-accent);
+    outline-offset: 3px;
+  }
   .plain-source .source-heading p {
     margin: 2px 0 0;
     font-size: 12px;
@@ -1497,9 +1501,6 @@ export const styles = css`
     font-size: 12px;
   }
   @media (max-width: 850px) {
-    .columns {
-      grid-template-columns: 1fr;
-    }
     main {
       padding: 22px 18px;
     }

@@ -1092,7 +1092,7 @@ export class BlastRadiusPanel extends LitElement {
                     <div class="source-heading">
                       ${sourceIcon(refs[0].source_type)}
                       <div>
-                        <h5>${this.sourceName(id)}</h5>
+                        <h5>${this.sourceControl(id)}</h5>
                         <p>
                           ${sourceLabels[refs[0].source_type] || refs[0].source_type}
                           · ${refs.length}
@@ -1108,7 +1108,10 @@ export class BlastRadiusPanel extends LitElement {
                           ${
                             refs.some((ref) => ref.confidence !== "explicit")
                               ? html` ·
-                                  <span class="review-hint">Needs review</span>`
+                                  <span
+                                    class="review-hint"
+                                    title="Some references could not be fully verified. Check the exact locations."
+                                  >Needs review</span>`
                               : nothing
                           }
                         </p>
@@ -1118,7 +1121,7 @@ export class BlastRadiusPanel extends LitElement {
                   </div>
                   <details class="plain-source-details">
                     <summary
-                      aria-label=${`Show reference locations in ${this.sourceName(id)}`}
+                      aria-label=${`View exact locations in ${this.sourceName(id)}`}
                     >
                       View exact locations
                     </summary>

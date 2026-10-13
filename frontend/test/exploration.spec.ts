@@ -955,3 +955,88 @@ test("primary summary tells the user what to check without repeating counts", as
     page.locator(".plain-use-group").getByRole("heading", { name: "Shows it" }),
   ).toBeVisible();
 });
+
+test("direct source names navigate to Home Assistant and disclose exact paths", async ({
+  page,
+}) => {
+  await input(page).fill("binary_sensor.wall_button");
+  await input(page).press("Enter");
+  const source = page.locator(
+    '.plain-impact .plain-source[data-source="automation.wall_button"]',
+  );
+  await expect(source).toBeVisible();
+  const title = source.locator("a.source-name");
+  await expect(title).toHaveAttribute(
+    "href",
+    "/config/automation/show/automation.wall_button",
+  );
+  await expect(source.locator("a.open-source")).toHaveAttribute(
+    "href",
+    "/config/automation/show/automation.wall_button",
+  );
+  await title.focus();
+  await expect(title).toBeFocused();
+
+  // The native details control has a descriptive, visible-label-matching name.
+  const exact = source.locator(".plain-source-details > summary");
+  await expect(exact).toHaveAttribute(
+    "aria-label",
+    "View exact locations in Wall button",
+  );
+  await exact.click();
+  await expect(source.locator(".plain-source-path code")).toBeVisible();
+});
+
+test("multiple control references and a dashboard produce one row per configuration", async ({
+  page,
+}) => {
+  await input(page).fill("light.desk");
+  await input(page).press("Enter");
+  await expect(page.getByRole("button", { name: "Export JSON" })).toBeVisible();
+  await page.locator("blast-radius-panel").evaluate((panel: any) => {
+    const base = panel.report.references[0];
+    const ref = (source_id: string, source_type: string, role: string, path: string) => ({
+      ...base,
+      source_id,
+      source_type,
+      role,
+      target: "light.desk",
+      path,
+      confidence: "explicit",
+    });
+    panel.report = {
+      ...panel.report,
+      references: [
+        ref("automation.room_switch", "automation", "write", "actions[0].target.entity_id"),
+        ref("automation.room_switch", "automation", "write", "actions[1].target.entity_id"),
+        ref("script.room_mode", "script", "write", "sequence[0].target.entity_id"),
+        ref("scene.relax", "scene", "write", "entity_id[0]"),
+        ref("dashboard.home", "dashboard", "display", "views[0].cards[0].entity"),
+      ],
+      source_names: {
+        ...panel.report.source_names,
+        "automation.room_switch": "Room switch",
+        "script.room_mode": "Room mode",
+        "scene.relax": "Relax",
+        "dashboard.home": "Home",
+      },
+    };
+  });
+  const overview = page.locator(".plain-impact");
+  await expect(overview.locator(".plain-lead h3")).toHaveText(
+    "4 configurations use this entity",
+  );
+  await expect(overview.locator(".plain-source")).toHaveCount(4);
+  await expect(
+    overview.locator('.plain-use-group[aria-label="Can change it"] .plain-source'),
+  ).toHaveCount(3);
+  await expect(
+    overview.locator('.plain-use-group[aria-label="Shows it"] .plain-source'),
+  ).toHaveCount(1);
+  const automation = overview.locator(
+    '.plain-source[data-source="automation.room_switch"]',
+  );
+  await expect(automation).toContainText("2 references");
+  await automation.locator(".plain-source-details > summary").click();
+  await expect(automation.locator(".plain-source-path")).toHaveCount(2);
+});

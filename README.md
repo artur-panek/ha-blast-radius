@@ -98,7 +98,7 @@ and select the latest numbered release. Updates do not install or restart HA aut
 3. Review the configurations listed below the selected entity. They're grouped
    by what they can do: **Can change it**, **Uses its state**, or **Shows it**,
    with other reference types shown when relevant. Each configuration appears
-   once. Choose **Open** to inspect it in Home Assistant, or **View exact locations**
+   once. Select its name or **Open** to inspect it in Home Assistant, or **View exact locations**
    to see the matching configuration paths.
 4. Choose **Preview a change** to check a same-domain rename or removal. The
    preview form opens only when requested and never writes any configuration.
