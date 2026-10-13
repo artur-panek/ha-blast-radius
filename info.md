@@ -1,15 +1,15 @@
-## Find what uses an entity before you change it
+## Find where an entity is used
 
-HA Blast Radius is a read-only dependency inspector for Home Assistant. Select an entity and see which automations, scripts, scenes and dashboards reference it, grouped by how they use it.
+Before renaming or removing a Home Assistant entity, check what refers to it.
 
-- **Open a source** directly in Home Assistant, or expand it to see the exact configuration locations.
-- **Preview a rename or removal** to review affected configurations. Blast Radius does not make the change for you.
-- **Explore relationships** when you need the deeper dependency map and raw references.
+Enter an entity ID. Blast Radius lists matching automations, scripts, scenes and dashboards. Open a configuration in Home Assistant, or expand a result to see the exact reference location.
 
-### Know the limits
+![Blast Radius results from a synthetic Home Assistant configuration](https://raw.githubusercontent.com/artur-panek/ha-blast-radius/main/docs/panel-light.png)
 
-The analysis is based on configuration, not a simulation of runtime behavior. Dynamic templates, device and area targets, external integrations and unavailable dashboard configuration may hide additional uses. No matches does **not** mean an entity is safe to delete.
+A rename or removal preview shows the configurations to review. Blast Radius is **read-only**: it never makes those changes. The relationship map and raw references are available when you need more detail.
 
-Requires **Home Assistant 2026.9.4 or later** and administrator access. Experimental alpha; no cloud service or telemetry.
+**Limitations:** This is a static scan of loaded configuration, not an execution trace. It cannot evaluate conditions or resolve every template, device/area target or unavailable dashboard. No matches does not mean an entity is safe to remove.
 
-[Installation and setup](https://github.com/artur-panek/ha-blast-radius#installation) · [Example screenshot](https://github.com/artur-panek/ha-blast-radius/blob/main/docs/panel-dark.png) · [Known limitations](https://github.com/artur-panek/ha-blast-radius#known-limitations) · [Report an issue](https://github.com/artur-panek/ha-blast-radius/issues/new/choose)
+Requires **Home Assistant 2026.9.4 or later** and an administrator account. Runs locally in Home Assistant, with no cloud service or telemetry.
+
+[Install through HACS](https://my.home-assistant.io/redirect/hacs_repository/?owner=artur-panek&repository=ha-blast-radius&category=integration) · [Documentation](https://github.com/artur-panek/ha-blast-radius#installation) · [Known limitations](https://github.com/artur-panek/ha-blast-radius#known-limitations) · [Report a problem](https://github.com/artur-panek/ha-blast-radius/issues/new/choose)

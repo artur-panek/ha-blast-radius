@@ -1,7 +1,8 @@
 # Security
 
-Security fixes target the latest 0.1.x alpha. Older alpha builds are not separately
-maintained. This project has not undergone an independent security audit.
+Security fixes target the latest published alpha release. Older alpha builds
+are not maintained separately. This project has not undergone an independent
+security audit.
 
 Reports contain entity IDs, names, configuration paths and dependency structure,
 even though raw source configs and template bodies are excluded. Treat JSON,

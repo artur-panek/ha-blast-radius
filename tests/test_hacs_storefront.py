@@ -14,3 +14,5 @@ def test_hacs_details_use_a_short_information_page():
     assert "configuration" in info.lower()
     assert "https://github.com/artur-panek/ha-blast-radius" in info
     assert "2026.9.4" in info
+    assert "panel-light.png" in info
+    assert "No matches does not mean" in info

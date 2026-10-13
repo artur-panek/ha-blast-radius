@@ -65,32 +65,32 @@ dashboards open their view and other entities open HA's details dialog. Scenes
 without an editor ID fall back to details; missing entities have no open button.
 Navigation does not run automations, scripts or scenes.
 
-Use browser **Back** after opening a source. The panel restores your last successful
-search, depth and tab, requests a fresh report and restores the scroll position as
-far as the refreshed layout allows. This also works after reloading the page.
-The **Recent** bar keeps six successful searches in this browser tab's session;
-click one to analyze it again at its saved depth. **Clear** forgets the history and
-saved view without removing the report currently on screen. Your next successful
-analysis starts the list again. History is separate for each HA user on this origin.
-Only entity IDs and view settings are saved locally, not reports or configuration.
-Closing the tab normally ends the session; browser session recovery can retain it.
+After opening a configuration, use your browser's **Back** button to return to
+Blast Radius. The panel reloads the last successful search and restores its depth,
+selected advanced tab and scroll position when possible.
 
-Open **Graph** for separate **Used by** and **Possible targets** columns. Expand
-**Preview a change** to try a removal preview. Preview buttons only generate
-reports; they never perform the change.
+The Recent bar can reopen up to six earlier searches. It stays out of the way if
+the only saved search is the one currently displayed. To clear history, expand
+**Analysis options** and choose **Clear search history**. Only entity IDs and view
+settings are saved in browser session storage; reports and raw configuration are
+not. History is scoped to your HA user and browser tab.
 
-An unresolved count is not a count of broken entities. Expand **Unresolved
-expressions** to review groups by source and reason. **In linked configurations**
-covers affected automation/script configurations and linked dashboard cards.
-**Elsewhere in linked dashboards** retains expressions outside those cards or at
-dashboard level without attributing them to this entity. Their targets remain
-unknown. The total across the snapshot is under **Coverage and limitations**;
-a zero local count does not establish complete coverage.
+Select **Preview a change** to inspect a possible rename or removal. The preview
+does not perform either operation. Select **Explore relationships** to open
+Advanced analysis, where **Detailed impact**, **Relationship map** and **Raw
+references** remain available. The relationship map separates configurations
+using an entity from possible output targets; it does not simulate execution.
 
-Friendly names and readable locations make the result easier to scan. Locations
-use one-based numbers (for example, Card 3). Expand **Reference details** or
-**Connection details** for
-the exact zero-based path (`cards[2]`), or use **Raw references** and the exports.
+For scanner gaps, open **Scan details**. The first section shows what was
+inspected and which configurations could not be checked. **Technical details**
+contains installation-wide statistics and reason groups. Counts of unresolved
+expressions are not counts of broken entities or confirmed dependencies of the
+selected entity.
+
+The normal results list has **View exact locations** under each source.
+Friendly paths use one-based numbers (for example, Card 3); the underlying
+configuration path uses zero-based indexes (`cards[2]`). Advanced analysis
+also exposes raw paths and export options.
 
 ## Troubleshooting
 
@@ -99,10 +99,10 @@ the exact zero-based path (`cards[2]`), or use **Raw references** and the export
 | Integration not found | Verify the folder path and HA version, then restart HA |
 | Sidebar entry absent | Confirm the integration was added and you are an administrator |
 | Old UI or missing sidebar icon | Restart HA after updating, then reload the browser or reopen the app |
-| Error loading automation (500) after Open | Update to v0.1.7+, restart HA and reload. Open now uses HA's loaded-config view. A 500 in HA's separate edit screen still needs investigation in HA logs; Blast Radius does not repair configuration files |
+| Error opening an automation | Check whether the same automation loads in HA's own inspector, then check HA logs. Blast Radius uses HA's loaded-config view; it does not repair invalid configuration files |
 | Analysis fails | Reload the integration and retry; record versions and a synthetic reproduction |
-| Expected reference absent | Expand coverage warnings; unloaded YAML, failed blueprint expansion and unsupported source types can leave gaps |
-| Many unresolved entries | Expand the reason groups; runtime variables, patterns and selectors need more context. Other dashboard cards are listed separately, not attributed to this entity |
+| Expected reference absent | Open Scan details. Unloaded YAML, failed blueprint expansion, generated dashboards and unsupported sources can leave gaps |
+| Many unresolved entries | Technical details includes full-snapshot statistics. Expand reason groups to inspect runtime variables, patterns or selectors; unlinked dashboard expressions are not assigned to the selected entity |
 | Empty result | Check spelling and coverage; no detected reference is not proof removal is safe |
 
 ## Removal
@@ -115,14 +115,14 @@ Report bugs at https://github.com/artur-panek/ha-blast-radius/issues.
 Share only redacted reports and minimal synthetic examples, not full household
 configuration, access tokens or `.storage` files.
 
-## v0.2.1 exploration controls
+## Advanced analysis
 
-Source/confidence chips filter the displayed results. Full totals, coverage and
-exports remain complete. **Analyze this** changes the graph root inside Blast
-Radius; **Open →** opens Home Assistant's own inspector. Filters reset for a new
-root or when the panel is reopened. Recent searches and the selected tab retain
-existing session behavior. After updating, reload the browser to load the new panel.
+Source and confidence filters apply to the detailed analysis, graph and raw
+references, not the main source list or exports. **Analyze this** changes the
+selected entity in the graph; **Open →** inspects the source in Home Assistant.
+Filters reset when you choose another entity or reopen the panel.
 
-Successful loaded automation/script blueprints are inspected with HA-substituted
-inputs. Selector identity status is checked against registries; their entity members
-are not inferred. Supported stable baseline: Core 2026.9.4. HA-next CI is advisory.
+Successful automation and script blueprints are inspected after Home Assistant
+substitutes their inputs. Device/area/floor/label selectors are checked for
+registry identity, but their entity members are not inferred. The stable
+compatibility baseline is Core 2026.9.4; HA-next CI is advisory.
