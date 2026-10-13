@@ -74,6 +74,8 @@ export class BlastRadiusPanel extends LitElement {
     previewError: { state: true },
     previewOpen: { state: true },
     scanOpen: { state: true },
+    copiedPath: { state: true },
+    pathCopyError: { state: true },
   };
   declare hass: Hass;
   narrow = false;
@@ -94,6 +96,8 @@ export class BlastRadiusPanel extends LitElement {
   previewError = "";
   previewOpen = false;
   scanOpen = false;
+  copiedPath = "";
+  pathCopyError = "";
   private analyzedRoot = "";
   private initialized = false;
   private requestId = 0;
@@ -256,6 +260,8 @@ export class BlastRadiusPanel extends LitElement {
     this.status = "";
     this.copyFallback = false;
     this.previewError = "";
+    this.copiedPath = "";
+    this.pathCopyError = "";
     try {
       // A preview failure should not discard the analysis being reviewed.
       if (!operation) this.report = undefined;
@@ -301,6 +307,18 @@ export class BlastRadiusPanel extends LitElement {
     } catch {
       this.copyFallback = true;
       this.status = "Clipboard unavailable. Select and copy the report below.";
+    }
+  }
+
+  private async copyReferencePath(ref: Reference) {
+    const key = `${ref.source_id}:${ref.path}`;
+    try {
+      await navigator.clipboard.writeText(ref.path);
+      this.copiedPath = key;
+      this.pathCopyError = "";
+    } catch {
+      this.copiedPath = "";
+      this.pathCopyError = key;
     }
   }
 
@@ -1132,7 +1150,38 @@ export class BlastRadiusPanel extends LitElement {
                           html`<div class="plain-source-path">
                             <span>${readablePath(ref.path)}</span>
                             ${this.badge(ref.confidence)}
-                            <code>${ref.path}</code>
+                            <div class="plain-path-line">
+                              <code>${ref.path}</code>
+                              <button
+                                class="path-copy"
+                                aria-label=${`Copy reference path ${ref.path}`}
+                                @click=${() => this.copyReferencePath(ref)}
+                              >
+                                Copy path
+                              </button>
+                              ${
+                                this.copiedPath ===
+                                `${ref.source_id}:${ref.path}`
+                                  ? html`<span
+                                      class="path-copy-status"
+                                      role="status"
+                                      >Copied</span
+                                    >`
+                                  : nothing
+                              }
+                              ${
+                                this.pathCopyError ===
+                                `${ref.source_id}:${ref.path}`
+                                  ? html`<span
+                                      class="path-copy-status"
+                                      role="status"
+                                    >
+                                      Clipboard unavailable. Select the path to
+                                      copy it.
+                                    </span>`
+                                  : nothing
+                              }
+                            </div>
                             ${ref.reason ? html`<p>${explainReason(ref.reason)}</p>` : nothing}
                           </div>`,
                       )}
@@ -2005,26 +2054,30 @@ export class BlastRadiusPanel extends LitElement {
                           <h3>What could be missing?</h3>
                           <ul>
                             ${(report.coverage.gaps || []).map(
-                              (gap) => html`<li>
-                                <strong>${gap.source_id}</strong> —
-                                ${({
-                                  configuration_unavailable:
-                                    "Loaded configuration could not be read.",
-                                  blueprint_unexpanded:
-                                    "Only blueprint inputs were available.",
-                                  loaded_config_unavailable:
-                                    "Loaded configuration was unavailable or failed validation.",
-                                  configuration_too_large:
-                                    "Configuration exceeded the scan size limit.",
-                                  metadata_unavailable:
-                                    "Home Assistant reference metadata was unavailable.",
-                                  membership_too_large:
-                                    "Membership exceeded the scan size limit.",
-                                  dashboard_unavailable:
-                                    "Dashboard configuration could not be read.",
-                                } as Record<string, string>)[gap.code] ||
-                                gap.warning}
-                              </li>`,
+                              (gap) =>
+                                html`<li>
+                                  <strong>${gap.source_id}</strong> —
+                                  ${
+                                    (
+                                      {
+                                        configuration_unavailable:
+                                          "Loaded configuration could not be read.",
+                                        blueprint_unexpanded:
+                                          "Only blueprint inputs were available.",
+                                        loaded_config_unavailable:
+                                          "Loaded configuration was unavailable or failed validation.",
+                                        configuration_too_large:
+                                          "Configuration exceeded the scan size limit.",
+                                        metadata_unavailable:
+                                          "Home Assistant reference metadata was unavailable.",
+                                        membership_too_large:
+                                          "Membership exceeded the scan size limit.",
+                                        dashboard_unavailable:
+                                          "Dashboard configuration could not be read.",
+                                      } as Record<string, string>
+                                    )[gap.code] || gap.warning
+                                  }
+                                </li>`,
                             )}
                             ${report.coverage.warnings
                               .filter(
