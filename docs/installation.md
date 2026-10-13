@@ -59,11 +59,12 @@ needed on the Home Assistant machine; the built panel is included.
 
 Analyze an entity you know appears in an automation or dashboard. Confirm the
 source IDs and paths against that configuration. Click a source name or **Open**
-to inspect the loaded automation or script in HA's native read-only view. This also
-works for loaded YAML automations without an editor ID. Scene links open HA's editor;
-dashboards open their view and other entities open HA's details dialog. Scenes
-without an editor ID fall back to details; missing entities have no open button.
-Navigation does not run automations, scripts or scenes.
+to inspect it in Home Assistant. Automation and script links open their native
+configuration views, including for loaded YAML automations without an editor ID.
+Scene links can open the HA editor; scenes without an editor ID fall back to
+details. Dashboard links open the dashboard, and entity links open the details
+dialog. Missing entities have no open button. Opening a link does not run
+automations, scripts or scenes, but the destination may allow manual edits.
 
 After opening a configuration, use your browser's **Back** button to return to
 Blast Radius. The panel reloads the last successful search and restores its depth,
