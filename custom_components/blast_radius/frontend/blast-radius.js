@@ -1349,6 +1349,15 @@ var De = {
     margin-top: 12px;
     padding: 18px;
   }
+  .advanced-tools-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+  }
+  .advanced-tools-row button {
+    font-size: 13px;
+  }
   @media (max-width: 600px) {
     .plain-impact {
       padding: 16px;
