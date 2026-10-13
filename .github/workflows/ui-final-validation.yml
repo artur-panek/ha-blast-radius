@@ -1,0 +1,40 @@
+name: Validate and sync simplified panel
+on:
+  push:
+    branches: [ui/clear-results-workflow]
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npx prettier --write 'src/*.ts' '*.ts' '*.json' 'test/*.ts' index.html
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+      - run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - run: npm test
+        working-directory: frontend
+      - name: Commit regenerated bundle and synthetic screenshots
+        run: |
+          if git diff --quiet -- frontend/src/ frontend/test/ custom_components/blast_radius/frontend/ docs/panel-light.png docs/panel-dark.png docs/panel-mobile-dark.png; then
+            echo 'Everything is already up to date.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add frontend/src/ frontend/test/ custom_components/blast_radius/frontend/ docs/panel-light.png docs/panel-dark.png docs/panel-mobile-dark.png
+          git commit -m 'build: refresh bundled panel and synthetic screenshots'
+          git push origin HEAD:ui/clear-results-workflow
