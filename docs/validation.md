@@ -1,5 +1,14 @@
 # Validation
 
+## Current stable compatibility lane — 2026-10-14
+
+`ha-current.yml` checks HA Core 2026.10.1 using the matching
+`pytest-homeassistant-custom-component==0.13.372` fixture and frontend
+`20260930.3`. It is advisory on pull requests, weekly and manually.
+The release-blocking Quality workflow continues to cover minimum supported
+Home Assistant 2026.9.4. Older HA-next beta results below are historical.
+
+
 ## v0.2.3
 
 The final review of v0.2.2 found the same read/write issue in ordinary state and
