@@ -1,4 +1,4 @@
-name: HA next (advisory)
+name: HA current stable (advisory)
 on:
   pull_request:
     paths-ignore: ['**.md', 'docs/**', 'LICENSE', '.github/ISSUE_TEMPLATE/**']
@@ -9,14 +9,14 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: ha-next-${{ github.ref }}
+  group: ha-current-${{ github.ref }}
   cancel-in-progress: true
 
 # Advisory only. Run it before merge, weekly, or manually.
 # Stable Quality runs again on main and remains the release gate.
 jobs:
-  ha-next:
-    name: Compatibility against HA next
+  ha-current:
+    name: Compatibility against current stable HA
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -27,13 +27,13 @@ jobs:
           cache: pip
           cache-dependency-path: |
             pyproject.toml
-            requirements/ha-next.txt
-      - run: python -m pip install -e '.[dev]' -r requirements/ha-next.txt
+            requirements/ha-current.txt
+      - run: python -m pip install -e '.[dev]' -r requirements/ha-current.txt
       - run: python -m pip check
-      - name: Record exact Home Assistant version
+      - name: Record tested Home Assistant version
         run: |
           python -c 'from homeassistant.const import __version__; print("Home Assistant", __version__)' | tee -a "$GITHUB_STEP_SUMMARY"
       - run: pytest -q --cov --timeout=60
       - name: Explain advisory result
         if: always()
-        run: echo 'HA-next is advisory. Stable HA 2026.9.4 Quality tests remain authoritative and release-blocking. See docs/validation.md.' >> "$GITHUB_STEP_SUMMARY"
+        run: echo 'Current-stable HA is advisory. Minimum supported HA 2026.9.4 Quality tests remain the release gate. See docs/validation.md.' >> "$GITHUB_STEP_SUMMARY"

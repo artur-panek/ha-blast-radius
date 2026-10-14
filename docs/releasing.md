@@ -73,28 +73,25 @@ submission is performed by this workflow.
 
 `pyproject.toml` pins stable HA, its matching pytest fixture package and frontend.
 Quality's Python 3.14 job remains required by publication; Python 3.12 tests the
-standalone engine. `.github/workflows/ha-next.yml` runs the full Python suite
+standalone engine. `.github/workflows/ha-current.yml` runs the full Python suite
 on pull requests, its weekly schedule, and manual dispatch, using
-`requirements/ha-next.txt` in a separate environment. It does not run again
+`requirements/ha-current.txt` in a separate environment. It does not run again
 after each merge to `main`; the stable Quality workflow handles the post-merge
-release gate. HA-next remains advisory, not a dependency of publication.
+release gate. Current-stable validation remains advisory, not a dependency of publication.
 Failures remain red with their logs and exact HA version; no
 `continue-on-error` hides them.
 
-Before each release, inspect official HA GitHub releases and update the next pairing
-to the latest appropriate official prerelease, including the matching fixture package
-and HA frontend requirement. Version pins keep runs reproducible. A newly released
-beta does not silently replace an already recorded test result.
+Before each release, check the latest official stable Home Assistant patch release.
+Pin the matching pytest fixture and frontend package. Do not silently change the
+minimum supported version; this lane is compatibility evidence, not the release gate.
 
-Once the next HA version becomes stable, run the full suite, assess interface changes
-and deliberately update the stable pins, HACS minimum/support statement, package
-checks and release notes. Then move the advisory pairing to the next official release.
-Do not relax stable checks to accommodate beta failures. Keep stable and next in
-separate environments; do not install the stable `ha` extra in the next environment.
+When the supported minimum changes, update its pins, HACS compatibility statement,
+package checks and release notes together. Keep it separate from the current-stable
+advisory environment. Do not install the `ha` extra in the current-stable environment.
 
 ```bash
-python3.14 -m venv .venv-next
-.venv-next/bin/python -m pip install -e '.[dev]' -r requirements/ha-next.txt
-.venv-next/bin/python -m pip check
-.venv-next/bin/pytest -q --cov --timeout=60
+python3.14 -m venv .venv-current
+.venv-current/bin/python -m pip install -e '.[dev]' -r requirements/ha-current.txt
+.venv-current/bin/python -m pip check
+.venv-current/bin/pytest -q --cov --timeout=60
 ```
