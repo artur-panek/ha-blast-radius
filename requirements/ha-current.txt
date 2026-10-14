@@ -1,0 +1,6 @@
+# Advisory compatibility checks against the latest confirmed stable HA release.
+# Tested release: HA 2026.10.1 (2026-10-10). Minimum supported stays 2026.9.4.
+# Keep the pytest fixture pinned to the exact matching Home Assistant release.
+homeassistant==2026.10.1
+pytest-homeassistant-custom-component==0.13.372
+home-assistant-frontend==20260930.3
