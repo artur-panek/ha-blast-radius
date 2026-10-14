@@ -167,7 +167,10 @@ def test_notes_use_only_matching_changelog_section():
         "0.1.3",
     )
     assert "New fix" in notes and "Old fix" not in notes
-    assert "experimental alpha" in notes and "`v0.1.3`" in notes
+    assert notes.startswith("## Experimental alpha\n")
+    assert "Install the update through HACS" in notes
+    assert "/blob/v0.1.3/docs/installation.md" in notes
+    assert "Redownload" not in notes
     with pytest.raises(ValueError, match="changelog"):
         publisher.release_notes("# Changelog\n", "0.1.3")
 
