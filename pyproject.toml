@@ -13,7 +13,7 @@ Issues = "https://github.com/artur-panek/ha-blast-radius/issues"
 Releases = "https://github.com/artur-panek/ha-blast-radius/releases"
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "pytest-asyncio>=1,<2", "pytest-cov>=6,<8", "pytest-timeout>=2,<3", "ruff>=0.12,<1", "mypy>=1.16,<2"]
+dev = ["pytest>=8,<10", "pytest-asyncio>=1,<2", "pytest-cov>=6,<8", "pytest-timeout>=2,<3", "ruff>=0.12,<1", "mypy>=1.16,<3"]
 ha = [
   "homeassistant==2026.9.4; python_full_version >= '3.14.2'",
   "pytest-homeassistant-custom-component==0.13.367; python_full_version >= '3.14.2'",
