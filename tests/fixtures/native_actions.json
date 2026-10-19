@@ -1,0 +1,35 @@
+[
+  {
+    "source_id": "dashboard.home",
+    "source_type": "dashboard",
+    "name": "Home",
+    "config": {
+      "views": [
+        {
+          "cards": [
+            {"type": "button", "entity": "light.kitchen"},
+            {
+              "type": "button",
+              "tap_action": {
+                "action": "perform-action",
+                "perform_action": "script.wake_up"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "source_id": "script.wake_up",
+    "source_type": "script",
+    "name": "Wake up",
+    "config": {"sequence": [{"scene": "scene.morning"}]}
+  },
+  {
+    "source_id": "scene.morning",
+    "source_type": "scene",
+    "name": "Morning",
+    "config": {"entity_id": ["light.bedroom"]}
+  }
+]
