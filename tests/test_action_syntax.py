@@ -294,3 +294,100 @@ def test_modern_dashboard_calls_do_not_connect_unrelated_cards(action_sources):
         "scene.morning",
         "light.bedroom",
     }
+
+
+@pytest.mark.parametrize("known", [False, True])
+def test_script_names_in_variables_and_event_data_do_not_create_calls(known):
+    data = json.loads((Path(__file__).parent / "fixtures/script_call_fields.json").read_text())
+    description, shutdown = (Source(**source) for source in data)
+    entities = {shutdown.source_id} if known else set()
+    refs = scan_sources((description,), entities).references
+    if known:
+        assert {ref.path for ref in refs} == {
+            "sequence[0].variables.service",
+            "sequence[0].variables.action",
+            "sequence[1].event_data.service",
+            "sequence[1].event_data.action",
+            "sequence[1].event_data.sequence[0].service",
+            "sequence[1].event_data.sequence[0].action",
+        }
+        assert all(ref.confidence == Confidence.UNKNOWN and ref.role == Role.READ for ref in refs)
+    else:
+        assert refs == ()
+
+    report = Analyzer((description, shutdown), entities).analyze(description.source_id)
+    assert [node["id"] for node in report["graph"]["nodes"]] == [description.source_id]
+    assert report["summary"]["downstream"] == 0
+
+
+@pytest.mark.parametrize("field", ["action", "service"])
+@pytest.mark.parametrize(
+    "sequence,path",
+    [
+        ([{}], "sequence[0]"),
+        (
+            [{"choose": [{"conditions": [], "sequence": [{}]}]}],
+            "sequence[0].choose[0].sequence[0]",
+        ),
+        (
+            [{"choose": [], "default": [{}]}],
+            "sequence[0].default[0]",
+        ),
+        (
+            [{"repeat": {"count": 2, "sequence": [{}]}}],
+            "sequence[0].repeat.sequence[0]",
+        ),
+        (
+            [{"parallel": [{"sequence": [{}]}]}],
+            "sequence[0].parallel[0].sequence[0]",
+        ),
+        ([{"parallel": [{}]}], "sequence[0].parallel[0]"),
+        ([{"parallel": [[{}]]}], "sequence[0].parallel[0][0]"),
+        ([{"if": [], "then": [{}]}], "sequence[0].then[0]"),
+        ([{"if": [], "then": [], "else": [{}]}], "sequence[0].else[0]"),
+    ],
+)
+def test_native_script_calls_keep_nested_paths_and_effects(field, sequence, path):
+    config = {"sequence": copy.deepcopy(sequence)}
+    item = config
+    for part in path.split("."):
+        key, *indexes = part.replace("]", "").split("[")
+        item = item[key]
+        for index in indexes:
+            item = item[int(index)]
+    item[field] = "script.shutdown"
+    caller = Source("script.caller", "script", "Caller", config)
+    shutdown = Source(
+        "script.shutdown",
+        "script",
+        "Shutdown",
+        {"sequence": [{"action": "light.turn_off", "target": {"entity_id": "light.office"}}]},
+    )
+    engine = Analyzer((caller, shutdown), set())
+    refs = engine.analyze(shutdown.source_id)["references"]
+    assert len(refs) == 1
+    assert refs[0]["path"] == f"{path}.{field}"
+    assert refs[0]["confidence"] == "explicit" and refs[0]["role"] == "call"
+    nodes = {node["id"]: node for node in engine.analyze(caller.source_id)["graph"]["nodes"]}
+    assert nodes[shutdown.source_id]["relationship"] == "downstream"
+    assert nodes["light.office"]["depth"] == 2
+
+
+@pytest.mark.parametrize(
+    "card",
+    [
+        {"type": "custom:example", "tap_action": {"action": "script.example"}},
+        {
+            "type": "custom:example",
+            "tap_action": {"action": "call-service", "service": "script.example"},
+        },
+        {"type": "button", "tap_action": {"action": "none", "service": "script.example"}},
+        {"type": "button", "data": {"service": "script.example"}},
+    ],
+)
+def test_untyped_legacy_dashboard_fields_do_not_create_script_calls(card):
+    source = Source("dashboard.home", "dashboard", "Home", {"views": [{"cards": [card]}]})
+    assert scan_sources((source,), set()).references == ()
+    refs = scan_sources((source,), {"script.example"}).references
+    assert len(refs) == 1
+    assert refs[0].confidence == Confidence.UNKNOWN and refs[0].role == Role.READ

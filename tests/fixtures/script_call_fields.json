@@ -1,0 +1,45 @@
+[
+  {
+    "source_id": "script.describe_shutdown",
+    "source_type": "script",
+    "name": "Describe shutdown",
+    "config": {
+      "sequence": [
+        {
+          "variables": {
+            "service": "script.shutdown",
+            "action": "script.shutdown"
+          }
+        },
+        {
+          "event": "shutdown_requested",
+          "event_data": {
+            "service": "script.shutdown",
+            "action": "script.shutdown",
+            "sequence": [
+              {
+                "service": "script.shutdown",
+                "action": "script.shutdown"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "source_id": "script.shutdown",
+    "source_type": "script",
+    "name": "Shutdown",
+    "config": {
+      "sequence": [
+        {
+          "action": "light.turn_off",
+          "target": {
+            "entity_id": "light.office"
+          }
+        }
+      ]
+    }
+  }
+]

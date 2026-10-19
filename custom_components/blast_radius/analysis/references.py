@@ -32,8 +32,8 @@ _DEVICE_POSITIONS = {
 }
 _NATIVE_NODE_PATH = re.compile(
     r"^(?:triggers?|conditions?|actions?|sequence)(?:\[\d+\])?"
-    r"(?:\.(?:choose|conditions?|sequence|then|else|default|parallel|repeat|while|until|if|"
-    r"wait_for_trigger)(?:\[\d+\])?)*$"
+    r"(?:\.(?:(?:choose|conditions?|sequence|then|else|default|repeat|while|until|if|"
+    r"wait_for_trigger)(?:\[\d+\])?|parallel(?:\[\d+\]){0,2}))*$"
 )
 _DASHBOARD_ACTION_PATH = re.compile(
     r"^views\[\d+\](?:\.sections\[\d+\])?\.(?:cards|badges)\[\d+\]"
@@ -194,15 +194,15 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                 elif field in {"action", "actions", "sequence", "then", "else"}:
                     next_role = Role.WRITE
                 native_action_field = isinstance(child, str) and (
-                    (dashboard_action and field == "perform_action")
+                    (dashboard_action and field in {"perform_action", "service"})
                     or (
                         native_source
                         and key in _ACTION_POSITIONS
                         and role == Role.WRITE
-                        and field == "scene"
+                        and field in {"action", "service", "scene"}
                     )
                 )
-                if native_action_field:
+                if native_action_field and field in {"perform_action", "scene"}:
                     next_role = Role.CALL if field == "perform_action" else Role.WRITE
                 if key == "entities" and ENTITY_RE.fullmatch(field):
                     emit(source, field, child_path, Confidence.EXPLICIT, role)
@@ -314,7 +314,7 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                         Role.WRITE,
                         "Non-literal entity target",
                     )
-            elif key in {"action", "service"} or (action_field and key == "perform_action"):
+            elif action_field and key in {"action", "service", "perform_action"}:
                 if (
                     value.startswith("script.")
                     and value[7:] not in _SCRIPT_SERVICES
