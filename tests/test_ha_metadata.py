@@ -166,7 +166,7 @@ async def test_selectors_confirm_registry_identity_without_entity_expansion(hass
     )
 
 
-async def test_native_metadata_fills_missing_reference_without_inventing_write_role(hass):
+async def test_scene_shorthand_keeps_its_native_location_and_effect(hass):
     assert await async_setup_component(
         hass,
         "script",
@@ -179,16 +179,34 @@ async def test_native_metadata_fills_missing_reference_without_inventing_write_r
         },
     )
     await hass.async_block_till_done()
-    report = await BlastRadiusCoordinator(hass).request("analyze", {"entity_id": "scene.evening"})
+    entity = next(iter(hass.data[DATA_INSTANCES]["script"].entities))
+    assert entity.available and entity.referenced_entities == {"scene.evening"}
+    assert hass.states.get("scene.evening") is None
+    with patch.object(type(hass.services), "async_call", side_effect=AssertionError("read only")):
+        report = await BlastRadiusCoordinator(hass).request(
+            "analyze", {"entity_id": "scene.evening"}
+        )
+        script = await BlastRadiusCoordinator(hass).request(
+            "analyze", {"entity_id": "script.scene_shortcut"}
+        )
     assert len(report["references"]) == 1
     ref = report["references"][0]
-    assert ref["path"] == "metadata.referenced_entities"
-    assert ref["confidence"] == "unknown"
-    assert ref["role"] == "read"
-    script = await BlastRadiusCoordinator(hass).request(
-        "analyze", {"entity_id": "script.scene_shortcut"}
-    )
-    assert not any(n["relationship"] == "downstream" for n in script["graph"]["nodes"])
+    assert ref["path"] == "sequence[0].scene"
+    assert ref["confidence"] == "explicit"
+    assert ref["role"] == "write"
+    assert {n["id"] for n in script["graph"]["nodes"] if n["relationship"] == "downstream"} == {
+        "scene.evening"
+    }
+
+    hass.states.async_set("scene.evening", "unknown", {"entity_id": ["light.bedroom"]})
+    with patch.object(type(hass.services), "async_call", side_effect=AssertionError("read only")):
+        script = await BlastRadiusCoordinator(hass).request(
+            "analyze", {"entity_id": "script.scene_shortcut"}
+        )
+    assert {n["id"] for n in script["graph"]["nodes"] if n["relationship"] == "downstream"} == {
+        "scene.evening",
+        "light.bedroom",
+    }
 
 
 async def test_device_action_registry_uuid_follows_renames_without_config_mutation(hass):

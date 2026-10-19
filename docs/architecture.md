@@ -56,9 +56,9 @@ HA skips template destinations and does not report a reference's location, role 
 branch execution. The structural scanner stays authoritative for located references.
 A native-only entity ID is added once with `confidence: unknown`, `role: read` and
 path `metadata.referenced_entities`, requiring review without creating a guessed
-write edge. Existing located references are not duplicated or upgraded. Regression
-coverage includes HA's scene shorthand, which the generic structural scanner can
-otherwise miss when the scene has no state/registry entry.
+write edge. Existing located references are not duplicated or upgraded. Native
+action fields described below retain their structural location even when the
+target has no state or registry entry.
 
 Literal selector fields retain their exact configuration location and, where it is
 a bounded identifier, a `selector: {kind, value, exists}` record. `exists` checks
@@ -218,6 +218,25 @@ Preview adds `preview: {operation, new_entity_id, affected_sources,
 changes_applied: false, note}`. Renames must be valid, same-domain, different,
 and collision-free. Missing source IDs are allowed for stale-reference analysis.
 Removal rejects a replacement ID.
+
+## Native action fields
+
+Literal `scene: scene.example` steps in automations and scripts are explicit write
+references, including nested branches, repeats and parallel sequences. This follows
+[Core 2026.9.4's scene action schema](https://github.com/home-assistant/core/blob/2026.9.4/homeassistant/helpers/config_validation.py#L1929-L1931).
+Scene membership remains limited to the attributes exposed by Home Assistant.
+
+Native dashboard tap, hold and double-tap actions recognize `perform_action` for
+both `perform-action` and the older `call-service` action. A direct `script.name`
+call retains its call role and exact path even when the script has been removed.
+When both fields are present, `perform_action` takes precedence over `service`,
+matching [frontend 20260826.7's action handler](https://github.com/home-assistant/frontend/blob/20260826.7/src/panels/lovelace/common/handle-action.ts).
+Generic services such as `script.turn_on` remain services, not script entities.
+
+These additions apply to native action positions in standard cards, rows, picture
+elements and badges. Fields inside custom cards or arbitrary payloads keep their
+untyped fallback; their behavior is not inferred from an action-like key. Dashboard
+actions still do not connect unrelated cards through forward impact traversal.
 
 ## Template classification
 

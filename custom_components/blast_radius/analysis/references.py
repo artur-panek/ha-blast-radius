@@ -12,6 +12,7 @@ _SKIP = {"alias", "description", "name", "icon", "unique_id", "id"}
 _ENTITY_KEYS = {"entity_id", "entity", "entities", "entity_ids"}
 _SCRIPT_SERVICES = {"turn_on", "turn_off", "toggle", "reload"}
 _SELECTOR_KEYS = {"area_id", "device_id", "floor_id", "label_id"}
+_ACTION_POSITIONS = {"action", "actions", "sequence", "then", "else", "default", "parallel"}
 _DEVICE_POSITIONS = {
     "trigger",
     "triggers",
@@ -33,6 +34,11 @@ _NATIVE_NODE_PATH = re.compile(
     r"^(?:triggers?|conditions?|actions?|sequence)(?:\[\d+\])?"
     r"(?:\.(?:choose|conditions?|sequence|then|else|default|parallel|repeat|while|until|if|"
     r"wait_for_trigger)(?:\[\d+\])?)*$"
+)
+_DASHBOARD_ACTION_PATH = re.compile(
+    r"^views\[\d+\](?:\.sections\[\d+\])?\.(?:cards|badges)\[\d+\]"
+    r"(?:\.(?:(?:cards|entities|elements|badges)\[\d+\]|card|row))*"
+    r"\.(?:tap_action|hold_action|double_tap_action)$"
 )
 
 
@@ -118,6 +124,8 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
         device_reference: bool = False,
         registry_entity: bool = False,
         event_filter: bool = False,
+        action_field: bool = False,
+        custom_dashboard: bool = False,
     ) -> None:
         if depth > MAX_NESTING:
             warnings.add(f"Nesting limit reached in {source.source_id}; analysis is incomplete.")
@@ -126,6 +134,17 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
             warnings.add("Reference limit reached; analysis is incomplete.")
             return
         if isinstance(value, dict):
+            custom_dashboard = custom_dashboard or (
+                source.source_type == "dashboard"
+                and isinstance(value.get("type"), str)
+                and value["type"].startswith("custom:")
+            )
+            dashboard_action = (
+                source.source_type == "dashboard"
+                and not custom_dashboard
+                and _DASHBOARD_ACTION_PATH.fullmatch(path) is not None
+                and value.get("action") in ("perform-action", "call-service")
+            )
             # Only HA device automation nodes accept entity registry IDs here.
             # An ID-looking value in service data, variables or a custom card
             # does not establish those semantics.
@@ -154,6 +173,9 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
             for field, child in value.items():
                 if not isinstance(field, str) or field in _SKIP:
                     continue
+                # HA's native dashboard handler prefers perform_action over service.
+                if dashboard_action and field == "service" and value.get("perform_action"):
+                    continue
                 child_path = f"{path}.{field}" if path else field
                 next_role = role
                 if field in {
@@ -171,6 +193,17 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     next_role = Role.READ
                 elif field in {"action", "actions", "sequence", "then", "else"}:
                     next_role = Role.WRITE
+                native_action_field = isinstance(child, str) and (
+                    (dashboard_action and field == "perform_action")
+                    or (
+                        native_source
+                        and key in _ACTION_POSITIONS
+                        and role == Role.WRITE
+                        and field == "scene"
+                    )
+                )
+                if native_action_field:
+                    next_role = Role.CALL if field == "perform_action" else Role.WRITE
                 if key == "entities" and ENTITY_RE.fullmatch(field):
                     emit(source, field, child_path, Confidence.EXPLICIT, role)
                     # Scene state attributes are not configuration references.
@@ -186,6 +219,8 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     and (device_node or (key == "event_data" and event_filter)),
                     registry_entity=field == "entity_id" and device_node,
                     event_filter=field == "event_data" and event_trigger,
+                    action_field=native_action_field,
+                    custom_dashboard=custom_dashboard,
                 )
         elif isinstance(value, (list, tuple)):
             for index, child in enumerate(value):
@@ -199,6 +234,7 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     device_reference,
                     registry_entity,
                     event_filter,
+                    custom_dashboard=custom_dashboard,
                 )
         elif isinstance(value, str):
             if is_template(value):
@@ -208,7 +244,7 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     # Even templated targets can read one entity to select another.
                     # Keep their visible literals as dependencies, never guessed effects.
                     emit(source, target, path, Confidence.TEMPLATE_LITERAL, Role.READ)
-                templated_target = (
+                templated_target = action_field or (
                     key
                     in _ENTITY_KEYS
                     | {
@@ -266,7 +302,19 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                             if any(char in target for char in "*?[")
                             else "Non-literal entity target",
                         )
-            elif key in {"action", "service"}:
+            elif action_field and key == "scene":
+                if value.startswith("scene.") and ENTITY_RE.fullmatch(value):
+                    emit(source, value, path, Confidence.EXPLICIT, Role.WRITE)
+                else:
+                    emit(
+                        source,
+                        None,
+                        path,
+                        Confidence.DYNAMIC,
+                        Role.WRITE,
+                        "Non-literal entity target",
+                    )
+            elif key in {"action", "service"} or (action_field and key == "perform_action"):
                 if (
                     value.startswith("script.")
                     and value[7:] not in _SCRIPT_SERVICES
