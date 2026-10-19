@@ -1,5 +1,7 @@
 """Contract tests against real HA loaded configurations, never household data."""
 
+import json
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -316,3 +318,35 @@ async def test_metadata_failure_and_missing_raw_config_are_redacted(hass):
     with patch.object(entity, "raw_config", None):
         report = await BlastRadiusCoordinator(hass).request("analyze", {"entity_id": "light.desk"})
     assert report["coverage"]["warnings"] == ["Configuration unavailable for script.example."]
+
+
+async def test_loaded_variable_and_event_data_script_names_are_not_calls(hass):
+    fixture = json.loads((Path(__file__).parent / "fixtures/script_call_fields.json").read_text())
+    scripts = {source["source_id"].removeprefix("script."): source["config"] for source in fixture}
+    scripts["caller"] = {"sequence": [{"action": "script.shutdown"}]}
+    scripts["parallel_caller"] = {"sequence": [{"parallel": [[{"service": "script.shutdown"}]]}]}
+    assert await async_setup_component(hass, "script", {"script": scripts})
+    await hass.async_block_till_done()
+    assert all(entity.available for entity in hass.data[DATA_INSTANCES]["script"].entities)
+
+    with patch.object(type(hass.services), "async_call", side_effect=AssertionError("read only")):
+        coordinator = BlastRadiusCoordinator(hass)
+        described = await coordinator.request("analyze", {"entity_id": "script.describe_shutdown"})
+        target = await coordinator.request("analyze", {"entity_id": "script.shutdown"})
+        called = await coordinator.request("analyze", {"entity_id": "script.caller"})
+
+    assert [node["id"] for node in described["graph"]["nodes"]] == ["script.describe_shutdown"]
+    descriptions = [
+        ref for ref in target["references"] if ref["source_id"] == "script.describe_shutdown"
+    ]
+    assert len(descriptions) == 6
+    assert all(ref["role"] == "read" and ref["confidence"] == "unknown" for ref in descriptions)
+    calls = [ref for ref in target["references"] if ref["source_id"] == "script.caller"]
+    assert len(calls) == 1 and calls[0]["role"] == "call"
+    assert calls[0]["confidence"] == "explicit" and calls[0]["path"] == "sequence[0].action"
+    parallel = [ref for ref in target["references"] if ref["source_id"] == "script.parallel_caller"]
+    assert len(parallel) == 1 and parallel[0]["role"] == "call"
+    assert parallel[0]["path"] == "sequence[0].parallel[0][0].service"
+    assert {
+        node["id"] for node in called["graph"]["nodes"] if node["relationship"] == "downstream"
+    } == {"script.shutdown", "light.office"}

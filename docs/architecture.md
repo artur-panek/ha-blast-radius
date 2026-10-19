@@ -233,9 +233,13 @@ When both fields are present, `perform_action` takes precedence over `service`,
 matching [frontend 20260826.7's action handler](https://github.com/home-assistant/frontend/blob/20260826.7/src/panels/lovelace/common/handle-action.ts).
 Generic services such as `script.turn_on` remain services, not script entities.
 
-These additions apply to native action positions in standard cards, rows, picture
-elements and badges. Fields inside custom cards or arbitrary payloads keep their
-untyped fallback; their behavior is not inferred from an action-like key. Dashboard
+Direct script calls are recognized only in native automation/script steps and
+standard dashboard action positions. A `service` or `action` field in variables,
+event data or another payload is ordinary data; known entity IDs there remain
+untyped reads and do not create downstream effects.
+
+Dashboard action coverage includes standard cards, rows, picture elements and
+badges. Fields inside custom cards or arbitrary payloads keep their untyped fallback; their behavior is not inferred from an action-like key. Dashboard
 actions still do not connect unrelated cards through forward impact traversal.
 
 ## Template classification
