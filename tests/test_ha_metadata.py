@@ -346,7 +346,7 @@ async def test_loaded_variable_and_event_data_script_names_are_not_calls(hass):
     assert calls[0]["confidence"] == "explicit" and calls[0]["path"] == "sequence[0].action"
     parallel = [ref for ref in target["references"] if ref["source_id"] == "script.parallel_caller"]
     assert len(parallel) == 1 and parallel[0]["role"] == "call"
-    assert parallel[0]["path"] == "sequence[0].parallel[0][0].service"
+    assert parallel[0]["path"] == "sequence[0].parallel[0][0].action"
     assert {
         node["id"] for node in called["graph"]["nodes"] if node["relationship"] == "downstream"
     } == {"script.shutdown", "light.office"}
