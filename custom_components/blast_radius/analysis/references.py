@@ -176,9 +176,13 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                 # HA's native dashboard handler prefers perform_action over service.
                 if dashboard_action and field == "service" and value.get("perform_action"):
                     continue
+                if dashboard_action and field == "service_data" and value.get("data") is not None:
+                    continue
                 child_path = f"{path}.{field}" if path else field
                 next_role = role
-                if field in {
+                if dashboard_action and field in {"target", "data", "service_data"}:
+                    next_role = Role.WRITE
+                elif field in {
                     "trigger",
                     "triggers",
                     "condition",

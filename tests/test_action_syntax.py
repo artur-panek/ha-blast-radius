@@ -144,6 +144,110 @@ def test_dashboard_generic_services_do_not_become_script_entities(service):
     assert [ref.target for ref in refs] == ["script.actual_target"]
 
 
+@pytest.mark.parametrize("action_key", ["tap_action", "hold_action", "double_tap_action"])
+@pytest.mark.parametrize(
+    "action,service_field,target_field",
+    [
+        ("perform-action", "perform_action", "target"),
+        ("perform-action", "perform_action", "data"),
+        ("call-service", "service", "service_data"),
+    ],
+)
+def test_dashboard_action_targets_are_not_display_references(
+    action_key, action, service_field, target_field
+):
+    source = Source(
+        "dashboard.home",
+        "dashboard",
+        "Home",
+        {
+            "views": [
+                {
+                    "cards": [
+                        {
+                            "type": "button",
+                            "entity": "light.office",
+                            action_key: {
+                                "action": action,
+                                service_field: "light.turn_on",
+                                target_field: {"entity_id": "light.office"},
+                            },
+                        }
+                    ]
+                }
+            ]
+        },
+    )
+    refs = scan_sources((source,), {"light.office"}).references
+    assert {ref.path: ref.role for ref in refs} == {
+        "views[0].cards[0].entity": Role.DISPLAY,
+        f"views[0].cards[0].{action_key}.{target_field}.entity_id": Role.WRITE,
+    }
+    assert all(ref.confidence == Confidence.EXPLICIT for ref in refs)
+
+
+@pytest.mark.parametrize("data", [{}, {"entity_id": "light.current"}])
+def test_dashboard_data_overrides_legacy_service_data(data):
+    action = {
+        "action": "perform-action",
+        "perform_action": "light.turn_on",
+        "data": data,
+        "service_data": {"entity_id": "light.previous"},
+    }
+    source = Source(
+        "dashboard.home", "dashboard", "Home", {"views": [{"cards": [{"tap_action": action}]}]}
+    )
+    refs = scan_sources((source,), {"light.current", "light.previous"}).references
+    assert [(ref.target, ref.role) for ref in refs] == (
+        [("light.current", Role.WRITE)] if data else []
+    )
+
+
+@pytest.mark.parametrize(
+    "card_type,action", [("custom:example", "perform-action"), ("button", "none")]
+)
+def test_untyped_dashboard_targets_keep_their_existing_role(card_type, action):
+    card = {
+        "type": card_type,
+        "tap_action": {
+            "action": action,
+            "perform_action": "light.turn_on",
+            "target": {"entity_id": "light.office"},
+        },
+    }
+    source = Source("dashboard.home", "dashboard", "Home", {"views": [{"cards": [card]}]})
+    refs = scan_sources((source,), {"light.office"}).references
+    assert [(ref.target, ref.role) for ref in refs] == [("light.office", Role.DISPLAY)]
+
+
+def test_templated_dashboard_target_keeps_reads_and_an_unresolved_write():
+    source = Source(
+        "dashboard.home",
+        "dashboard",
+        "Home",
+        {
+            "views": [
+                {
+                    "cards": [
+                        {
+                            "tap_action": {
+                                "action": "perform-action",
+                                "perform_action": "light.turn_on",
+                                "target": {"entity_id": "{{ states('input_text.target') }}"},
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+    )
+    refs = scan_sources((source,), set()).references
+    assert [(ref.target, ref.role) for ref in refs] == [
+        ("input_text.target", Role.READ),
+        (None, Role.WRITE),
+    ]
+
+
 @pytest.mark.parametrize(
     "card",
     [
