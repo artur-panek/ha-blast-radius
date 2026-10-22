@@ -232,6 +232,9 @@ call retains its call role and exact path even when the script has been removed.
 When both fields are present, `perform_action` takes precedence over `service`,
 matching [frontend 20260826.7's action handler](https://github.com/home-assistant/frontend/blob/20260826.7/src/panels/lovelace/common/handle-action.ts).
 Generic services such as `script.turn_on` remain services, not script entities.
+Entity references in native action `target`, `data` and `service_data` fields are
+write targets; the card's own `entity` field remains a display reference.
+When `data` is non-null, the ignored legacy `service_data` field contributes no targets.
 
 Direct script calls are recognized only in native automation/script steps and
 standard dashboard action positions. A `service` or `action` field in variables,
