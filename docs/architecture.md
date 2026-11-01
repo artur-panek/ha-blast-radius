@@ -60,6 +60,15 @@ write edge. Existing located references are not duplicated or upgraded. Native
 action fields described below retain their structural location even when the
 target has no state or registry entry.
 
+Native numeric-state triggers and conditions retain entity-valued `above` and
+`below` thresholds as explicit reads, including in nested script conditions and
+wait-for-trigger steps. The accepted domains (`input_number`, `number`, `sensor`
+and `zone`) follow the pinned
+[numeric-state threshold validator](https://github.com/home-assistant/core/blob/2026.9.4/homeassistant/helpers/config_validation.py).
+Missing threshold entities retain their exact locations in rename/removal previews.
+This does not imply that changing a threshold fires a trigger. Numeric literals,
+dashboard conditions and threshold-shaped payload data do not gain these semantics.
+
 Literal selector fields retain their exact configuration location and, where it is
 a bounded identifier, a `selector: {kind, value, exists}` record. `exists` checks
 identity in HA's device/area/floor/label registry (`null` in a pure-engine snapshot

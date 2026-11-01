@@ -164,6 +164,13 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                 and key in {"trigger", "triggers", "wait_for_trigger"}
                 and value.get("trigger", value.get("platform")) == "event"
             )
+            numeric_state = native_source and (
+                value.get("condition") == "numeric_state"
+                or (
+                    key in {"trigger", "triggers", "wait_for_trigger"}
+                    and value.get("trigger", value.get("platform")) == "numeric_state"
+                )
+            )
             if native_source and (
                 isinstance(value.get("condition"), str)
                 or (device_node and value.get("trigger", value.get("platform")) == "device")
@@ -179,6 +186,16 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                 if dashboard_action and field == "service_data" and value.get("data") is not None:
                     continue
                 child_path = f"{path}.{field}" if path else field
+                if (
+                    numeric_state
+                    and field in {"above", "below"}
+                    and isinstance(child, str)
+                    and ENTITY_RE.fullmatch(child)
+                    and child.partition(".")[0] in {"input_number", "number", "sensor", "zone"}
+                ):
+                    # Threshold entities supply values; they are not action targets.
+                    emit(source, child, child_path, Confidence.EXPLICIT, Role.READ)
+                    continue
                 next_role = role
                 if dashboard_action and field in {"target", "data", "service_data"}:
                     next_role = Role.WRITE

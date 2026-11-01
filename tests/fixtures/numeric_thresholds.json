@@ -1,0 +1,37 @@
+[
+  {
+    "source_id": "automation.heating",
+    "source_type": "automation",
+    "name": "Heating",
+    "config": {
+      "triggers": [
+        {
+          "trigger": "numeric_state",
+          "entity_id": "sensor.temperature",
+          "below": "input_number.limit"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "numeric_state",
+          "entity_id": "sensor.temperature",
+          "above": "input_number.limit"
+        }
+      ],
+      "actions": [{"action": "light.turn_on", "target": {"entity_id": "light.heating"}}]
+    }
+  },
+  {
+    "source_id": "script.check_temperature",
+    "source_type": "script",
+    "name": "Check temperature",
+    "config": {
+      "sequence": [
+        {
+          "if": [{"condition": "numeric_state", "entity_id": "sensor.temperature", "above": "input_number.limit"}],
+          "then": []
+        }
+      ]
+    }
+  }
+]

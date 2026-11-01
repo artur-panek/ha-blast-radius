@@ -27,6 +27,35 @@ def custom_integrations(enable_custom_integrations):
 
 
 @pytest.mark.parametrize("domain", ["automation", "script"])
+async def test_loaded_numeric_thresholds_keep_exact_missing_entity_locations(hass, domain):
+    data = json.loads((Path(__file__).parent / "fixtures/numeric_thresholds.json").read_text())
+    source = next(source for source in data if source["source_type"] == domain)
+    instance = dict(source["config"], alias=source["name"])
+    config = (
+        [dict(instance, id="heating")]
+        if domain == "automation"
+        else {"check_temperature": instance}
+    )
+    assert await async_setup_component(hass, domain, {domain: config})
+    await hass.async_block_till_done()
+    entity = next(iter(hass.data[DATA_INSTANCES][domain].entities))
+    assert entity.available
+    with patch.object(type(hass.services), "async_call", side_effect=AssertionError("read only")):
+        report = await BlastRadiusCoordinator(hass).request(
+            "preview", {"entity_id": "input_number.limit", "operation": "delete"}
+        )
+    assert not report["exists"]
+    assert {ref["path"] for ref in report["references"]} == (
+        {"triggers[0].below", "conditions[0].above"}
+        if domain == "automation"
+        else {"sequence[0].if[0].above"}
+    )
+    assert all(
+        ref["confidence"] == "explicit" and ref["role"] == "read" for ref in report["references"]
+    )
+
+
+@pytest.mark.parametrize("domain", ["automation", "script"])
 async def test_loaded_blueprint_is_substituted_through_native_config_api(
     hass, hass_ws_client, tmp_path, domain
 ):
