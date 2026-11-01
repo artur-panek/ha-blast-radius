@@ -250,6 +250,19 @@ standard dashboard action positions. A `service` or `action` field in variables,
 event data or another payload is ordinary data; known entity IDs there remain
 untyped reads and do not create downstream effects.
 
+For native `event` actions, references inside `event_data` and the legacy
+`event_data_template` are payload mentions, not action targets. Entity-shaped
+fields retain exact locations even when their IDs are missing, with
+`confidence: unknown`, `role: read` and `reason: "Literal in event payload"`.
+Here `read` keeps a mention out of the effect graph; it does not establish that
+the entity's state was read. Nested action-shaped dictionaries cannot create
+write or call edges. Template state reads remain visible, and dynamic expressions
+remain unresolved without becoming action targets. Event trigger filters and
+service target handling are unchanged. This follows
+[Core 2026.9.4's event action](https://github.com/home-assistant/core/blob/2026.9.4/homeassistant/helpers/script.py),
+which renders the supplied data and fires an event on the bus without treating
+payload fields as service actions.
+
 Dashboard action coverage includes standard cards, rows, picture elements and
 badges. Fields inside custom cards or arbitrary payloads keep their untyped fallback; their behavior is not inferred from an action-like key. Dashboard
 actions still do not connect unrelated cards through forward impact traversal.
