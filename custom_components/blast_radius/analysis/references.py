@@ -126,6 +126,7 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
         event_filter: bool = False,
         action_field: bool = False,
         custom_dashboard: bool = False,
+        event_payload: bool = False,
     ) -> None:
         if depth > MAX_NESTING:
             warnings.add(f"Nesting limit reached in {source.source_id}; analysis is incomplete.")
@@ -133,6 +134,11 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
         if len(found) >= MAX_REFERENCES:
             warnings.add("Reference limit reached; analysis is incomplete.")
             return
+        if event_payload:
+            # Nested action-shaped data cannot establish a write or script call.
+            role = Role.READ
+        literal_confidence = Confidence.UNKNOWN if event_payload else Confidence.EXPLICIT
+        literal_reason = "Literal in event payload" if event_payload else ""
         if isinstance(value, dict):
             custom_dashboard = custom_dashboard or (
                 source.source_type == "dashboard"
@@ -151,6 +157,9 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
             native_source = (
                 source.source_type in {"automation", "script"}
                 and _NATIVE_NODE_PATH.fullmatch(path) is not None
+            )
+            event_action = (
+                native_source and key in _ACTION_POSITIONS and isinstance(value.get("event"), str)
             )
             device_node = (
                 native_source
@@ -226,9 +235,10 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                 if native_action_field and field in {"perform_action", "scene"}:
                     next_role = Role.CALL if field == "perform_action" else Role.WRITE
                 if key == "entities" and ENTITY_RE.fullmatch(field):
-                    emit(source, field, child_path, Confidence.EXPLICIT, role)
+                    emit(source, field, child_path, literal_confidence, role, literal_reason)
                     # Scene state attributes are not configuration references.
-                    continue
+                    if not event_payload:
+                        continue
                 walk(
                     source,
                     child,
@@ -242,6 +252,8 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     event_filter=field == "event_data" and event_trigger,
                     action_field=native_action_field,
                     custom_dashboard=custom_dashboard,
+                    event_payload=event_payload
+                    or (event_action and field in {"event_data", "event_data_template"}),
                 )
         elif isinstance(value, (list, tuple)):
             for index, child in enumerate(value):
@@ -256,6 +268,7 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     registry_entity,
                     event_filter,
                     custom_dashboard=custom_dashboard,
+                    event_payload=event_payload,
                 )
         elif isinstance(value, str):
             if is_template(value):
@@ -265,15 +278,11 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     # Even templated targets can read one entity to select another.
                     # Keep their visible literals as dependencies, never guessed effects.
                     emit(source, target, path, Confidence.TEMPLATE_LITERAL, Role.READ)
-                templated_target = action_field or (
-                    key
+                templated_target = not event_payload and (
+                    action_field
+                    or key
                     in _ENTITY_KEYS
-                    | {
-                        "action",
-                        "service",
-                        "service_template",
-                        "target",
-                    }
+                    | {"action", "service", "service_template", "target"}
                     | _SELECTOR_KEYS
                 )
                 if result.dynamic or templated_target:
@@ -291,7 +300,7 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                 for target in value.split(","):
                     target = target.strip()
                     if ENTITY_RE.fullmatch(target):
-                        emit(source, target, path, Confidence.EXPLICIT, role)
+                        emit(source, target, path, literal_confidence, role, literal_reason)
                     elif (
                         registry_entity
                         and source.entity_registry is not None
@@ -351,7 +360,7 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     path,
                     Confidence.UNKNOWN,
                     Role.READ,
-                    "Literal in an untyped field",
+                    literal_reason or "Literal in an untyped field",
                 )
 
     for source in sources:

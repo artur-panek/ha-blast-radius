@@ -379,3 +379,33 @@ async def test_loaded_variable_and_event_data_script_names_are_not_calls(hass):
     assert {
         node["id"] for node in called["graph"]["nodes"] if node["relationship"] == "downstream"
     } == {"script.shutdown", "light.office"}
+
+
+async def test_loaded_event_payload_mentions_do_not_claim_light_actions(hass):
+    fixture = json.loads((Path(__file__).parent / "fixtures/event_payloads.json").read_text())
+    scripts = {source["source_id"].removeprefix("script."): source["config"] for source in fixture}
+    assert await async_setup_component(hass, "script", {"script": scripts})
+    await hass.async_block_till_done()
+    assert all(entity.available for entity in hass.data[DATA_INSTANCES]["script"].entities)
+    hass.states.async_set("light.reported", "on")
+    hass.states.async_set("sensor.temperature", "20")
+    events = []
+    hass.bus.async_listen("diagnostic_report", events.append)
+    hass.bus.async_listen("legacy_report", events.append)
+    await hass.services.async_call("script", "report_status", blocking=True)
+    await hass.async_block_till_done()
+    assert len(events) == 2
+    assert all(event.data["entity_id"] == "light.reported" for event in events)
+    assert hass.states.get("light.reported").state == "on"
+    with patch.object(type(hass.services), "async_call", side_effect=AssertionError("read only")):
+        coordinator = BlastRadiusCoordinator(hass)
+        report = await coordinator.request("analyze", {"entity_id": "script.report_status"})
+        mentioned = await coordinator.request("analyze", {"entity_id": "light.reported"})
+    assert [node["id"] for node in report["graph"]["nodes"]] == ["script.report_status"]
+    literals = [
+        ref
+        for ref in mentioned["references"]
+        if ref["source_id"] == "script.report_status" and ref["confidence"] != "template_literal"
+    ]
+    assert len(literals) == 3
+    assert all(ref["confidence"] == "unknown" and ref["role"] == "read" for ref in literals)

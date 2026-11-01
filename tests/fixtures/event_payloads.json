@@ -1,0 +1,38 @@
+[
+  {
+    "source_id": "script.report_status",
+    "source_type": "script",
+    "name": "Report status",
+    "config": {
+      "sequence": [
+        {
+          "event": "diagnostic_report",
+          "event_data": {
+            "entity_id": "light.reported",
+            "actions": [
+              {"action": "script.shutdown", "target": {"entity_id": "light.reported"}}
+            ],
+            "entities": {"light.reported": {"state": "off"}}
+          }
+        },
+        {
+          "event": "legacy_report",
+          "event_data_template": {
+            "entity_id": "{{ 'light.reported' }}",
+            "temperature": "{{ states('sensor.temperature') }}"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "source_id": "script.shutdown",
+    "source_type": "script",
+    "name": "Shutdown",
+    "config": {
+      "sequence": [
+        {"action": "light.turn_off", "target": {"entity_id": "light.reported"}}
+      ]
+    }
+  }
+]
