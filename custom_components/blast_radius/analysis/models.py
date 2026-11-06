@@ -29,6 +29,7 @@ class Role(StrEnum):
     CALL = "call"
     MEMBER = "member"
     DISPLAY = "display"
+    DEFINITION = "definition"
 
 
 class Resolution(StrEnum):

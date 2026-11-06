@@ -69,6 +69,7 @@ export function reviewRole(ref: Reference): string {
       display: "Display",
       call: "Call",
       member: "Membership",
+      definition: "Stored scene definition",
     }[ref.role] || ref.role
   );
 }

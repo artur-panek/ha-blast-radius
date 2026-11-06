@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.10 — release preparation
+
+- treat literal scene.create snapshot entities as reads, including stale IDs, and stored entity definitions as structural references rather than immediate writes.
+- retain scene activation and apply effects; show stored scene definitions explicitly in reference review.
+- refresh current-stable API smoke to HA 2026.11.0; full fixture-backed lifecycle checks remain on minimum 2026.9.4 until a matching current fixture is published.
+
 ## 0.2.9 — 2026-10-13
 
 - Report skipped dashboards and membership sources with stable scan-gap reason codes. Keep the existing warning text for older clients.
