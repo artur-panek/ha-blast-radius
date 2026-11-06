@@ -95,3 +95,5 @@ python3.14 -m venv .venv-current
 .venv-current/bin/python -m pip check
 .venv-current/bin/pytest -q --cov --timeout=60
 ```
+
+Committed PNG branding is checked against the vector input and file hashes in `scripts/brand-raster.json`. Routine frontend dependency updates do not re-encode reviewed PNGs. After a geometry or palette change, run `node scripts/generate_brand.mjs --rasterize` with the installed Playwright Chromium and review the PNGs and manifest together. The default command regenerates vectors/sidebar code and rejects changed raster inputs or bytes; it does not silently bless stale artwork.
