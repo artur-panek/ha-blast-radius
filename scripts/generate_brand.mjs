@@ -1,6 +1,7 @@
 // Generate local HA branding and the sidebar icon from the panel's vector geometry.
 // Run after: cd frontend && npm ci && npx playwright install chromium
 import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
@@ -35,6 +36,26 @@ await writeFile(
     }) +
     ` : undefined;\n`,
 );
+
+// Raster encoders change between Chromium releases even when the artwork does not.
+// Keep reviewed PNG bytes stable; regenerate them explicitly when the artwork changes.
+const rasterPaths = ["icon.png", "icon@2x.png", "dark_icon.png", "dark_icon@2x.png"];
+const digest = (value) => createHash("sha256").update(value).digest("hex");
+const rasterManifestUrl = new URL("scripts/brand-raster.json", root);
+async function rasterManifest() {
+  const files = {};
+  for (const name of rasterPaths)
+    files[name] = digest(await readFile(new URL(`custom_components/blast_radius/brand/${name}`, root)));
+  return { source: digest(`${light}\n${dark}`), files };
+}
+if (!process.argv.includes("--rasterize")) {
+  const expected = JSON.parse(await readFile(rasterManifestUrl, "utf8"));
+  const current = await rasterManifest();
+  if (JSON.stringify(expected) !== JSON.stringify(current))
+    throw new Error("Brand artwork or PNGs changed. Run node scripts/generate_brand.mjs --rasterize and review the raster assets.");
+  console.log("Generated vector assets and verified committed raster artwork.");
+  process.exit(0);
+}
 
 const browser = await chromium.launch();
 try {
@@ -87,3 +108,5 @@ try {
 console.log(
   "Generated vector marks, local HA icons and the sidebar icon module.",
 );
+
+await writeFile(rasterManifestUrl, JSON.stringify(await rasterManifest(), null, 2) + "\n");

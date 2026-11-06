@@ -1,4 +1,4 @@
-//#region node_modules/@lit/reactive-element/css-tag.js
+// node_modules/@lit/reactive-element/css-tag.js
 var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, n = Symbol(), r = /* @__PURE__ */ new WeakMap(), i = class {
 	constructor(e, t, r) {
 		if (this._$cssResult$ = !0, r !== n) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
@@ -252,8 +252,7 @@ var v = class extends HTMLElement {
 	firstUpdated(e) {}
 };
 v.elementStyles = [], v.shadowRootOptions = { mode: "open" }, v[g("elementProperties")] = /* @__PURE__ */ new Map(), v[g("finalized")] = /* @__PURE__ */ new Map(), ne?.({ ReactiveElement: v }), (h.reactiveElementVersions ??= []).push("2.1.2");
-//#endregion
-//#region node_modules/lit-html/lit-html.js
+// node_modules/lit-html/lit-html.js
 var y = globalThis, ae = (e) => e, b = y.trustedTypes, oe = b ? b.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, x = "$lit$", S = `lit$${Math.random().toFixed(9).slice(2)}$`, C = "?" + S, se = `<${C}>`, w = document, T = () => w.createComment(""), E = (e) => e === null || typeof e != "object" && typeof e != "function", D = Array.isArray, ce = (e) => D(e) || typeof e?.[Symbol.iterator] == "function", O = "[ 	\n\f\r]", k = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, le = /-->/g, ue = />/g, A = RegExp(`>|${O}(?:([^\\s"'>=/]+)(${O}*=${O}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), de = /'/g, fe = /"/g, pe = /^(?:script|style|textarea|title)$/i, me = (e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
@@ -523,8 +522,7 @@ var Te = (e, t, n) => {
 V._$litElement$ = !0, V.finalized = !0, B.litElementHydrateSupport?.({ LitElement: V });
 var Ee = B.litElementPolyfillSupport;
 Ee?.({ LitElement: V }), (B.litElementVersions ??= []).push("4.2.2");
-//#endregion
-//#region node_modules/lit-html/directive.js
+// node_modules/lit-html/directive.js
 var De = {
 	ATTRIBUTE: 1,
 	CHILD: 2,
@@ -2459,8 +2457,7 @@ var He = {
 function Y(e) {
 	return e.startsWith("Unexpanded ") ? "This configuration names a device, area, floor or label. Its entity membership and runtime eligibility are not expanded." : e.split("; ").map((e) => He[e] || e || "The target cannot be determined from the loaded configuration.").join(" ");
 }
-//#endregion
-//#region src/icons.ts
+// src/icons.ts
 function X(e) {
 	return j`<svg class="source-icon" viewBox="0 0 24 24" aria-hidden="true">
     <path
@@ -2479,8 +2476,7 @@ function X(e) {
     />
   </svg>`;
 }
-//#endregion
-//#region src/session.ts
+// src/session.ts
 var Z = /* @__PURE__ */ new Map(), Ue = [
 	1,
 	2,
@@ -2544,8 +2540,7 @@ function Je(e, t) {
 		} catch {}
 	}
 }
-//#endregion
-//#region src/filters.ts
+// src/filters.ts
 var Ye = [
 	"automation",
 	"script",
@@ -2579,11 +2574,9 @@ function Ze(e, t) {
 		}] : [];
 	});
 }
-//#endregion
-//#region package.json
+// package.json
 var Qe = "0.2.9";
-//#endregion
-//#region src/review.ts
+// src/review.ts
 function Q(e) {
 	return e.resolution || (e.target === null ? e.selector ? "selector" : "unresolved" : "entity");
 }
@@ -2632,8 +2625,7 @@ function $(e) {
 	let t = $e(e).length;
 	return `${t} ${t === 1 ? "group" : "groups"} · ${e.length} ${e.length === 1 ? "location" : "locations"}`;
 }
-//#endregion
-//#region src/panel.ts
+// src/panel.ts
 var rt = {
 	explicit: "Explicit",
 	template_literal: "Template literal",
@@ -4112,5 +4104,4 @@ var rt = {
 	}
 };
 customElements.get("blast-radius-panel") || customElements.define("blast-radius-panel", it);
-//#endregion
 export { it as BlastRadiusPanel };
