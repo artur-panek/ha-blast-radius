@@ -2575,7 +2575,7 @@ function Ze(e, t) {
 	});
 }
 // package.json
-var Qe = "0.2.9";
+var Qe = "0.2.10";
 // src/review.ts
 function Q(e) {
 	return e.resolution || (e.target === null ? e.selector ? "selector" : "unresolved" : "entity");
@@ -2618,7 +2618,8 @@ function nt(e) {
 		write: "Action",
 		display: "Display",
 		call: "Call",
-		member: "Membership"
+		member: "Membership",
+		definition: "Stored scene definition"
 	}[e.role] || e.role;
 }
 function $(e) {
@@ -2884,7 +2885,7 @@ var rt = {
 		return t ? `${e.references.filter((e) => e.confidence === "explicit").length}/${t} direct refs explicit` : "0 direct refs";
 	}
 	referenceCategory(e) {
-		return e.role === "write" ? "change" : e.role === "call" ? "invoke" : e.role === "display" || e.source_type === "dashboard" ? "display" : e.role === "member" ? "structural" : e.role === "read" || /^(triggers?|wait_for_trigger)(\[|\.)/.test(e.path) ? "read" : "other";
+		return e.role === "write" ? "change" : e.role === "call" ? "invoke" : e.role === "definition" ? "structural" : e.role === "read" ? "read" : e.role === "display" || e.source_type === "dashboard" ? "display" : e.role === "member" ? "structural" : e.role === "read" || /^(triggers?|wait_for_trigger)(\[|\.)/.test(e.path) ? "read" : "other";
 	}
 	directCategoryMeta(e) {
 		let t = {
@@ -2906,7 +2907,7 @@ var rt = {
 			structural: {
 				title: "Includes it structurally",
 				description: "Groups or structural configuration include this entity without treating it as an action target.",
-				badge: "memberships"
+				badge: "structural references"
 			},
 			display: {
 				title: "Displays it",

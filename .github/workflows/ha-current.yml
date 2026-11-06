@@ -16,7 +16,7 @@ concurrency:
 # Stable Quality runs again on main and remains the release gate.
 jobs:
   ha-current:
-    name: Compatibility against current stable HA
+    name: Current stable HA API smoke
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -36,4 +36,4 @@ jobs:
       - run: pytest -q --cov --timeout=60
       - name: Explain advisory result
         if: always()
-        run: echo 'Current-stable HA is advisory. Minimum supported HA 2026.9.4 Quality tests remain the release gate. See docs/validation.md.' >> "$GITHUB_STEP_SUMMARY"
+        run: echo 'Current HA 2026.11.0 API smoke is advisory. The published custom-component fixture targets 2026.10.4, so full fixture-based lifecycle tests remain on minimum HA 2026.9.4 in Quality. See docs/validation.md.' >> "$GITHUB_STEP_SUMMARY"

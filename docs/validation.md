@@ -1,10 +1,14 @@
 # Validation
 
-## Current stable compatibility lane — 2026-10-14
+## Current stable API smoke — 2026-11-06
 
-`ha-current.yml` checks HA Core 2026.10.1 using the matching
-`pytest-homeassistant-custom-component==0.13.372` fixture and frontend
-`20260930.3`. It is advisory on pull requests, weekly and manually.
+`ha-current.yml` checks HA Core 2026.11.0 and frontend 20261028.5 on pull
+requests, weekly and manually. The available custom-component fixture 0.13.375
+requires HA 2026.10.4; no published fixture matches 2026.11.0 yet. The current
+lane therefore runs fixture-free tests, including HA's native scene.create
+handler, and skips the two fixture-dependent lifecycle modules. This is API smoke
+coverage, not a full lifecycle compatibility claim. Restore that coverage when
+a matching fixture is published; do not override incompatible dependency pins.
 The release-blocking Quality workflow continues to cover minimum supported
 Home Assistant 2026.9.4. Older HA-next beta results below are historical.
 

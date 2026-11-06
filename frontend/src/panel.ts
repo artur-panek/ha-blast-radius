@@ -512,6 +512,8 @@ export class BlastRadiusPanel extends LitElement {
   private referenceCategory(ref: Reference) {
     if (ref.role === "write") return "change";
     if (ref.role === "call") return "invoke";
+    if (ref.role === "definition") return "structural";
+    if (ref.role === "read") return "read";
     if (ref.role === "display" || ref.source_type === "dashboard")
       return "display";
     if (ref.role === "member") return "structural";
@@ -550,7 +552,7 @@ export class BlastRadiusPanel extends LitElement {
         title: "Includes it structurally",
         description:
           "Groups or structural configuration include this entity without treating it as an action target.",
-        badge: "memberships",
+        badge: "structural references",
       },
       display: {
         title: "Displays it",

@@ -127,6 +127,7 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
         action_field: bool = False,
         custom_dashboard: bool = False,
         event_payload: bool = False,
+        scene_create_data: bool = False,
     ) -> None:
         if depth > MAX_NESTING:
             warnings.add(f"Nesting limit reached in {source.source_id}; analysis is incomplete.")
@@ -186,6 +187,15 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
             ):
                 # A condition used as a sequence step still reads its entity.
                 role = Role.READ
+            action_name = (
+                value.get("perform_action", value.get("service"))
+                if dashboard_action
+                else value.get("action", value.get("service"))
+            )
+            scene_create = (
+                dashboard_action
+                or (native_source and key in _ACTION_POSITIONS and role == Role.WRITE)
+            ) and action_name == "scene.create"
             for field, child in value.items():
                 if not isinstance(field, str) or field in _SKIP:
                     continue
@@ -205,8 +215,16 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     # Threshold entities supply values; they are not action targets.
                     emit(source, child, child_path, Confidence.EXPLICIT, Role.READ)
                     continue
+                if scene_create_data and field == "snapshot_entities":
+                    walk(source, child, child_path, "entity_ids", Role.READ, depth + 1)
+                    continue
+                if scene_create_data and field == "entities":
+                    walk(source, child, child_path, "entities", Role.DEFINITION, depth + 1)
+                    continue
                 next_role = role
-                if dashboard_action and field in {"target", "data", "service_data"}:
+                if scene_create and field in {"data", "service_data"}:
+                    next_role = Role.READ
+                elif dashboard_action and field in {"target", "data", "service_data"}:
                     next_role = Role.WRITE
                 elif field in {
                     "trigger",
@@ -252,6 +270,7 @@ def scan_sources(sources: tuple[Source, ...], known_entities: set[str]) -> Scan:
                     event_filter=field == "event_data" and event_trigger,
                     action_field=native_action_field,
                     custom_dashboard=custom_dashboard,
+                    scene_create_data=scene_create and field in {"data", "service_data"},
                     event_payload=event_payload
                     or (event_action and field in {"event_data", "event_data_template"}),
                 )
