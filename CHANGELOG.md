@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.10 — 2026-11-10
+
+- Leave the integration unavailable when panel registration fails or is cancelled,
+  without exposing a partial setup or leaving its sidebar icon registered.
+- Recognize native dashboard service calls and scene actions, and distinguish
+  action targets from entities displayed by dashboard cards.
+- Keep script names in ordinary payload fields and event data out of action
+  targets. Preserve entity references used as numeric-state thresholds.
+- Refresh compatibility checks against the latest available matching HA test
+  fixture (Core 2026.10.4). Minimum supported Home Assistant remains 2026.9.4;
+  Core 2026.11.1 is not yet validated because its matching fixture is unavailable.
+
 ## 0.2.9 — 2026-10-13
 
 - Report skipped dashboards and membership sources with stable scan-gap reason codes. Keep the existing warning text for older clients.
