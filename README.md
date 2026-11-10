@@ -213,8 +213,10 @@ zero-based paths; the raw-reference view and exports retain the original identif
 - No Node-RED, AppDaemon, ESPHome, runtime causality or event recording.
 - Rename previews do not predict HA's own automatic reference rewrites.
 - The adapter uses version-sensitive HA component interfaces. Tested against
-  2026.9.4 is the required stable baseline. A separate advisory CI lane tests
-  2026.10.0b0 with the full HA suite; this does not declare general support for future HA.
+  2026.9.4 is the required stable baseline. A separate advisory CI lane targets
+  2026.10.4 with the full HA suite and matching test fixtures. Core 2026.11.1 is
+  not yet validated because a matching fixture is unavailable; this does not
+  declare general support for other HA versions.
 
 See [architecture and API](docs/architecture.md) for source access and
 [validation](docs/validation.md) for tested versions and evidence.

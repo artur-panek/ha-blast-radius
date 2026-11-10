@@ -1,5 +1,21 @@
 # Validation
 
+## v0.2.10 release target — 2026-11-10
+
+This patch packages the merged panel setup lifecycle fix and the native-action,
+payload classification and numeric-state reference fixes already on `main`.
+The release-blocking Quality workflow retains Home Assistant 2026.9.4, Python
+3.12/3.14, browser tests, hassfest and HACS validation.
+
+The advisory lane now targets HA Core 2026.10.4 with
+`pytest-homeassistant-custom-component==0.13.375` and frontend `20260930.5`.
+The latest official stable release checked on 2026-11-10 is
+[Core 2026.11.1](https://github.com/home-assistant/core/releases/tag/2026.11.1),
+but the [latest published matching fixture](https://github.com/MatthewFlamm/pytest-homeassistant-custom-component/releases/tag/0.13.375)
+requires 2026.10.4. Keep the dependency pair exact and treat 2026.11.1 as
+unvalidated until its fixture is available. This does not change the minimum
+supported HA version or claim an installation on the user's running server.
+
 ## Current stable compatibility lane — 2026-10-14
 
 `ha-current.yml` checks HA Core 2026.10.1 using the matching
