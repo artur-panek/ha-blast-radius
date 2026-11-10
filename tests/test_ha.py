@@ -348,6 +348,32 @@ async def test_failed_panel_setup_leaves_integration_unloaded(hass, hass_ws_clie
         assert await async_unload_entry(hass, entry)
 
 
+async def test_panel_url_conflict_does_not_load_coordinator(hass, hass_ws_client):
+    entry = MockConfigEntry(domain=DOMAIN, data={}, unique_id=DOMAIN)
+    entry.add_to_hass(hass)
+    hass.data[frontend.DATA_EXTRA_MODULE_URL] = set()
+    frontend.async_register_built_in_panel(
+        hass, component_name="custom", frontend_url_path="blast-radius"
+    )
+    existing_panel = hass.data[frontend.DATA_PANELS]["blast-radius"]
+    with patch.object(hass, "http", create=True) as http:
+        http.async_register_static_paths = AsyncMock()
+        with pytest.raises(ValueError, match="Overwriting panel blast-radius"):
+            await async_setup_entry(hass, entry)
+
+        assert hass.data[frontend.DATA_PANELS]["blast-radius"] is existing_panel
+        assert "coordinator" not in hass.data[DOMAIN]
+        assert not hass.data[frontend.DATA_EXTRA_MODULE_URL]
+        client = await hass_ws_client(hass)
+        await client.send_json({"id": 1, "type": "blast_radius/entities"})
+        assert (await client.receive_json())["error"]["code"] == "not_loaded"
+
+        frontend.async_remove_panel(hass, "blast-radius")
+        assert await async_setup_entry(hass, entry)
+        http.async_register_static_paths.assert_awaited_once()
+        assert await async_unload_entry(hass, entry)
+
+
 async def test_config_flow_singleton(hass):
     from custom_components.blast_radius.config_flow import BlastRadiusConfigFlow
 
