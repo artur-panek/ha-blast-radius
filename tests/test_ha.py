@@ -1,5 +1,6 @@
 """Exercise real HA configuration, WebSocket auth and integration lifecycle."""
 
+import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
@@ -311,6 +312,66 @@ async def test_setup_unload_reload_and_private_diagnostics(hass):
         assert http.async_register_static_paths.await_count == 1
     diagnostics = await async_get_config_entry_diagnostics(hass, entry)
     assert diagnostics == {"version": VERSION, "read_only": True}
+
+
+@pytest.mark.parametrize("error_type", [RuntimeError, asyncio.CancelledError])
+async def test_failed_panel_setup_leaves_integration_unloaded(hass, hass_ws_client, error_type):
+    entry = MockConfigEntry(domain=DOMAIN, data={}, unique_id=DOMAIN)
+    entry.add_to_hass(hass)
+    hass.data[frontend.DATA_PANELS] = {}
+    hass.data[frontend.DATA_EXTRA_MODULE_URL] = set()
+    icon_url = f"/blast_radius_static/blast-radius-icons.js?v={VERSION}"
+    with patch.object(hass, "http", create=True) as http:
+        http.async_register_static_paths = AsyncMock()
+        with (
+            patch(
+                "custom_components.blast_radius.panel_custom.async_register_panel",
+                side_effect=error_type("panel registration failed"),
+            ),
+            pytest.raises(error_type),
+        ):
+            await async_setup_entry(hass, entry)
+
+        assert "coordinator" not in hass.data[DOMAIN]
+        assert icon_url not in hass.data[frontend.DATA_EXTRA_MODULE_URL]
+        assert "blast-radius" not in hass.data[frontend.DATA_PANELS]
+
+        client = await hass_ws_client(hass)
+        await client.send_json({"id": 1, "type": "blast_radius/entities"})
+        assert (await client.receive_json())["error"]["code"] == "not_loaded"
+
+        assert await async_setup_entry(hass, entry)
+        assert hass.data[frontend.DATA_PANELS]["blast-radius"].require_admin
+        assert icon_url in hass.data[frontend.DATA_EXTRA_MODULE_URL]
+        assert hass.data[DOMAIN]["coordinator"] is entry.runtime_data
+        http.async_register_static_paths.assert_awaited_once()
+        assert await async_unload_entry(hass, entry)
+
+
+async def test_panel_url_conflict_does_not_load_coordinator(hass, hass_ws_client):
+    entry = MockConfigEntry(domain=DOMAIN, data={}, unique_id=DOMAIN)
+    entry.add_to_hass(hass)
+    hass.data[frontend.DATA_EXTRA_MODULE_URL] = set()
+    frontend.async_register_built_in_panel(
+        hass, component_name="custom", frontend_url_path="blast-radius"
+    )
+    existing_panel = hass.data[frontend.DATA_PANELS]["blast-radius"]
+    with patch.object(hass, "http", create=True) as http:
+        http.async_register_static_paths = AsyncMock()
+        with pytest.raises(ValueError, match="Overwriting panel blast-radius"):
+            await async_setup_entry(hass, entry)
+
+        assert hass.data[frontend.DATA_PANELS]["blast-radius"] is existing_panel
+        assert "coordinator" not in hass.data[DOMAIN]
+        assert not hass.data[frontend.DATA_EXTRA_MODULE_URL]
+        client = await hass_ws_client(hass)
+        await client.send_json({"id": 1, "type": "blast_radius/entities"})
+        assert (await client.receive_json())["error"]["code"] == "not_loaded"
+
+        frontend.async_remove_panel(hass, "blast-radius")
+        assert await async_setup_entry(hass, entry)
+        http.async_register_static_paths.assert_awaited_once()
+        assert await async_unload_entry(hass, entry)
 
 
 async def test_config_flow_singleton(hass):

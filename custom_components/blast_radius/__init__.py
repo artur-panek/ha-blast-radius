@@ -22,9 +22,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: BlastRadiusConfigEntry) 
         )
         async_register_commands(hass)
         data["registered"] = True
-    entry.runtime_data = BlastRadiusCoordinator(hass)
-    data["coordinator"] = entry.runtime_data
-    frontend.add_extra_js_url(hass, f"{STATIC_URL}/blast-radius-icons.js?v={VERSION}")
     await panel_custom.async_register_panel(
         hass,
         frontend_url_path=PANEL_PATH,
@@ -34,6 +31,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: BlastRadiusConfigEntry) 
         module_url=f"{STATIC_URL}/blast-radius.js?v={VERSION}",
         require_admin=True,
     )
+    entry.runtime_data = BlastRadiusCoordinator(hass)
+    data["coordinator"] = entry.runtime_data
+    frontend.add_extra_js_url(hass, f"{STATIC_URL}/blast-radius-icons.js?v={VERSION}")
     return True
 
 
